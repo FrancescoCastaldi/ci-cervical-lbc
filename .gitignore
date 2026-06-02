@@ -17,15 +17,25 @@ env/
 # Jupyter
 .ipynb_checkpoints/
 
-# Data (non pushare il dataset)
+# Dataset raw - NON pushare le immagini
 data/raw/
+data/raw/Squamous cell carcinoma/
+data/raw/Negative for Intraepithelial malignancy/
+data/raw/Low squamous intra-epithelial lesion/
+data/raw/High squamous intra-epithelial lesion/
+
+# Dataset processato e degraded
 data/processed/
 data/splits/
+data/degraded/
 
 # Results
-results/metrics/
-results/figures/
-results/reconstructions/
+results/
+
+# Pesi e checkpoint
+*.pth
+*.ckpt
+*.pt
 
 # OS
 .DS_Store
@@ -34,8 +44,3 @@ Thumbs.db
 # IDEs
 .vscode/
 .idea/
-
-# Weights e checkpoint
-*.pth
-*.ckpt
-*.pt
