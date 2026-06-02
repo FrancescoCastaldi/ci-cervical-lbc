@@ -1,0 +1,23 @@
+# Questo file tiene traccia della cartella data/ su git.
+# Le immagini raw e i file processati NON vengono pushati (vedi .gitignore).
+#
+# Struttura attesa dopo il preprocessing:
+#
+# data/
+# ├── raw/
+# │   ├── Squamous cell carcinoma/
+# │   ├── Negative for Intraepithelial malignancy/
+# │   ├── Low squamous intra-epithelial lesion/
+# │   └── High squamous intra-epithelial lesion/
+# ├── splits/
+# │   ├── train.txt
+# │   ├── val.txt
+# │   └── test.txt
+# └── degraded/
+#     ├── train/gt/, train/noise_0.005/, ...
+#     ├── val/gt/, val/noise_0.005/, ...
+#     ├── test/gt/, test/noise_0.005/, ...
+#     └── examples/
+#
+# Per generare tutto eseguire:
+#   python scripts/preprocess.py
