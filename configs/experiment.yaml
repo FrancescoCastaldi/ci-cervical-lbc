@@ -4,6 +4,7 @@ dataset:
   root: data/raw/
   processed: data/processed/
   splits: data/splits/
+  degraded: data/degraded/
   subset_size: 4000
   image_size: 256
   train_ratio: 0.7
