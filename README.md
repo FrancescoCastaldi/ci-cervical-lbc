@@ -2,7 +2,7 @@
 
 Computational Imaging project – **Deblur & Denoise** on the Mendeley LBC Cervical Cancer dataset.
 
-Università di Bologna – LM Informatica – Computational Imaging  
+Università di Bologna – LM Informatica – Computational Imaging
 Prof. Picciolomini & Evangelista
 
 ## Task
@@ -23,7 +23,7 @@ Inverse problem: recover a high-quality image from a degraded observation (Gauss
 
 ## Dataset
 
-Mendeley LBC Cervical Cancer – [download here](https://data.mendeley.com/datasets/zddtpgzv63/2)  
+Mendeley LBC Cervical Cancer – [download here](https://data.mendeley.com/datasets/zddtpgzv63/2)
 Place the raw images in `data/raw/`.
 
 ## Setup
@@ -58,3 +58,8 @@ Metrics: **PSNR** and **SSIM** on the test set, for each method and noise level.
 ## Reproducibility
 
 All experiments use the same degraded inputs and a fixed random seed (see `configs/experiment.yaml`).
+
+## Contributors
+
+- [Francesco Castaldi](https://github.com/FrancescoCastaldi)
+- [Paolo Fusco](https://github.com/PaoloFusco)
