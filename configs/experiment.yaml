@@ -28,8 +28,9 @@ unet:
   out_channels: 3
 
 diffpir:
-  num_steps: 100
+  num_steps: 20
   noise_level: 0.05
+  max_test_images: 10
 
 eval:
   results_dir: results/
