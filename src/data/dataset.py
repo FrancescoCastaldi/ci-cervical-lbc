@@ -7,7 +7,19 @@ from torch.utils.data import Dataset
 import torchvision.transforms as T
 
 
-def load_config(path="configs/experiment.yaml"):
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _resolve(path):
+    p = Path(path)
+    if not p.is_absolute():
+        p = PROJECT_ROOT / p
+    return p
+
+
+def load_config(path=None):
+    if path is None:
+        path = PROJECT_ROOT / "configs" / "experiment.yaml"
     with open(path) as f:
         return yaml.safe_load(f)
 
@@ -22,8 +34,8 @@ def is_valid_image(path):
 
 
 def build_splits(config):
-    raw_dir = Path(config["dataset"]["root"])
-    splits_dir = Path(config["dataset"]["splits"])
+    raw_dir = _resolve(config["dataset"]["root"])
+    splits_dir = _resolve(config["dataset"]["splits"])
     splits_dir.mkdir(parents=True, exist_ok=True)
 
     all_images = list(raw_dir.rglob("*.png")) + list(raw_dir.rglob("*.jpg"))
@@ -58,8 +70,8 @@ def build_splits(config):
 
 class LBCDataset(Dataset):
     def __init__(self, split_file, image_size=256, return_path=False):
-        with open(split_file) as f:
-            self.paths = [Path(l.strip()) for l in f.readlines() if l.strip()]
+        with open(_resolve(split_file)) as f:
+            self.paths = [_resolve(l.strip()) for l in f.readlines() if l.strip()]
         self.image_size = image_size
         self.return_path = return_path
         self.transform = T.Compose([
@@ -81,8 +93,8 @@ class LBCDataset(Dataset):
 
 class DegradedDataset(Dataset):
     def __init__(self, degraded_dir, gt_dir):
-        self.degraded_paths = sorted(Path(degraded_dir).glob("*.pt"))
-        self.gt_dir = Path(gt_dir)
+        self.degraded_paths = sorted(_resolve(degraded_dir).glob("*.pt"))
+        self.gt_dir = _resolve(gt_dir)
 
     def __len__(self):
         return len(self.degraded_paths)
