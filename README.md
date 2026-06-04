@@ -59,7 +59,25 @@ Metrics: **PSNR** and **SSIM** on the test set, for each method and noise level.
 
 All experiments use the same degraded inputs and a fixed random seed (see `configs/experiment.yaml`).
 
+## Running Experiments
+
+To run the experiments for each method, use the provided scripts:
+
+- Total Variation: `python scripts/run_tv.py`
+- UNet: `python scripts/run_unet.py`
+- DiffPir: `python scripts/run_diffpir.py`
+
+Note: DiffPir requires the DiffPIR repository to be cloned and pretrained weights placed in `src/methods/diffpir/weights/`.
+
+## Results
+
+After running the scripts, quantitative results (PSNR, SSIM) will be saved in the `results/` directory, and qualitative examples will be saved in `results/` as well.
+
 ## Contributors
 
 - [Francesco Castaldi](https://github.com/FrancescoCastaldi)
 - [Paolo Fusco](https://github.com/PaoloFusco)
+
+## License
+
+This project is for educational purposes only.
