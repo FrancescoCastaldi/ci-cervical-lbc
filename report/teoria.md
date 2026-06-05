@@ -74,29 +74,55 @@ La UNet è un'architettura encoder-decoder con skip connections, progettata per 
 
 ### 3.3 DiffPIR — Metodo Generativo (Diffusion)
 
-DiffPIR integra un modello di diffusione pretrained in un framework plug-and-play per il restauro di immagini.
+DiffPIR integra un modello di diffusione (DDPM) in un framework plug-and-play per il restauro di immagini. A differenza dell'approccio originale che utilizzava un modello pre-addestrato su ImageNet (256×256, 500M parametri, ~2GB), qui utilizziamo una **LightUNet custom** addestrata da zero sulle immagini cervicali LBC.
 
-**Idea chiave:** Alternare due step ad ogni timestep $t$:
+#### Architettura del Modello di Diffusione (LightUNet)
 
-1. **Denoising step** (prior): il modello di diffusione stima $x_0^{(t)}$ da $x_t$
+La LightUNet è una UNet leggera progettata per DDPM:
+
+| Componente | Dettaglio |
+|---|---|
+| Canali base | 32 |
+| Livelli encoder | 3 (32 → 64 → 128 canali) |
+| Livelli decoder | 3 (skip-connected) |
+| Timestep embedding | Sinusoidale + MLP (dim=128) |
+| Normalizzazione | GroupNorm (8 gruppi) |
+| Parametri totali | ~1.2M |
+| Peso modello | ~5 MB |
+
+Addestramento DDPM standard con 1000 timestep, scheduler lineare $\beta_1=10^{-4}, \beta_T=0.02$, loss MSE sulla predizione del rumore.
+
+#### Algoritmo DiffPIR
+
+L'idea chiave è alternare due step ad ogni timestep $t$:
+
+1. **Denoising step** (prior): il modello di diffusione stima $\hat{x}_0^{(t)}$ da $x_t$
 2. **Data-fidelity step**: proiezione vincolata sull'osservazione $y$ via FFT
 
-$$x_0^{(t)} = \text{Denoiser}(x_t)$$
-$$\hat{x}_0^{(t)} = \arg\min_x \|y - \mathcal{H}(x)\|^2 + \rho_t \|x - x_0^{(t)}\|^2$$
+$$\hat{x}_0^{(t)} = \frac{x_t - \sqrt{1-\bar{\alpha}_t} \cdot \varepsilon_\theta(x_t, t)}{\sqrt{\bar{\alpha}_t}}$$
+$$\tilde{x}_0^{(t)} = \arg\min_x \|y - \mathcal{H}(x)\|^2 + \rho_t \|x - \hat{x}_0^{(t)}\|^2$$
 
 Il data-fidelity step si risolve analiticamente nel dominio della frequenza:
 
-$$\hat{x}_0 = \mathcal{F}^{-1}\left(\frac{\mathcal{F}(y) \cdot \overline{\mathcal{F}(k)} + \rho \cdot \mathcal{F}(x_0)}{|\mathcal{F}(k)|^2 + \rho}\right)$$
+$$\tilde{x}_0 = \mathcal{F}^{-1}\left(\frac{\mathcal{F}(y) \cdot \overline{\mathcal{F}(k)} + \rho \cdot \mathcal{F}(\hat{x}_0)}{|\mathcal{F}(k)|^2 + \rho}\right)$$
 
-**Modello diffusion:** 256×256 unconditional (ImageNet), 1000 timestep di training, 20-100 step di sampling.
+Il peso $\rho_t$ controlla il bilanciamento tra fedeltà ai dati e prior:
+$$\rho_t = \lambda \cdot \frac{\sigma^2 \cdot \bar{\alpha}_t}{1 - \bar{\alpha}_t}$$
 
-**Parametri chiave:**
-- $\lambda$ (peso data-fidelity): 1.0
-- $\zeta$ (stocasticità): 0.1
-- `num_steps`: 20 (CPU) / 100 (GPU)
+#### Parametri Chiave
 
-**Pro:** Qualità generativa superiore, preserva dettagli fini.
-**Contro:** Molto lento in inferenza, complesso da configurare.
+| Parametro | Valore | Ruolo |
+|---|---|---|
+| $t_{\text{start}}$ | 50 | Timestep di partenza (stabilità numerica) |
+| `num_steps` | 15 | Step di sampling (sub-campionati da $t_{\text{start}}$ a 0) |
+| $\lambda$ | 10.0 | Peso data-fidelity |
+| $\zeta$ | 0.0 | Stocasticità (0 = deterministico) |
+| Modello | LightUNet custom | Addestrato su 100 immagini LBC |
+
+Il sampling parte da $t_{\text{start}}=50$ invece che da $t=1000$ per evitare l'amplificazione degli errori di predizione: quando $\bar{\alpha}_t$ è molto piccolo (tipico per $t>500$), la stima di $x_0$ diventa numericamente instabile poiché $\sqrt{1-\bar{\alpha}_t} / \sqrt{\bar{\alpha}_t}$ amplifica gli errori del modello.
+
+**Pro:** Qualità generativa, preserva dettagli fini, deblurring via FFT.
+**Contro:** Lento in inferenza su CPU (~2 sec/img), modello leggero limita la qualità massima.
 
 ## 4. Metriche di Valutazione
 
@@ -123,11 +149,20 @@ Misura il costo computazionale per immagine. Rilevante per applicazioni real-tim
 Il punto fondamentale del progetto è la **correttezza del confronto**:
 
 1. **Stessi dati**: tutte le immagini del test set (145 immagini, split 15%)
-2. **Stessa degradazione**: pipeline unica (`src/degradation/degradation.py`) applicata a tutti i metodi
-3. **Stesse metriche**: PSNR e SSIM calcolati con `skimage.metrics`
+2. **Stessa degradazione**: pipeline unica (`src/degradation/degradation.py`) con blur ($\sigma=2$, kernel=9) + AWGN a 4 livelli
+3. **Stesse metriche**: PSNR e SSIM calcolati con `skimage.metrics` su immagini in [0, 1]
 4. **Stesso seed**: 42, per riproducibilità
 
 Ogni metodo riceve in input la stessa immagine degradata e produce un'immagine restaurata della stessa dimensione. Le metriche sono calcolate rispetto alla stessa ground truth.
+
+I risultati sono organizzati automaticamente in:
+```
+results/<metodo>/
+├── metrics.csv        # PSNR, SSIM, tempo per ogni noise_level
+└── qualitative/       # immagini di confronto visivo
+    ├── noise_0.005_sample0.png
+    └── ...
+```
 
 ## 6. Preprocessing
 
@@ -136,4 +171,4 @@ Ogni metodo riceve in input la stessa immagine degradata e produce un'immagine r
 3. **Normalizzazione**: $(x - 0.5) / 0.5$ → [-1, 1]
 4. **Split**: 70% train / 15% val / 15% test (seed=42)
 
-La normalizzazione in [-1, 1] è coerente con il range atteso dai modelli diffusion e dalla loss MSE.
+La normalizzazione in [-1, 1] è coerente con il range atteso dal modello diffusion e dalla loss MSE.

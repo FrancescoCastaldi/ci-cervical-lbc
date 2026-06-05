@@ -1,23 +1,12 @@
-import sys
 import time
 import torch
+import torch.nn.functional as F
 import numpy as np
 from pathlib import Path
+from .model import LightUNet
 
-DIFFPIR_ROOT = Path(__file__).resolve().parents[3] / "external" / "diffpir"
 
 _model_cache = {}
-
-
-def _setup_path():
-    if not DIFFPIR_ROOT.exists():
-        raise FileNotFoundError(
-            f"DiffPIR non trovato in {DIFFPIR_ROOT}\n"
-            f"Esegui: git clone https://github.com/yuanzhi-zhu/DiffPIR.git external/diffpir"
-        )
-    root = str(DIFFPIR_ROOT)
-    if root not in sys.path:
-        sys.path.insert(0, root)
 
 
 def _load_model(weights_path, device):
@@ -25,178 +14,200 @@ def _load_model(weights_path, device):
     if key in _model_cache:
         return _model_cache[key]
 
-    _setup_path()
-    from guided_diffusion.script_util import (
-        model_and_diffusion_defaults,
-        create_model_and_diffusion,
-        args_to_dict,
-    )
-    from utils import utils_model
+    checkpoint = torch.load(str(weights_path), map_location="cpu")
 
-    model_config = dict(
-        model_path=str(weights_path),
-        num_channels=256,
-        num_res_blocks=2,
-        attention_resolutions="8,16,32",
-    )
-    args = utils_model.create_argparser(model_config).parse_args([])
-    model, diffusion = create_model_and_diffusion(
-        **args_to_dict(args, model_and_diffusion_defaults().keys())
-    )
-    model.load_state_dict(torch.load(str(weights_path), map_location="cpu"))
+    model = LightUNet(in_channels=3, out_channels=3, base_channels=32)
+    model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
     for p in model.parameters():
         p.requires_grad_(False)
     model = model.to(device)
 
-    _model_cache[key] = (model, diffusion)
-    return model, diffusion
+    schedule = {
+        "num_timesteps": checkpoint["num_timesteps"],
+        "betas": checkpoint["betas"],
+        "alphas": checkpoint["alphas"],
+        "alphas_cumprod": checkpoint["alphas_cumprod"],
+    }
+
+    _model_cache[key] = (model, schedule)
+    return model, schedule
+
+
+def _psf_to_otf(kernel, img_size):
+    pad_h = img_size[-2] - kernel.shape[-2]
+    pad_w = img_size[-1] - kernel.shape[-1]
+    pad_h_before = pad_h // 2
+    pad_h_after = pad_h - pad_h_before
+    pad_w_before = pad_w // 2
+    pad_w_after = pad_w - pad_w_before
+    padded = F.pad(kernel, (pad_w_before, pad_w_after, pad_h_before, pad_h_after))
+    shifted = torch.roll(padded, (-kernel.shape[-2] // 2, -kernel.shape[-1] // 2), dims=(-2, -1))
+    otf = torch.fft.fftn(shifted, dim=(-2, -1))
+    return otf
+
+
+def _data_fidelity_fft(y, x0_pred, kernel_otf, rho):
+    FB = kernel_otf
+    FBC = torch.conj(FB)
+    F2B = torch.abs(FB) ** 2
+
+    y_f = torch.fft.fftn(y, dim=(-2, -1))
+    x0_f = torch.fft.fftn(x0_pred, dim=(-2, -1))
+
+    numerator = FBC * y_f + rho * x0_f
+    denominator = F2B + rho
+
+    x_f = numerator / denominator
+    x = torch.fft.ifftn(x_f, dim=(-2, -1)).real
+    return x
 
 
 def run_diffpir(
     degraded,
-    num_steps=100,
+    num_steps=15,
     noise_level=0.05,
     weights_path=None,
     kernel_size=9,
     blur_sigma=2.0,
     lambda_=1.0,
     zeta=0.1,
+    t_start=None,
     return_timing=False,
 ):
     """
-    DiffPIR deblur+denoise wrapper.
+    DiffPIR: Diffusion-based Plug-and-Play Image Restoration.
+
+    Uses a lightweight DDPM model trained on cervical cancer images,
+    combined with FFT-based data fidelity for deblurring.
 
     Args:
         degraded: torch.Tensor [C, H, W] in [-1, 1]
-        num_steps: number of diffusion sampling steps
+        num_steps: number of diffusion sampling steps (subsampled from 0..t_start)
         noise_level: AWGN noise level
-        weights_path: path to pretrained .pt file
+        weights_path: path to trained DDPM .pt file
         kernel_size: Gaussian blur kernel size
         blur_sigma: Gaussian blur sigma
         lambda_: data-fidelity weight
-        zeta: stochasticity parameter
+        zeta: stochasticity parameter (0=deterministic, 1=fully stochastic)
+        t_start: starting timestep (None = auto from noise schedule)
         return_timing: if True, returns (restored, inference_time)
 
     Returns:
         restored: torch.Tensor [C, H, W] in [0, 1]
-        or (restored, inference_time) if return_timing=True
     """
     start_time = time.time()
-    _setup_path()
-    from utils import utils_model
-    from utils import utils_sisr as sr
 
     device = degraded.device if degraded.is_cuda else torch.device("cpu")
+    y = degraded.unsqueeze(0).to(device)
 
     if weights_path is None:
-        weights_path = (
-            Path(__file__).resolve().parent
-            / "weights"
-            / "256x256_diffusion_uncond.pt"
-        )
+        weights_path = Path(__file__).resolve().parent / "weights" / "ddpm_lbc.pt"
     weights_path = Path(weights_path)
     if not weights_path.exists():
         raise FileNotFoundError(
-            f"Pesi non trovati: {weights_path}\n"
-            f"Scarica da: https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt\n"
-            f"E salva in: {weights_path}"
+            f"DDPM weights not found at {weights_path}\n"
+            f"Run: python -m src.methods.diffpir.train"
         )
 
-    y = (degraded.clamp(-1, 1) + 1) / 2
-    y = y.unsqueeze(0).to(device)
+    model, schedule = _load_model(weights_path, device)
+    num_timesteps = schedule["num_timesteps"]
+    betas = schedule["betas"].to(device)
+    alphas_cumprod = schedule["alphas_cumprod"].to(device)
 
-    model, diffusion = _load_model(weights_path, device)
+    sqrt_alphas_cumprod = torch.sqrt(alphas_cumprod)
+    sqrt_1m_alphas_cumprod = torch.sqrt(1.0 - alphas_cumprod)
 
+    # --- Gaussian blur kernel OTF ---
     coords = torch.arange(kernel_size, dtype=torch.float32) - kernel_size // 2
-    g = torch.exp(-(coords**2) / (2 * blur_sigma**2))
+    g = torch.exp(-(coords ** 2) / (2 * blur_sigma ** 2))
     g = g / g.sum()
     k = g[:, None] * g[None, :]
     k = k / k.sum()
-    k_np = k.numpy()
     k_tensor = k.unsqueeze(0).unsqueeze(0).to(device)
+    img_size = y.shape[-2:]
+    kernel_otf = _psf_to_otf(k_tensor, img_size)
 
-    num_train_timesteps = 1000
-    beta_start = 0.1 / 1000
-    beta_end = 20 / 1000
-    betas = torch.linspace(
-        beta_start, beta_end, num_train_timesteps, dtype=torch.float32, device=device
-    )
-    alphas = 1.0 - betas
-    alphas_cumprod = torch.cumprod(alphas, dim=0)
-    sqrt_alphas_cumprod = torch.sqrt(alphas_cumprod)
-    sqrt_1m_alphas_cumprod = torch.sqrt(1.0 - alphas_cumprod)
-    reduced_alpha_cumprod = sqrt_1m_alphas_cumprod / sqrt_alphas_cumprod
-
-    reduced_np = reduced_alpha_cumprod.cpu().numpy()
-
-    sigma = max(0.001, noise_level)
-    sf = 1
-
-    FB, FBC, F2B, FBFy = sr.pre_calculate(y, k_tensor, sf)
-
+    # --- Find t_y (timestep matching measurement noise level) ---
     sigma_ks = sqrt_1m_alphas_cumprod / sqrt_alphas_cumprod
-    rhos = lambda_ * (sigma**2) / (sigma_ks**2)
+    t_y = torch.argmin(torch.abs(sigma_ks - 2 * noise_level)).item()
 
-    t_start = num_train_timesteps - 1
-    t_y = utils_model.find_nearest(reduced_np, 2 * noise_level)
-    sqrt_alpha_effective = sqrt_alphas_cumprod[t_start] / sqrt_alphas_cumprod[t_y]
-    x = sqrt_alpha_effective * (2 * y - 1) + torch.sqrt(
-        sqrt_1m_alphas_cumprod[t_start] ** 2
-        - sqrt_alpha_effective**2 * sqrt_1m_alphas_cumprod[t_y] ** 2
-    ) * torch.randn_like(y)
+    # --- Choose t_start where x0 estimation is numerically stable ---
+    #  x0 = (x_t - sqrt(1-α̅) * ε_θ) / sqrt(α̅)
+    #  Error amplification = sqrt(1-α̅) / sqrt(α̅)
+    #  We want α̅ large enough that this amplification is manageable (< 5).
+    STABLE_ALPHA_THRESH = 0.08
+    if t_start is None:
+        stable_mask = alphas_cumprod >= STABLE_ALPHA_THRESH
+        if stable_mask.any():
+            t_start = torch.where(stable_mask)[0][-1].item()
+        else:
+            t_start = min(200, num_timesteps - 1)
+    else:
+        t_start = min(t_start, num_timesteps - 1)
 
-    seq = np.sqrt(np.linspace(0, num_train_timesteps**2, num_steps))
-    seq = [int(s) for s in seq]
-    seq[-1] = seq[-1] - 1
+    if t_y >= t_start:
+        t_start = min(t_y + 5, num_timesteps - 1)
 
-    sigmas_arr = reduced_np[::-1].copy()
+    # --- Initialize x at t_start with correct noise level ---
+    ac_start = sqrt_alphas_cumprod[t_start]
+    ac_t_y = sqrt_alphas_cumprod[t_y]
+    alpha_eff = ac_start / ac_t_y
+    var_eff = sqrt_1m_alphas_cumprod[t_start] ** 2 - alpha_eff ** 2 * sqrt_1m_alphas_cumprod[t_y] ** 2
+    var_eff = var_eff.clamp(min=0.0)
+    x = alpha_eff * y + torch.sqrt(var_eff) * torch.randn_like(y)
 
+    # --- ρ_t schedule: data-fidelity weight ---
+    #  ρ_t = λ * σ² / σ_k(t)²
+    #  where σ_k(t) = sqrt(1-α̅(t)) / sqrt(α̅(t))
+    sigma = max(0.001, noise_level)
+    rhos = lambda_ * (sigma ** 2) / (sigma_ks ** 2)
+
+    # --- Build subsampled sequence: t_start → 0 with sqrt spacing ---
+    if num_steps <= 1:
+        seq = [0]
+    else:
+        seq = np.sqrt(np.linspace(0, t_start ** 2, num_steps))
+        seq = sorted(set(int(s) for s in seq))
+        if seq[-1] != t_start:
+            seq.append(t_start)
+        seq = seq[::-1]
+
+    # --- Sampling loop ---
     for i in range(len(seq)):
-        curr_sigma = float(sigmas_arr[seq[i]])
-        t_i = utils_model.find_nearest(reduced_np, curr_sigma)
-        if t_i > t_start:
-            continue
+        t_i = seq[i]
 
-        x0 = utils_model.model_fn(
-            x,
-            noise_level=curr_sigma * 255,
-            model_out_type="pred_xstart",
-            model_diffusion=model,
-            diffusion=diffusion,
-            ddim_sample=False,
-            alphas_cumprod=alphas_cumprod,
-        )
+        with torch.no_grad():
+            t_tensor = torch.tensor([t_i], device=device).expand(y.shape[0])
+            pred_noise = model(x, t_tensor)
 
-        if seq[i] != seq[-1]:
-            tau = rhos[t_i].reshape(1, 1, 1, 1)
-            x0_p = x0 / 2 + 0.5
-            x0_p = sr.data_solution(x0_p.float(), FB, FBC, F2B, FBFy, tau, sf)
-            x0_p = x0_p * 2 - 1
-            x0 = x0 + 1.0 * (x0_p - x0)
+        # Estimate x0 from current x and predicted noise
+        x0 = (x - sqrt_1m_alphas_cumprod[t_i] * pred_noise) / sqrt_alphas_cumprod[t_i]
+        x0 = x0.clamp(-1, 1)
 
+        # Data fidelity (skip on last step)
         if i < len(seq) - 1:
-            next_sigma = float(sigmas_arr[seq[i + 1]])
-            t_im1 = utils_model.find_nearest(reduced_np, next_sigma)
-            eps = (x - sqrt_alphas_cumprod[t_i] * x0) / sqrt_1m_alphas_cumprod[t_i]
-            eta = 0.0
-            eta_sigma = (
-                eta
-                * sqrt_1m_alphas_cumprod[t_im1]
-                / sqrt_1m_alphas_cumprod[t_i]
-                * torch.sqrt(betas[t_i])
-            )
-            x = sqrt_alphas_cumprod[t_im1] * x0 + np.sqrt(1 - zeta) * (
-                torch.sqrt(
-                    sqrt_1m_alphas_cumprod[t_im1] ** 2 - eta_sigma**2
-                )
-                * eps
-                + eta_sigma * torch.randn_like(x)
-            ) + np.sqrt(zeta) * sqrt_1m_alphas_cumprod[t_im1] * torch.randn_like(x)
+            rho_t = rhos[t_i].reshape(1, 1, 1, 1)
+            x0 = _data_fidelity_fft(y, x0, kernel_otf, rho_t)
 
-    result = (x / 2 + 0.5).clamp(0, 1).squeeze(0).cpu()
-    
+        # DDIM step to next timestep (or finalize)
+        if i < len(seq) - 1:
+            t_im1 = seq[i + 1]
+            eps = (x - sqrt_alphas_cumprod[t_i] * x0) / sqrt_1m_alphas_cumprod[t_i]
+
+            # Deterministic DDIM component
+            x_ddpm_mean = sqrt_alphas_cumprod[t_im1] * x0
+            x_ddpm_dir = torch.sqrt(sqrt_1m_alphas_cumprod[t_im1] ** 2) * eps
+
+            # Stochastic mixing controlled by zeta
+            noise_std = sqrt_1m_alphas_cumprod[t_im1]
+            x = x_ddpm_mean + np.sqrt(1 - zeta) * x_ddpm_dir + np.sqrt(zeta) * noise_std * torch.randn_like(x)
+        else:
+            x = x0
+
+    # Convert from [-1, 1] to [0, 1] for external evaluation
+    result = ((x.squeeze(0) + 1) / 2).clamp(0, 1).cpu()
+
     if return_timing:
-        inference_time = time.time() - start_time
-        return result, inference_time
+        return result, time.time() - start_time
     return result

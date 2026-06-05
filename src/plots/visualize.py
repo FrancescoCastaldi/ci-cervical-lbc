@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import torch
 import pandas as pd
+from pathlib import Path
 
 
 def show_comparison(images_dict, save_path=None):
@@ -14,12 +15,24 @@ def show_comparison(images_dict, save_path=None):
         ax.axis("off")
     plt.tight_layout()
     if save_path:
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_path, dpi=150)
-    plt.show()
+    plt.close(fig)
 
 
-def plot_metrics(results_csv, save_path=None):
-    df = pd.read_csv(results_csv)
+def plot_metrics(results_dir, save_path=None):
+    results_dir = Path(results_dir)
+    dfs = []
+    for method_dir in sorted(results_dir.iterdir()):
+        csv_file = method_dir / "metrics.csv"
+        if csv_file.exists():
+            dfs.append(pd.read_csv(csv_file))
+    if not dfs:
+        print(f"Nessun risultato trovato in {results_dir}")
+        return
+    df = pd.concat(dfs, ignore_index=True)
+
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     for ax, metric in zip(axes, ["psnr", "ssim"]):
         for method, group in df.groupby("method"):
@@ -30,5 +43,7 @@ def plot_metrics(results_csv, save_path=None):
         ax.legend()
     plt.tight_layout()
     if save_path:
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_path, dpi=150)
-    plt.show()
+    plt.close(fig)

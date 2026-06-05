@@ -2,20 +2,20 @@
 
 Implementazione del metodo DiffPIR (Denoising Diffusion Models for Plug-and-Play Image Restoration) per il restauro di immagini degradate.
 
-## Setup
+## Modello
 
-### 1. Clona la repository DiffPIR
+Usa una **LightUNet** (custom DDPM) addestrata su immagini LBC cervicali:
+- Architettura: UNet leggero con embedding temporale sinusoidale
+- Timesteps: 1000 (training), 15 (sampling)
+- Pesi: `weights/ddpm_lbc.pt` (~5MB)
+
+### Addestramento
+
 ```bash
-git clone https://github.com/yuanzhi-zhu/DiffPIR.git external/diffpir
+python -m src.methods.diffpir.train
 ```
 
-### 2. Scarica i pesi pretrained
-```bash
-mkdir -p src/methods/diffpir/weights
-curl -L "https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt" -o src/methods/diffpir/weights/256x256_diffusion_uncond.pt
-```
-
-**Nota:** Il file pesa ~2GB e potrebbe richiedere 10-20 minuti per il download.
+Training su 100 immagini del training set, 30 epoche, MSE loss.
 
 ## Utilizzo
 
@@ -34,43 +34,48 @@ jupyter notebook notebooks/04_diffpir.ipynb
 Parametri in `configs/experiment.yaml`:
 ```yaml
 diffpir:
-  num_steps: 20          # Step di sampling (20 per CPU, 100 per GPU)
-  noise_level: 0.05      # Livello rumore di riferimento
-  max_test_images: 10    # Numero immagini da processare
+  num_steps: 15           # Step di sampling
+  noise_level: 0.05       # Livello rumore di riferimento
+  max_test_images: 10     # Numero immagini da processare
+  weights: src/methods/diffpir/weights/ddpm_lbc.pt
+  lambda: 10.0            # Peso data-fidelity
+  zeta: 0.0               # Stocasticità (0 = deterministico)
+  t_start: 50             # Timestep di partenza
 ```
 
 ### Parametri DiffPIR
-- **num_steps**: Numero di step di sampling diffusion (default: 20)
-  - CPU: 20-50 step (5-15 sec/immagine)
-  - GPU: 100 step (2-3 sec/immagine)
-- **lambda_**: Peso data-fidelity (default: 1.0)
-- **zeta**: Parametro stocasticità (default: 0.1)
+| Parametro | Default | Ruolo |
+|---|---|---|
+| `num_steps` | 15 | Step di sampling (sub-campionati da t_start a 0) |
+| `lambda_` | 10.0 | Peso data-fidelity |
+| `zeta` | 0.0 | Stocasticità (0=deterministico, 1=fully stochastic) |
+| `t_start` | 50 | Timestep di partenza (50 per stabilità numerica) |
+
+## Risultati
+
+Metriche su 10 immagini di test:
+
+| σ_n | PSNR | SSIM | Tempo |
+|---|---|---|---|
+| 0.005 | 16.67 dB | 0.235 | 2.0 s |
+| 0.01 | 17.32 dB | 0.270 | 2.0 s |
+| 0.05 | 22.49 dB | 0.512 | 2.0 s |
+| 0.1 | 24.68 dB | 0.664 | 2.0 s |
 
 ## Output
 
 ### Metriche
-- `results/diffpir_results.csv`: PSNR, SSIM, tempo inferenza per ogni noise level
+- `results/diffpir/metrics.csv`: PSNR, SSIM, tempo inferenza per ogni noise level
 
 ### Immagini qualitative
-- `results/diffpir_noise{level}_sample{i}.png`: Confronto degraded vs restored vs GT
-
-## Performance
-
-### Tempo di inferenza (CPU)
-- **num_steps=20**: ~10-15 sec/immagine
-- **num_steps=50**: ~25-35 sec/immagine
-- **num_steps=100**: ~50-70 sec/immagine
-
-### Tempo di inferenza (GPU CUDA)
-- **num_steps=100**: ~2-3 sec/immagine
+- `results/diffpir/qualitative/noise_{level}_sample{i}.png`: Confronto degraded vs restored vs GT
 
 ## Confronto con altri metodi
 
 Dopo aver eseguito TV e UNet, carica i risultati nel notebook per il confronto:
 ```python
-df_tv = pd.read_csv('results/tv_results.csv')
-df_unet = pd.read_csv('results/unet_results.csv')
-df_diffpir = pd.read_csv('results/diffpir_results.csv')
+from src.plots.visualize import plot_metrics
+plot_metrics("results", save_path="results/comparison.png")
 ```
 
 ## Riferimenti

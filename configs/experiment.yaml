@@ -28,9 +28,13 @@ unet:
   out_channels: 3
 
 diffpir:
-  num_steps: 20
+  num_steps: 15
   noise_level: 0.05
   max_test_images: 10
+  weights: src/methods/diffpir/weights/ddpm_lbc.pt
+  lambda: 10.0
+  zeta: 0.0
+  t_start: 50
 
 eval:
   results_dir: results/

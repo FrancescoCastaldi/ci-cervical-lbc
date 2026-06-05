@@ -8,15 +8,19 @@ def to_numpy(tensor):
     return tensor.detach().cpu().permute(1, 2, 0).numpy()
 
 
+def _to_01(tensor):
+    return (tensor + 1) / 2
+
+
 def compute_psnr(pred, gt):
     pred_np = to_numpy(pred.clamp(0, 1))
-    gt_np = to_numpy(gt.clamp(0, 1))
+    gt_np = to_numpy(_to_01(gt).clamp(0, 1))
     return psnr(gt_np, pred_np, data_range=1.0)
 
 
 def compute_ssim(pred, gt):
     pred_np = to_numpy(pred.clamp(0, 1))
-    gt_np = to_numpy(gt.clamp(0, 1))
+    gt_np = to_numpy(_to_01(gt).clamp(0, 1))
     return ssim(gt_np, pred_np, data_range=1.0, channel_axis=-1)
 
 
