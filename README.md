@@ -121,8 +121,8 @@ The degradation pipeline (`src/degradation/degradation.py`) applies identical bl
 
 ## Contributors
 
-- [Francesco Castaldi](https://github.com/FrancescoCastaldi) — DiffPIR
-- [Paolo Fusco](https://github.com/PaoloFusco) — TV, UNet
+- [Francesco Castaldi](https://github.com/FrancescoCastaldi)
+- [Paolo Fusco](https://github.com/PaoloFusco)
 
 ## License
 
