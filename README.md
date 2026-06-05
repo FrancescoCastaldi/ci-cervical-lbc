@@ -15,11 +15,20 @@ Inverse problem: recover a high-quality image from a degraded observation (Gauss
 
 ## Methods
 
-| Method | Family |
-|---|---|
-| Total Variation (TV) | Variational |
-| UNet | End-to-end |
-| DiffPir | Generative (Diffusion) |
+| Method | Family | Status |
+|---|---|---|
+| Total Variation (TV) | Variational | 🔄 Da eseguire |
+| UNet | End-to-end | 🔄 Da eseguire |
+| DiffPIR | Generative (Diffusion) | ✅ Completato |
+
+## DiffPIR Results (10 test images)
+
+| σ_n | PSNR | SSIM | Tempo |
+|---|---|---|---|
+| 0.005 | 16.67 dB | 0.235 | 2.0 s |
+| 0.01 | 17.32 dB | 0.270 | 2.0 s |
+| 0.05 | 22.49 dB | 0.512 | 2.0 s |
+| 0.1 | 24.68 dB | 0.664 | 2.0 s |
 
 ## Dataset
 
@@ -32,32 +41,50 @@ Place the raw images in `data/raw/`.
 pip install -r requirements.txt
 ```
 
+Running DiffPIR requires a trained DDPM model (included: `src/methods/diffpir/weights/ddpm_lbc.pt`).
+To retrain:
+```bash
+python -m src.methods.diffpir.train
+```
+
 ## Project Structure
 
 ```
 ci-cervical-lbc/
-├── configs/          # Experiment configuration
-├── data/             # Dataset (not tracked by git)
-├── notebooks/        # Exploratory analysis
+├── configs/                    # experiment.yaml (seed, paths, parametri)
+├── data/
+│   ├── raw/                    # Dataset originale (non tracciato)
+│   └── splits/                 # Split train/val/test .txt
+├── notebooks/
+│   ├── 01_eda.ipynb            # EDA completo (classi, statistiche)
+│   └── 04_diffpir.ipynb        # DiffPIR demo + valutazione
 ├── src/
-│   ├── data/         # Dataset loading and preprocessing
-│   ├── degradation/  # Degradation pipeline
-│   ├── methods/      # TV, UNet, DiffPir
-│   ├── eval/         # Metrics (PSNR, SSIM)
-│   └── plots/        # Visualization utilities
-├── scripts/          # Run experiments
-├── results/          # Output metrics and figures (not tracked)
+│   ├── data/dataset.py         # LBCDataset, build_splits
+│   ├── degradation/degradation.py  # Blur + noise pipeline
+│   ├── methods/
+│   │   ├── tv/tv.py            # Total Variation
+│   │   ├── unet/unet.py        # UNet architecture
+│   │   └── diffpir/            # DiffPIR (modulo autonomo)
+│   │       ├── diffpir.py      # Algoritmo DiffPIR
+│   │       ├── model.py        # LightUNet per DDPM
+│   │       ├── train.py        # Training DDPM
+│   │       ├── weights/        # Pesi addestrati
+│   │       └── README.md       # Documentazione metodo
+│   ├── eval/metrics.py         # PSNR, SSIM
+│   └── plots/visualize.py      # Comparazione, plot metriche
+├── scripts/
+│   ├── preprocess.py           # Preprocessing dataset
+│   ├── run_tv.py               # Esecuzione TV
+│   ├── run_unet.py             # Esecuzione UNet
+│   ├── run_diffpir.py          # Esecuzione DiffPIR
+│   └── plot_results.py         # Grafico comparativo finale
 ├── report/
-└── slides/
+│   ├── teoria.md               # Fondamenti teorici
+│   └── notebook.md             # Riassunto risultati notebook
+├── slides/                     # Materiale presentazione
+├── agents.md                   # Stato progetto e divisione lavoro
+└── README.md                   # Questo file
 ```
-
-## Evaluation
-
-Metrics: **PSNR** and **SSIM** on the test set, for each method and noise level.
-
-## Reproducibility
-
-All experiments use the same degraded inputs and a fixed random seed (see `configs/experiment.yaml`).
 
 ## Running Experiments
 
@@ -65,18 +92,37 @@ To run the experiments for each method, use the provided scripts:
 
 - Total Variation: `python scripts/run_tv.py`
 - UNet: `python scripts/run_unet.py`
-- DiffPir: `python scripts/run_diffpir.py`
+- DiffPIR: `python scripts/run_diffpir.py`
 
-Note: DiffPir usa una custom LightUNet (~1.2M params) addestrata su LBC, pesi in `src/methods/diffpir/weights/ddpm_lbc.pt`.
+After all methods have results, generate the comparison plot:
+```bash
+python scripts/plot_results.py
+```
 
-## Results
+## Evaluation
 
-After running the scripts, quantitative results (PSNR, SSIM) will be saved in the `results/` directory, and qualitative examples will be saved in `results/` as well.
+Metrics: **PSNR** and **SSIM** on the test set, for each method and noise level.
+
+Output structure:
+```
+results/
+├── comparison.png              # Grafico comparativo
+├── diffpir/
+│   ├── metrics.csv             # PSNR, SSIM, tempo
+│   └── qualitative/            # Immagini di confronto
+├── tv/                         # (dopo esecuzione)
+└── unet/                       # (dopo esecuzione)
+```
+
+## Reproducibility
+
+All experiments use the same degraded inputs and a fixed random seed (`seed=42` in `configs/experiment.yaml`).
+The degradation pipeline (`src/degradation/degradation.py`) applies identical blur + noise to all methods.
 
 ## Contributors
 
-- [Francesco Castaldi](https://github.com/FrancescoCastaldi)
-- [Paolo Fusco](https://github.com/PaoloFusco)
+- [Francesco Castaldi](https://github.com/FrancescoCastaldi) — DiffPIR
+- [Paolo Fusco](https://github.com/PaoloFusco) — TV, UNet
 
 ## License
 
