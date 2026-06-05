@@ -36,11 +36,11 @@ Inverse problem: recover a high-quality image from a degraded observation (Gauss
 ### Total Variation Results
 
 | σₙ | PSNR | SSIM |
-|---|---|---|---|
-| 0.005 | **32.09 dB** | **0.91** |
-| 0.01 | 32.04 dB | 0.90 |
-| 0.05 | 30.42 dB | 0.83 |
-| 0.1 | 26.54 dB | 0.58 |
+|---|---|---|
+| 0.005 | 32.09 dB | 0.911 |
+| 0.01 | 32.04 dB | 0.909 |
+| 0.05 | 30.42 dB | 0.837 |
+| 0.1 | 26.54 dB | 0.586 |
 
 Why do the results worsen with more noise?
 It's normal, and there are two reasons:
