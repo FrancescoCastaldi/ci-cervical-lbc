@@ -17,8 +17,8 @@ degradation:
   noise_levels: [0.005, 0.01, 0.05, 0.1]
 
 tv:
-  lambda_reg: 0.1
-  max_iter: 300
+  lambda_reg: 0.005
+  max_iter: 150
 
 unet:
   lr: 0.0001

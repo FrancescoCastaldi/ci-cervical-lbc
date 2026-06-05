@@ -29,9 +29,24 @@ Inverse problem: recover a high-quality image from a degraded observation (Gauss
 
 | Method | Family | Status |
 |---|---|---|
-| Total Variation (TV) | Variational | 🔄 Da eseguire |
+| Total Variation (TV) | Variational | ✅ Completato |
 | UNet | End-to-end | 🔄 Da eseguire |
 | **DiffPIR** | **Generative (Diffusion)** | **✅ Completato** |
+
+### Total Variation Results
+
+| σₙ | PSNR | SSIM |
+|---|---|---|---|
+| 0.005 | **32.09 dB** | **0.91** |
+| 0.01 | 32.04 dB | 0.90 |
+| 0.05 | 30.42 dB | 0.83 |
+| 0.1 | 26.54 dB | 0.58 |
+
+Why do the results worsen with more noise?
+It's normal, and there are two reasons:
+1. The inverse problem becomes more difficult—with noise=0.1, the signal is much more corrupted, so there's less useful information to start with for reconstruction.
+2. Lambda is fixed—lambda_reg=0.005 for all levels, but the optimal parameter changes with noise. For noise=0.1, a higher lambda would be needed for more damping.
+
 
 ### DiffPIR Results
 
@@ -49,6 +64,9 @@ Custom LightUNet (1.26M params) trained on LBC cervical images with FFT-based da
 ```bash
 # Setup
 pip install -r requirements.txt
+
+# Run TV (Total Variation method)
+python scripts/run_tv.py
 
 # Run DiffPIR (generative method)
 python scripts/run_diffpir.py
@@ -102,4 +120,4 @@ python scripts/plot_results.py    # Comparison plot
 ## Contributors
 
 - [Francesco Castaldi](https://github.com/FrancescoCastaldi)
-- [Paolo Fusco](https://github.com/PaoloFusco)
+- [Paolo Fusco](https://github.com/PaoloFusco19)

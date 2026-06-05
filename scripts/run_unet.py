@@ -13,10 +13,12 @@ from src.eval.metrics import evaluate
 from src.plots.visualize import show_comparison
 
 config = load_config()
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 noise_levels = config["degradation"]["noise_levels"]
 results_dir = Path(config["eval"]["results_dir"])
 results_dir.mkdir(parents=True, exist_ok=True)
+kernel_size = config["degradation"]["kernel_size"] 
+blur_sigma  = config["degradation"]["blur_sigma"] 
 
 train_dataset = LBCDataset("data/splits/train.txt", config["dataset"]["image_size"])
 train_loader = DataLoader(train_dataset, batch_size=config["unet"]["batch_size"], shuffle=True)
@@ -28,9 +30,14 @@ criterion = nn.MSELoss()
 for epoch in range(config["unet"]["epochs"]):
     model.train()
     total_loss = 0
-    for gt in train_loader:
+    for batch_idx,gt in enumerate(train_loader):
+        print(f"Epoca {epoch+1} | Elaborando il batch {batch_idx+1}/{len(train_loader)}...") # <--- Riga spia
+        degraded = torch.stack([
+            degrade(g, kernel_size=kernel_size, sigma=blur_sigma, noise_level=0.01) 
+            for g in gt
+        ])
         gt = gt.to(device)
-        degraded = torch.stack([degrade(g, noise_level=0.01) for g in gt]).to(device)
+        degraded = degraded.to(device)
         pred = model(degraded)
         loss = criterion(pred, gt)
         optimizer.zero_grad()
@@ -48,7 +55,8 @@ for noise_level in noise_levels:
     psnr_list, ssim_list = [], []
     with torch.no_grad():
         for i, gt in enumerate(test_dataset):
-            degraded = degrade(gt, noise_level=noise_level).unsqueeze(0).to(device)
+            degraded = degrade(gt, kernel_size=kernel_size, sigma=blur_sigma, 
+                   noise_level=noise_level).unsqueeze(0).to(device)
             restored = model(degraded).squeeze(0).cpu()
             m = evaluate(restored, gt)
             psnr_list.append(m["psnr"])

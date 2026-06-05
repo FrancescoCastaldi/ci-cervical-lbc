@@ -56,4 +56,4 @@ class UNet(nn.Module):
             x = torch.cat([skip, x], dim=1)
             x = self.decoders[i + 1](x)
 
-        return torch.sigmoid(self.final(x))
+        return torch.tanh(self.final(x))
