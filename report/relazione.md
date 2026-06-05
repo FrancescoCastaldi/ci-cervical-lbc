@@ -119,9 +119,77 @@ Ogni metodo ha i propri parametri, scelti **euristicamente** e giustificati nell
 
 ---
 
-### 4.2 Total Variation (TV)
+## 4.2 Total Variation (TV)
 
-> Descrizione del metodo variazionale, funzione obiettivo, scelta dei parametri ($\lambda_{reg}=0.1$, 300 iterazioni Adam), implementazione in `src/methods/tv/tv.py`.
+### Descrizione del metodo
+La Total Variation (TV) è un metodo variazionale classico per la risoluzione 
+di problemi inversi in imaging. L'idea fondamentale è formulare la ricostruzione 
+come un problema di ottimizzazione in cui si bilanciano due termini: la fedeltà 
+ai dati osservati e una penalizzazione sulla complessità dell'immagine ricostruita.
+
+### Formulazione del problema inverso
+Il modello di degradazione adottato è:
+
+$$y = H * x + n$$
+
+dove $y$ è l'immagine degradata osservata, $x$ è l'immagine originale da 
+ricostruire, $H$ è l'operatore di blur gaussiano (σ=2, kernel 9×9) e $n$ 
+è il rumore gaussiano additivo. La ricostruzione TV minimizza la seguente 
+funzione obiettivo:
+
+$$\hat{x} = \arg\min_x \|H*x - y\|_2^2 + \lambda \cdot TV(x)$$
+
+Il primo termine, detto **data fidelity**, garantisce che la soluzione rimanga 
+coerente con l'osservazione degradata. Il secondo termine, il **regolarizzatore TV**, 
+penalizza le variazioni locali dell'immagine:
+
+$$TV(x) = \sum_{i,j} |x_{i+1,j} - x_{i,j}| + |x_{i,j+1} - x_{i,j}|$$
+
+La TV favorisce immagini con regioni uniformi e bordi netti, caratteristica 
+particolarmente adatta a immagini di citologia cervicale dove le cellule presentano 
+contorni definiti su sfondo omogeneo.
+
+### Scelta dei parametri
+L'ottimizzazione è realizzata tramite l'algoritmo **Adam** con i seguenti parametri:
+
+- $\lambda_{reg} = 0.005$: peso del termine di regolarizzazione TV. 
+  Un valore più alto produce immagini più lisce ma perde dettaglio; 
+  un valore più basso è più fedele all'input ma meno efficace nel denoising.
+  Il valore è stato scelto empiricamente osservando la qualità visiva delle 
+  ricostruzioni sul validation set.
+- Learning rate: $lr = 0.001$, scelto per garantire convergenza stabile 
+  senza artefatti numerici.
+- Numero di iterazioni: 150, sufficiente per la convergenza sul dataset in esame.
+
+Un valore di $\lambda_{reg}$ troppo alto (es. 0.1) produceva artefatti 
+a blocchi (*staircasing*) dovuti alla dominanza del termine TV sulla 
+data fidelity. Un learning rate troppo alto (es. 0.01) causava update 
+aggressivi sulle alte frequenze, generando pixelatura nell'output.
+
+### Implementazione
+Il metodo è implementato in `src/methods/tv/tv.py`. Il kernel gaussiano 
+viene costruito come tensore PyTorch e applicato tramite convoluzione 2D 
+(`F.conv2d`) con padding simmetrico per preservare le dimensioni spaziali. 
+Ad ogni iterazione Adam, il tensore ricostruito viene clampato in $[-1, 1]$ 
+per mantenere la coerenza con il range di normalizzazione del dataset.
+Lo script di esecuzione `scripts/run_tv.py` carica i parametri da 
+`configs/experiment.yaml`, valuta il metodo su tutto il test set per 
+ciascuno dei quattro livelli di rumore, e salva i risultati quantitativi 
+in `results/tv/tv_results.csv` insieme a campioni visivi di confronto.
+
+### Risultati
+| σₙ    | PSNR     | SSIM  |
+|-------|----------|-------|
+| 0.005 | 32.09 dB | 0.911 |
+| 0.01  | 32.04 dB | 0.909 |
+| 0.05  | 30.42 dB | 0.837 |
+| 0.1   | 26.54 dB | 0.586 |
+
+Il metodo ottiene risultati buoni per bassi livelli di rumore (PSNR > 30 dB, 
+SSIM > 0.9) con un degrado progressivo all'aumentare di σₙ, dovuto al fatto 
+che il parametro λ è stato mantenuto fisso per tutti i livelli. Un tuning 
+separato di λ per ciascun noise level potrebbe migliorare le performance 
+nei casi più difficili.
 
 ---
 

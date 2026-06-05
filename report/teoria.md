@@ -36,23 +36,24 @@ Il dataset è eterogeneo per contenuto ma uniforme per dimensioni. La distribuzi
 ## 3. Metodi
 
 ### 3.1 Total Variation (TV) — Metodo Variazionale
-
-La Total Variation è un regolarizzatore classico che penalizza le variazioni locali dell'immagine, preservando i bordi.
+La Total Variation è un regolarizzatore classico che penalizza le variazioni 
+locali dell'immagine, preservando i bordi.
 
 **Funzione obiettivo:**
 
-$$\hat{x} = \arg\min_x \frac{1}{2}\|y - x\|_2^2 + \lambda \cdot TV(x)$$
+$$\hat{x} = \arg\min_x \|H*x - y\|_2^2 + \lambda \cdot TV(x)$$
 
-dove:
+dove $H$ è l'operatore di blur gaussiano (σ=2, kernel 9×9) e:
 
 $$TV(x) = \sum_{i,j} |x_{i+1,j} - x_{i,j}| + |x_{i,j+1} - x_{i,j}|$$
 
 **Parametri:**
-- $\lambda_{reg} = 0.1$ (peso regolarizzazione)
-- 300 iterazioni con ottimizzatore Adam ($lr = 0.01$)
+- $\lambda_{reg} = 0.005$ (peso regolarizzazione)
+- 150 iterazioni con ottimizzatore Adam ($lr = 0.001$)
 
-**Pro:** Interpretabile, robusto, non richiede training.
-**Contro:** Tende a produrre immagini "a blocchi" (staircasing), dettaglio limitato.
+**Pro:** Interpretabile, robusto, non richiede training.  
+**Contro:** Tende a produrre immagini leggermente sovra-lisciate sulle 
+strutture fini (staircasing effect), dettaglio limitato ad alti livelli di rumore.
 
 ### 3.2 UNet — Metodo Deep Learning End-to-End
 
