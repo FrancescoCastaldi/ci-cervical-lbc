@@ -108,36 +108,30 @@ Tutti i metodi ricevono **la stessa identica immagine degradata**, generata con 
 
 Siamo un gruppo di 2 studenti, quindi abbiamo scelto **3 dei 4 metodi** proposti, escludendo il metodo ibrido (Weighted TV):
 
-| Metodo | Famiglia | Scelto | Autore |
-|---|---|---|---|
-| Total Variation (TV) | Variazionale | ✅ Sì | Paolo |
-| UNet | End-to-end (deep learning) | ✅ Sì | Paolo |
-| DiffPIR | Generativo (diffusion) | ✅ Sì | **Francesco** |
-| Weighted TV | Ibrido | ❌ No (2 studenti, 3 metodi bastano) | — |
+| Metodo | Famiglia | Scelto |
+|---|---|---|
+| Total Variation (TV) | Variazionale | ✅ Sì |
+| UNet | End-to-end (deep learning) | ✅ Sì |
+| DiffPIR | Generativo (diffusion) | ✅ Sì |
+| Weighted TV | Ibrido | ❌ No (2 studenti, 3 metodi bastano) |
 
 Ogni metodo ha i propri parametri, scelti **euristicamente** e giustificati nelle sezioni seguenti.
 
 ---
 
-### 4.2 Total Variation (TV) — [da completare: Paolo]
-
-**Autore:** Paolo Fusco
+### 4.2 Total Variation (TV)
 
 > Descrizione del metodo variazionale, funzione obiettivo, scelta dei parametri ($\lambda_{reg}=0.1$, 300 iterazioni Adam), implementazione in `src/methods/tv/tv.py`.
 
 ---
 
-### 4.3 UNet — [da completare: Paolo]
-
-**Autore:** Paolo Fusco
+### 4.3 UNet
 
 > Descrizione dell'architettura UNet scelta, motivazione della scelta (perché UNet e non ViT o NAF-Net in relazione al task), parametri di training (loss, ottimizzatore, epoche, batch size), implementazione in `src/methods/unet/unet.py`.
 
 ---
 
 ### 4.4 DiffPIR — Metodo Generativo
-
-**Autore:** Francesco Castaldi
 
 #### 4.4.1 Scelta del Metodo e Motivazione
 
@@ -288,16 +282,14 @@ Il confronto visivo mostra:
 
 ---
 
-### 5.3 Total Variation (TV) — [da completare: Paolo]
+### 5.3 Total Variation (TV)
 
-> **Autore:** Paolo Fusco
 > Risultati TV: PSNR/SSIM per ogni noise level, immagini qualitative, analisi delle ricostruzioni e dell'effetto staircasing.
 
 ---
 
-### 5.4 UNet — [da completare: Paolo]
+### 5.4 UNet
 
-> **Autore:** Paolo Fusco
 > Risultati UNet: PSNR/SSIM per ogni noise level, immagini qualitative, analisi della capacità di generalizzazione.
 
 ---
@@ -306,10 +298,10 @@ Il confronto visivo mostra:
 
 | $\sigma_n$ | Degradato | TV | UNet | DiffPIR |
 |---|---|---|---|---|
-| 0.005 | — | [Paolo] | [Paolo] | **16.67 dB** / **0.235** |
-| 0.01 | — | [Paolo] | [Paolo] | **17.32 dB** / **0.270** |
-| 0.05 | — | [Paolo] | [Paolo] | **22.49 dB** / **0.512** |
-| 0.1 | — | [Paolo] | [Paolo] | **24.68 dB** / **0.664** |
+| 0.005 | — | — | — | **16.67 dB** / **0.235** |
+| 0.01 | — | — | — | **17.32 dB** / **0.270** |
+| 0.05 | — | — | — | **22.49 dB** / **0.512** |
+| 0.1 | — | — | — | **24.68 dB** / **0.664** |
 
 Il plot comparativo sarà generato dopo l'esecuzione di TV e UNet tramite:
 
@@ -363,10 +355,10 @@ Il progetto copre 3 famiglie metodologiche diverse, ognuna con presupposti e com
 
 | Metodo | Parametro | Valore | Come è stato scelto |
 |---|---|---|---|
-| **TV** | $\lambda_{reg}$ | 0.1 | [Paolo] |
-| **TV** | Iterazioni | 300 | [Paolo] |
-| **UNet** | Learning rate | $10^{-4}$ | [Paolo] |
-| **UNet** | Batch size, epoche | 16, 50 | [Paolo] |
+| **TV** | $\lambda_{reg}$ | 0.1 | — |
+| **TV** | Iterazioni | 300 | — |
+| **UNet** | Learning rate | $10^{-4}$ | — |
+| **UNet** | Batch size, epoche | 16, 50 | — |
 | **DiffPIR** | $t_{start}$ | 50 | Testati {10, 30, 50, 100, 200} → 50 dà stabilità numerica |
 | **DiffPIR** | $\lambda$ | 10.0 | Testati {0.1, 1, 5, 10, 50} → 10 è il bilanciamento ottimale |
 | **DiffPIR** | $num\_steps$ | 15 | Testati {5, 10, 15, 30} → 15 è il miglior rapporto qualità/tempo |
@@ -376,7 +368,7 @@ Il progetto copre 3 famiglie metodologiche diverse, ognuna con presupposti e com
 
 ## 7. Conclusioni
 
-> **Sezione da completare dopo l'esecuzione di TV e UNet e il confronto finale.**
+> Sezione da completare dopo l'esecuzione di TV e UNet e il confronto finale.
 
 ---
 
@@ -397,13 +389,13 @@ python scripts/preprocess.py
 ### Esecuzione Metodi
 
 ```bash
-# Metodo variazionale (Paolo)
+# Metodo variazionale
 python scripts/run_tv.py
 
-# Metodo end-to-end (Paolo)
+# Metodo end-to-end
 python scripts/run_unet.py
 
-# Metodo generativo (Francesco)
+# Metodo generativo
 python scripts/run_diffpir.py
 
 # Plot comparativo
