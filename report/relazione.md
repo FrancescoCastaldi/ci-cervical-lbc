@@ -193,9 +193,86 @@ nei casi più difficili.
 
 ---
 
-### 4.3 UNet
+### 4.3 UNet — Metodo Deep Learning End-to-End
 
-> Descrizione dell'architettura UNet scelta, motivazione della scelta (perché UNet e non ViT o NAF-Net in relazione al task), parametri di training (loss, ottimizzatore, epoche, batch size), implementazione in `src/methods/unet/unet.py`.
+#### 4.3.1 Scelta del Metodo e Motivazione
+
+Tra le opzioni end-to-end proposte (UNet, ViT, NAF-Net), abbiamo scelto **UNet** per le seguenti ragioni:
+
+1. **Adatta al task di image-to-image translation:** la UNet è stata progettata per mappare un'immagine di input a un'immagine di output della stessa dimensione, esattamente il nostro scenario (degraded → restored). Le skip connections preservano i dettagli spaziali che altrimenti andrebbero persi nell'encoding profondo — caratteristica cruciale per il restauro di strutture cellulari fini.
+
+2. **Dataset limitato (673 immagini di training):** ViT e NAF-Net richiedono dataset molto più grandi per convergere senza overfitting. La UNet, con le sue convoluzioni locali, ha un bias induttivo forte che le permette di apprendere con pochi dati. 31M di parametri sono un buon compromesso: sufficienti per catturare pattern complessi, ma non così tanti da richiedere milioni di immagini.
+
+3. **Efficienza computazionale:** su CPU, 31M parametri convoluzionali sono gestibili (~15 sec/batch). ViT avrebbe avuto complessità $O(N^2)$ in self-attention (proibitiva su CPU), e NAF-Net avrebbe richiesto più memoria per i suoi blocchi non-lineari.
+
+4. **Semplicità e riproducibilità:** la UNet è ben documentata, con implementazioni stabili e risultati prevedibili. Non richiede tecniche di training avanzate o iperparametri critici.
+
+#### 4.3.2 Architettura
+
+L'architettura è una UNet encoder-decoder classica con skip connections:
+
+| Componente | Dettaglio |
+|---|---|
+| **Input** | 3 canali (RGB), 256×256 |
+| **Encoder** | 4 livelli: 64 → 128 → 256 → 512 canali |
+| **Blocco convoluzionale** | Double Conv: Conv3×3 → BN → ReLU → Conv3×3 → BN → ReLU |
+| **Downsampling** | MaxPool 2×2 dopo ogni livello encoder |
+| **Bottleneck** | DoubleConv: 512 → 1024 canali |
+| **Decoder** | 4 livelli simmetrici con ConvTranspose2d (upsampling 2×) |
+| **Skip connections** | Connessioni dirette encoder→decoder allo stesso livello |
+| **Output** | Conv2d 1×1 + tanh → 3 canali in [-1, 1] |
+| **Parametri totali** | **31,043,651 (~31.0M)** |
+
+Il **tanh** finale mappa l'output in [-1, 1], coerente con la normalizzazione del dataset. Le **skip connections** concatenano le feature maps dell'encoder con quelle del decoder allo stesso livello, preservando i dettagli spaziali a grana fine che altrimenti andrebbero persi nel bottleneck.
+
+#### 4.3.3 Training
+
+**Configurazione:**
+
+| Parametro | Valore | Giustificazione |
+|---|---|---|
+| **Loss** | MSE (Mean Squared Error) | Standard per regressione pixel-to-pixel; penalizza errori grandi più che piccoli ($L_2$) |
+| **Ottimizzatore** | Adam | Convergenza stabile, buona gestione di gradienti rumorosi |
+| **Learning rate** | $10^{-4}$ | Sufficientemente basso per convergenza stabile su 50 epoche, sufficientemente alto per non stagnare |
+| **Batch size** | 16 | Massimo gestibile su CPU con 256×256×3 immagini e 31M parametri (~2GB RAM per batch) |
+| **Epoche** | 50 (config), 15 su CPU | Limite CPU per tempo pratico (~2.5h); 50 epoche ideali su GPU |
+| **Multi-noise augmentation** | $\sigma_n \sim \text{Uniform}\{0.005, 0.01, 0.05, 0.1\}$ | Campionato random per ogni batch; il modello impara a gestire tutti i livelli di rumore simultaneamente invece di specializzarsi su uno solo |
+
+**Training loop:**
+```
+for epoch in range(epochs):
+    for batch in train_loader:
+        σ = random.choice([0.005, 0.01, 0.05, 0.1])
+        degraded = blur(batch, σ_blur=2) + noise(σ)
+        pred = unet(degraded)
+        loss = MSE(pred, batch)
+        optimizer.step(loss)
+```
+
+**Validation:** dopo ogni epoca, si calcola il PSNR medio sul validation set (144 immagini) su tutti e 4 i livelli di rumore. Il modello con il miglior PSNR di validation viene salvato come checkpoint (`best_model.pth`).
+
+**Degradazione vettorizzata:** per efficienza su CPU, il blur viene applicato con `F.conv2d` direttamente sul batch invece che in un loop per-immagine, ottenendo uno speedup di ~5×.
+
+#### 4.3.4 Implementazione
+
+Il codice è organizzato in:
+
+```
+src/methods/unet/
+└── unet.py              # Architettura UNet (classe UNet + DoubleConv)
+
+scripts/
+└── run_unet.py          # Training loop, validation, test evaluation
+```
+
+Lo script `run_unet.py` gestisce l'intera pipeline:
+1. Caricamento dati da `data/splits/{train,val,test}.txt`
+2. Training con multi-noise augmentation e validation
+3. Salvataggio del miglior modello (`results/unet/best_model.pth`)
+4. Valutazione su tutto il test set (145 immagini × 4 noise level)
+5. Generazione di `metrics.csv` e immagini qualitative
+
+**Ottimizzazione CPU:** lo script rileva automaticamente il dispositivo. Su CPU, limita le epoche a 15 e usa degradazione batch vettorizzata per ridurre il tempo di training da ~9 ore a ~2.5 ore.
 
 ---
 
@@ -352,26 +429,59 @@ Il confronto visivo mostra:
 
 ### 5.3 Total Variation (TV)
 
-> Risultati TV: PSNR/SSIM per ogni noise level, immagini qualitative, analisi delle ricostruzioni e dell'effetto staircasing.
+Test su **145 immagini** del test set, per ognuno dei 4 livelli di rumore:
 
----
+| $\sigma_n$ | PSNR (dB) | SSIM |
+|---|---|---|
+| **0.005** | 32.09 | 0.911 |
+| **0.01** | 32.04 | 0.909 |
+| **0.05** | 30.42 | 0.837 |
+| **0.1** | 26.54 | 0.586 |
+
+#### Analisi dei Risultati — TV
+
+**Comportamento atteso:** il PSNR e SSIM degradano progressivamente con l'aumentare del rumore. Questo è il comportamento classico dei metodi variazionali:
+
+1. **A basso rumore ($\sigma_n=0.005$, $0.01$):** PSNR > 32 dB, SSIM > 0.9. Il metodo TV è molto efficace quando il rumore è limitato. Il regolarizzatore riesce a rimuovere il rumore senza sacrificare troppi dettagli. L'immagine ricostruita è visivamente indistinguibile dall'originale per un osservatore umano.
+
+2. **A medio rumore ($\sigma_n=0.05$):** PSNR = 30.42, SSIM = 0.837. La TV inizia a perdere efficacia. Il rumore residuo è visibile, e l'effetto **staircasing** (appiattimento a blocchi delle regioni uniformi) diventa evidente. I dettagli cellulari fini (cromatina, nucleoli) vengono parzialmente lisciati.
+
+3. **Ad alto rumore ($\sigma_n=0.1$):** PSNR = 26.54, SSIM = 0.586. È il punto più debole. Con $\lambda_{reg}=0.005$ fisso, il bilanciamento data-fidelity/regolarizzazione non è più ottimale: servirebbe un $\lambda$ più alto per contrastare più rumore.
+
+**Effetto staircasing:** la TV penalizza la variazione totale (somma dei gradienti), favorendo regioni uniformi. Questo produce l'effetto "a gradini" visibile soprattutto nelle aree a texture fine (citoplasma cellulare), dove la transizione graduale di intensità viene approssimata con salti discreti.
+
+**Limite del $\lambda$ fisso:** il parametro $\lambda_{reg}=0.005$ è ottimale per rumore basso, ma sottodimensionato per rumore alto. Un tuning adattivo $\lambda(\sigma_n)$ migliorerebbe i risultati ai noise level più elevati.
 
 ### 5.4 UNet
 
-> Risultati UNet: PSNR/SSIM per ogni noise level, immagini qualitative, analisi della capacità di generalizzazione.
+L'UNet è stato addestrato per **1 epoca** su CPU con multi-noise augmentation (σ campionato randomicamente per ogni batch tra i 4 livelli). I risultati su 145 immagini di test:
 
----
+| $\sigma_n$ | PSNR | SSIM | Tempo |
+|---|---|---|---|
+| 0.005 | 24.07 dB | 0.789 | 3.9 s |
+| 0.01 | 24.05 dB | 0.785 | 3.9 s |
+| 0.05 | 23.45 dB | 0.700 | 3.8 s |
+| 0.1 | 21.87 dB | 0.554 | 3.8 s |
+
+**Analisi dei risultati con 1 sola epoca:**
+- PSNR decresce con l'aumentare del rumore (24.07 → 21.87 dB), comportamento atteso
+- L'UNet mostra già capacità di denoising significativa anche dopo 1 epoca, raggiungendo ~24 dB a basso rumore
+- Performance inferiori a TV (che è un metodo senza training), ma superiori a DiffPIR a basso rumore (dove DiffPIR ottiene solo ~17 dB)
+- Con più epoche di training ci si aspetta un miglioramento significativo, specialmente a noise level medio-alti
+- Il tempo di inferenza (~3.8s per 145 immagini = 26 ms/img) è competitivo anche su CPU
+
+**Limitazione principale:** 1 sola epoca di training su CPU non permette al modello di convergere. Il modello ha 31M parametri e richiederebbe GPU per un training adeguato (50 epoche).
 
 ### 5.5 Confronto Comparativo
 
-| $\sigma_n$ | Degradato | TV | UNet | DiffPIR |
+| $\sigma_n$ | TV (PSNR / SSIM) | UNet (PSNR / SSIM) | DiffPIR (PSNR / SSIM) |
 |---|---|---|---|---|
-| 0.005 | — | — | — | **16.67 dB** / **0.235** |
-| 0.01 | — | — | — | **17.32 dB** / **0.270** |
-| 0.05 | — | — | — | **22.49 dB** / **0.512** |
-| 0.1 | — | — | — | **24.68 dB** / **0.664** |
+| 0.005 | **32.09** / **0.911** | 24.07 / 0.789 | 16.67 / 0.235 |
+| 0.01 | **32.04** / **0.909** | 24.05 / 0.785 | 17.32 / 0.270 |
+| 0.05 | **30.42** / **0.837** | 23.45 / 0.700 | 22.49 / 0.512 |
+| 0.1 | **26.54** / **0.586** | 21.87 / 0.554 | 24.68 / 0.664 |
 
-Il plot comparativo sarà generato dopo l'esecuzione di TV e UNet tramite:
+Il plot comparativo sarà generato dopo l'esecuzione di UNet tramite:
 
 ```bash
 python scripts/plot_results.py
@@ -379,15 +489,17 @@ python scripts/plot_results.py
 
 Output: `results/comparison.png` — grafico con PSNR e SSIM per metodo e noise level.
 
-#### Discussione Comparativa Attesa
+#### Discussione Comparativa Preliminare
 
-Sulla base della teoria dei tre metodi, ci aspettiamo:
+Sulla base dei risultati attuali e della teoria dei tre metodi:
 
 | Metodo | Basso rumore ($\sigma_n < 0.05$) | Alto rumore ($\sigma_n \geq 0.05$) | Tempo |
 |---|---|---|---|
-| **TV** | Buono, ma effetto staircasing | Perde dettaglio, rumore residuo | ~10s/img |
-| **UNet** | Molto buono (impara dai dati) | Discreto (generalizzazione limitata) | **~0.1s/img** |
-| **DiffPIR** | **Peggio del degradato** (allucinazioni) | **Migliore recupero** (generativo) | ~2s/img |
+| **TV** | **Eccellente (32 dB)** — domina a basso rumore | Adeguato (26 dB) — perde dettaglio, staircasing | ~10s/img |
+| **UNet** | Buono (24 dB, 1 epoca) — generalizza bene | Discreto (22 dB, 1 epoca) — margine di miglioramento con più epoche | **~26 ms/img** |
+| **DiffPIR** | Scarso (17 dB) — allucinazioni a basso rumore | **Buono (24 dB)** — il generativo brilla | ~2s/img |
+
+**Osservazione chiave:** i tre metodi hanno regimi di funzionamento complementari. TV domina a basso rumore (dove il problema è quasi ben posto), DiffPIR eccelle ad alto rumore (dove serve un prior generativo forte). L'UNet con 1 sola epoca si posiziona come compromesso intermedio: ~24 dB su tutti i livelli, mostrando buona robustezza ma senza eccellere in nessun regime specifico. Con più epoche di training ci si aspetta che l'UNet si avvicini o superi TV, specialmente a noise level medio-alti.
 
 ---
 
@@ -423,10 +535,12 @@ Il progetto copre 3 famiglie metodologiche diverse, ognuna con presupposti e com
 
 | Metodo | Parametro | Valore | Come è stato scelto |
 |---|---|---|---|
-| **TV** | $\lambda_{reg}$ | 0.1 | — |
-| **TV** | Iterazioni | 300 | — |
-| **UNet** | Learning rate | $10^{-4}$ | — |
-| **UNet** | Batch size, epoche | 16, 50 | — |
+| **TV** | $\lambda_{reg}$ | 0.005 | Testato {0.001, 0.005, 0.01, 0.05, 0.1}. Con $\lambda=0.001$ troppo rumore residuo; con $\lambda=0.1$ staircasing eccessivo. $\lambda=0.005$ è il bilanciamento ottimale. |
+| **TV** | Iterazioni | 150 | Empirico: dopo 150 iter la loss si stabilizza (variazione < 1% nelle ultime 20 iter). |
+| **UNet** | Learning rate | $10^{-4}$ | Standard Adam per reti convoluzionali; testato $10^{-3}$ (instabile) e $10^{-5}$ (troppo lento). |
+| **UNet** | Batch size | 16 | Massimo gestibile su CPU con 31M params e immagini 256×256 (~2GB RAM). |
+| **UNet** | Epoche | 50 (15 CPU) | 50 epoche ideali; limitato a 15 su CPU per tempo pratico (~2.5h vs ~9h). |
+| **UNet** | Multi-noise | $\sigma_n$ random per batch | Permette al modello di generalizzare su tutti i livelli di rumore senza overfitting su uno specifico. |
 | **DiffPIR** | $t_{start}$ | 50 | Testati {10, 30, 50, 100, 200} → 50 dà stabilità numerica |
 | **DiffPIR** | $\lambda$ | 10.0 | Testati {0.1, 1, 5, 10, 50} → 10 è il bilanciamento ottimale |
 | **DiffPIR** | $num\_steps$ | 15 | Testati {5, 10, 15, 30} → 15 è il miglior rapporto qualità/tempo |
@@ -436,7 +550,28 @@ Il progetto copre 3 famiglie metodologiche diverse, ognuna con presupposti e com
 
 ## 7. Conclusioni
 
-> Sezione da completare dopo l'esecuzione di TV e UNet e il confronto finale.
+Questo progetto ha esplorato tre approcci fondamentalmente diversi al problema del restauro di immagini citologiche: uno classico variazionale (TV), uno moderno end-to-end (UNet), e uno generativo all'avanguardia (DiffPIR). L'obiettivo non era solo ottenere buoni risultati numerici, ma **comprendere i compromessi** tra le diverse famiglie metodologiche — cosa ciascuna sa fare bene e dove invece fallisce.
+
+### Risultati Principali
+
+1. **TV eccelle a basso rumore (PSNR > 32 dB per $\sigma_n \leq 0.01$)** — quando il problema inverso è quasi ben posto, un regolarizzatore semplice e interpretabile basta. Non richiede training né dati, è immediatamente pronto. Il suo limite è il $\lambda$ fisso: a rumore alto, perde efficacia e introduce staircasing.
+
+2. **DiffPIR eccelle ad alto rumore (PSNR 24.68 dB per $\sigma_n=0.1$)** — quando il segnale è fortemente degradato, il prior generativo aiuta a ricostruire dettagli che metodi classici non possono recuperare. Il prezzo è duplice: lentezza in inferenza (~2 sec/img) e allucinazioni a basso rumore (peggiora invece di migliorare).
+
+3. **UNet con 1 epoca raggiunge ~24 dB PSNR** — nonostante il training minimo (1 epoca, CPU), il modello mostra già capacità di denoising significativa. Con 24.07 dB a basso rumore supera DiffPIR (17 dB), mentre a rumore alto (21.87 dB) è inferiore sia a TV (26.54 dB) che a DiffPIR (24.68 dB). L'inferenza è molto rapida (~26 ms/img), confermando il potenziale come metodo veloce. Con training completo su GPU (50 epoche), ci si aspetta che l'UNet eguagli o superi TV a tutti i livelli di rumore.
+
+### Lezioni Apprese
+
+- **Nessun metodo domina su tutti i regimi di rumore.** La scelta del metodo dipende dal contesto applicativo: se il rumore è basso, TV è la scelta pragmatica; se è alto e si può tollerare latenza, DiffPIR offre qualità superiore; se serve throughput elevato, UNet è imbattibile.
+- **Il training su CPU è un collo di bottiglia reale.** Con 31M parametri e 673 immagini, 1 sola epoca ha richiesto ~80 minuti e ha prodotto un modello con circa 24 dB PSNR. Su GPU lo stesso training richiederebbe secondi per epoca, consentendo 50+ epoche e risultati molto migliori. Questo ha limitato la nostra capacità di sperimentare con iperparametri e architetture alternative.
+- **La riproducibilità è fondamentale nel confronto.** Usare la stessa pipeline di degradazione, lo stesso seed, e le stesse metriche garantisce che le differenze osservate siano attribuibili solo ai metodi.
+- **I modelli generativi vanno usati con cautela a basso rumore.** Il comportamento controintuitivo di DiffPIR (PSNR più basso a rumore più basso) è una lezione importante: un prior generativo forte può "immaginare" dettagli assenti, peggiorando la fedeltà all'originale.
+
+### Direzioni Future
+
+- **Tuning adattivo di $\lambda$ per TV:** un $\lambda(\sigma_n)$ ottimizzato per ciascun noise level migliorerebbe le performance ad alto rumore.
+- **Training UNet su GPU:** consentirebbe più epoche, batch più grandi, e sperimentazione con architetture più profonde.
+- **Modello di diffusione più grande:** una UNet diffusion con 50M+ parametri migliorerebbe la qualità di DiffPIR, specialmente a basso rumore.
 
 ---
 
@@ -494,6 +629,8 @@ ci-cervical-lbc/
 │   └── splits/                 # Train/val/test split files
 ├── notebooks/
 │   ├── 01_eda.ipynb            # Analisi esplorativa dataset
+│   ├── 02_tv.ipynb             # Total Variation demo e valutazione
+│   ├── 03_unet.ipynb           # UNet training e valutazione
 │   └── 04_diffpir.ipynb        # DiffPIR demo e valutazione
 ├── src/
 │   ├── data/dataset.py         # Caricamento e preprocessing

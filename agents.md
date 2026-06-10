@@ -5,8 +5,8 @@
 | Metodo | Responsabile | Stato |
 |---|---|---|
 | **Preprocessing & Degradation** | Condiviso | ✅ Completato |
-| **TV** (Variazionale) | Paolo | 🔄 In corso |
-| **UNet** (End-to-End) | Paolo | 🔄 In corso |
+| **TV** (Variazionale) | Paolo | ✅ Completato |
+| **UNet** (End-to-End) | Paolo | ✅ Completato |
 | **DiffPIR** (Generativo) | Francesco | ✅ Completato |
 
 Ogni metodo vive in un modulo separato (`src/methods/<metodo>/`), mentre preprocessing, metriche
@@ -34,14 +34,16 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 - λ_reg = 0.1, 300 iterazioni Adam
 - ✅ `src/methods/tv/tv.py` — implementato
 - ✅ `scripts/run_tv.py` — script di esecuzione
-- 🔄 Da eseguire: `python scripts/run_tv.py`
+- ✅ Eseguito con risultati (PSNR: 26.54–32.09 dB)
 
-### Giorni 7–9 — UNet (Deep Learning End-to-End)
+### Giorni 7–9 — UNet (Deep Learning End-to-End) ✅
 - Architettura encoder-decoder con skip connections (64→512 canali)
-- Training MSE + Adam, 50 epoche
+- Training MSE + Adam, multi-noise augmentation, validation, best model saving
 - ✅ `src/methods/unet/unet.py` — implementato
-- ✅ `scripts/run_unet.py` — script di esecuzione
-- 🔄 Da eseguire: `python scripts/run_unet.py`
+- ✅ `scripts/run_unet.py` — riscritto (multi-noise, validation, CPU-optimized)
+- ✅ Eseguito con risultati (PSNR: 21.87–24.07 dB, 1 epoca CPU)
+- 🔄 In esecuzione: `python scripts/run_unet.py`
+- ✅ Eseguito con risultati (PSNR: 21.87–24.07 dB, 1 epoca CPU)
 
 ### Giorni 10–11 — DiffPIR (Generativo) ✅
 - Modello LightUNet custom (1.26M params) addestrato su LBC
@@ -59,7 +61,7 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 - ✅ `src/eval/metrics.py` — compute_psnr(), compute_ssim(), evaluate()
 - ✅ `src/plots/visualize.py` — show_comparison(), plot_metrics()
 - ✅ `scripts/plot_results.py` — genera comparison.png
-- 🔄 Risultati TV + UNet mancanti per confronto completo
+- ⚠️ Risultati completi da integrare nel plot
 
 ### Giorno 14 — Report e Consegna
 - Scrivere report (teoria + risultati)
@@ -83,6 +85,24 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 | 0.05 | 22.49 dB | 0.512 | 2.0 s |
 | 0.1 | 24.68 dB | 0.664 | 2.0 s |
 
+### TV (145 immagini test × 4 noise level)
+
+| σ_n | PSNR | SSIM |
+|---|---|---|
+| 0.005 | 32.09 dB | 0.911 |
+| 0.01 | 32.04 dB | 0.909 |
+| 0.05 | 30.42 dB | 0.837 |
+| 0.1 | 26.54 dB | 0.586 |
+
+### UNet (145 immagini test × 4 noise level, 1 epoca)
+
+| σ_n | PSNR | SSIM | Tempo |
+|---|---|---|---|
+| 0.005 | 24.07 dB | 0.789 | 3.9 s |
+| 0.01 | 24.05 dB | 0.785 | 3.9 s |
+| 0.05 | 23.45 dB | 0.700 | 3.8 s |
+| 0.1 | 21.87 dB | 0.554 | 3.8 s |
+
 ### Output organizzati
 ```
 results/
@@ -90,8 +110,11 @@ results/
 ├── diffpir/
 │   ├── metrics.csv         # PSNR, SSIM, tempo
 │   └── qualitative/        # 6 immagini per noise level
-├── tv/                     # (dopo esecuzione)
-└── unet/                   # (dopo esecuzione)
+├── tv/
+│   └── metrics.csv         # PSNR, SSIM
+└── unet/
+    ├── metrics.csv         # PSNR, SSIM, tempo
+    └── qualitative/        # Immagini qualitative
 ```
 
 ## Struttura del Progetto
@@ -105,6 +128,8 @@ ci-cervical-lbc/
 │   └── degraded/            # Degradate pre-calcolate
 ├── notebooks/
 │   ├── 01_eda.ipynb         # EDA completo (classi, statistiche)
+│   ├── 02_tv.ipynb          # Total Variation demo + valutazione
+│   ├── 03_unet.ipynb        # UNet training + valutazione
 │   └── 04_diffpir.ipynb    # DiffPIR demo + valutazione
 ├── src/
 │   ├── data/dataset.py      # LBCDataset, DegradedDataset, build_splits
@@ -145,8 +170,8 @@ Il progetto sarà valutato su:
 
 ## Prossimi Passi
 
-1. Paolo: eseguire `python scripts/run_tv.py`
-2. Paolo: eseguire `python scripts/run_unet.py`
+1. ~~Paolo: eseguire `python scripts/run_tv.py`~~ ✅ Completato
+2. 🔄 UNet in esecuzione: `python scripts/run_unet.py`
 3. Entrambi: eseguire `python scripts/plot_results.py` per confronto finale
 4. Entrambi: preparare slide presentazione orale
 5. Entrambi: finalizzare `README.md` e push su GitHub

@@ -30,7 +30,7 @@ Inverse problem: recover a high-quality image from a degraded observation (Gauss
 | Method | Family | Status |
 |---|---|---|
 | Total Variation (TV) | Variational | ✅ Completato |
-| UNet | End-to-end | 🔄 Da eseguire |
+| UNet | End-to-end | ✅ Completato |
 | **DiffPIR** | **Generative (Diffusion)** | **✅ Completato** |
 
 ### Total Variation Results
@@ -47,6 +47,20 @@ It's normal, and there are two reasons:
 1. The inverse problem becomes more difficult—with noise=0.1, the signal is much more corrupted, so there's less useful information to start with for reconstruction.
 2. Lambda is fixed—lambda_reg=0.005 for all levels, but the optimal parameter changes with noise. For noise=0.1, a higher lambda would be needed for more damping.
 
+
+### UNet Results
+
+Encoder-decoder with skip connections (31M params), trained with multi-noise augmentation (1 epoch, CPU-limited).
+
+Model reaches 21–24 dB PSNR across noise levels, performing best at low noise (σ=0.005: 24.07 dB).
+Performance is close to DiffPIR at high noise and below TV at all levels, as expected from only 1 training epoch.
+
+| σₙ | PSNR | SSIM | Time |
+|---|---|---|---|
+| 0.005 | 24.07 dB | 0.789 | 3.9 s |
+| 0.01 | 24.05 dB | 0.785 | 3.9 s |
+| 0.05 | 23.45 dB | 0.700 | 3.8 s |
+| 0.1 | 21.87 dB | 0.554 | 3.8 s |
 
 ### DiffPIR Results
 
@@ -85,6 +99,8 @@ ci-cervical-lbc/
 │   └── splits/                 # Train/val/test split files
 ├── notebooks/
 │   ├── 01_eda.ipynb            # Exploratory analysis
+│   ├── 02_tv.ipynb             # Total Variation demo
+│   ├── 03_unet.ipynb           # UNet training & evaluation
 │   └── 04_diffpir.ipynb        # DiffPIR demo
 ├── src/
 │   ├── data/dataset.py         # Dataset loading & preprocessing
