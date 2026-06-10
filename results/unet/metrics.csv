@@ -1,0 +1,5 @@
+method,noise_level,psnr,ssim,avg_inference_time
+unet,0.005,24.07,0.7889,4.3874
+unet,0.01,24.05,0.7848,4.052
+unet,0.05,23.45,0.6997,4.2885
+unet,0.1,21.87,0.5542,4.3869

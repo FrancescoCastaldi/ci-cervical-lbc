@@ -11,6 +11,11 @@ def to_numpy(tensor):
     return np.clip(img, 0.0, 1.0)
 
 
+def _to_01(tensor):
+    """Convert tensor from [-1, 1] to [0, 1] range (no clamping)."""
+    return (tensor + 1) / 2
+
+
 def compute_psnr(pred, gt):
     return psnr(to_numpy(gt), to_numpy(pred), data_range=1.0)
 

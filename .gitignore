@@ -29,8 +29,10 @@ data/processed/
 data/splits/
 data/degraded/
 
-# Results
-results/
+# Results — keep metrics and plots, ignore large models
+results/**/*.pth
+results/**/*.pt
+results/**/*.ckpt
 
 # Pesi e checkpoint
 *.pth
@@ -47,3 +49,6 @@ Thumbs.db
 
 # External dependencies
 external/
+
+# Agent workspace
+thoughts/

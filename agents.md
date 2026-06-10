@@ -42,8 +42,6 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 - ✅ `src/methods/unet/unet.py` — implementato
 - ✅ `scripts/run_unet.py` — riscritto (multi-noise, validation, CPU-optimized)
 - ✅ Eseguito con risultati (PSNR: 21.87–24.07 dB, 1 epoca CPU)
-- 🔄 In esecuzione: `python scripts/run_unet.py`
-- ✅ Eseguito con risultati (PSNR: 21.87–24.07 dB, 1 epoca CPU)
 
 ### Giorni 10–11 — DiffPIR (Generativo) ✅
 - Modello LightUNet custom (1.26M params) addestrato su LBC
@@ -54,23 +52,26 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 - ✅ `scripts/run_diffpir.py` — eseguito con risultati
 - ✅ `results/diffpir/metrics.csv` — PSNR/SSIM/tempo su 10 test
 
-### Giorni 12–13 — Valutazione e Confronto
+### Giorni 12–13 — Valutazione e Confronto ✅
 - Calcolare PSNR, SSIM su test set per ogni noise level
 - Generare tabelle e plot comparativi
-- Salvare immagini qualitative
+- Salvare immagini qualitative (TV: 24, UNet: 24, DiffPIR: 24)
 - ✅ `src/eval/metrics.py` — compute_psnr(), compute_ssim(), evaluate()
 - ✅ `src/plots/visualize.py` — show_comparison(), plot_metrics()
-- ✅ `scripts/plot_results.py` — genera comparison.png
-- ⚠️ Risultati completi da integrare nel plot
+- ✅ `scripts/plot_results.py` — genera comparison.png (3 metodi)
+- ✅ Qualitative per tutti e 3 i metodi completate
 
-### Giorno 14 — Report e Consegna
+### Giorno 14 — Report, Slide e Consegna ✅
 - Scrivere report (teoria + risultati)
 - Preparare slide
 - Pulire repo e README
 - ✅ `report/teoria.md` — teoria completa
+- ✅ `report/relazione.md` — relazione completa (673 righe)
 - ✅ `report/notebook.md` — riassunto notebook
-- ✅ `notebooks/04_diffpir.ipynb` — notebook DiffPIR
-- ⚠️ `README.md` — aggiornato, da verificare prima della consegna
+- ✅ `slides/presentazione.pptx` — 10 slide PowerPoint
+- ✅ `notebooks/01_eda.ipynb` through `04_diffpir.ipynb`
+- ✅ 32 test unitari: degradation (10), metrics (9), diffpir (7), unet (6)
+- ✅ `README.md` — aggiornato con tutti i risultati
 
 ---
 
@@ -106,15 +107,16 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 ### Output organizzati
 ```
 results/
-├── comparison.png          # Grafico comparativo (solo DiffPIR per ora)
+├── comparison.png              # Grafico comparativo (3 metodi)
 ├── diffpir/
-│   ├── metrics.csv         # PSNR, SSIM, tempo
-│   └── qualitative/        # 6 immagini per noise level
+│   ├── metrics.csv             # PSNR, SSIM, tempo
+│   └── qualitative/            # 24 immagini (6 per noise level)
 ├── tv/
-│   └── metrics.csv         # PSNR, SSIM
+│   ├── metrics.csv             # PSNR, SSIM
+│   └── qualitative/            # 24 immagini (6 per noise level)
 └── unet/
-    ├── metrics.csv         # PSNR, SSIM, tempo
-    └── qualitative/        # Immagini qualitative
+    ├── metrics.csv             # PSNR, SSIM, tempo
+    └── qualitative/            # 24 immagini (6 per noise level)
 ```
 
 ## Struttura del Progetto
@@ -171,7 +173,7 @@ Il progetto sarà valutato su:
 ## Prossimi Passi
 
 1. ~~Paolo: eseguire `python scripts/run_tv.py`~~ ✅ Completato
-2. 🔄 UNet in esecuzione: `python scripts/run_unet.py`
-3. Entrambi: eseguire `python scripts/plot_results.py` per confronto finale
-4. Entrambi: preparare slide presentazione orale
-5. Entrambi: finalizzare `README.md` e push su GitHub
+2. ~~UNet in esecuzione: `python scripts/run_unet.py`~~ ✅ Completato
+3. ~~Entrambi: eseguire `python scripts/plot_results.py` per confronto finale~~ ✅ Completato
+4. ~~Entrambi: preparare slide presentazione orale~~ ✅ Completato
+5. ~~Entrambi: finalizzare `README.md` e push su GitHub~~ ✅ Completato

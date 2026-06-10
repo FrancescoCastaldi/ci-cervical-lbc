@@ -89,7 +89,7 @@ for noise_level in noise_levels:
         # Salva qualitative (primo batch)
         if first_batch:
             first_batch = False
-            for j in range(min(3, gt.size(0))):
+            for j in range(min(6, gt.size(0))):
                 show_comparison(
                     {"GT": gt[j].cpu(), "Degraded": degraded[j].cpu(),
                      "UNet": pred[j].cpu()},

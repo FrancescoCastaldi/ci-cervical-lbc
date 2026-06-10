@@ -6,18 +6,17 @@ from src.eval.metrics import compute_psnr, compute_ssim, evaluate, _to_01
 
 class TestPSNR:
     def test_identical_images(self):
-        """PSNR should be very high for identical images.
-        compute_psnr expects pred in [0,1] and gt in [-1,1] (dataset format)."""
-        arr = torch.rand(3, 64, 64)
-        pred = arr.clone()  # [0, 1]
-        gt = arr * 2 - 1     # same content, but in [-1, 1]
+        """PSNR should be very high for identical images in [-1,1]."""
+        arr = torch.rand(3, 64, 64) * 2 - 1  # [-1, 1]
+        pred = arr.clone()
+        gt = arr.clone()
         psnr_val = compute_psnr(pred, gt)
         assert psnr_val > 50.0, f"PSNR for identical images too low: {psnr_val:.2f}"
 
     def test_different_images(self):
-        """PSNR should be lower for different images."""
-        pred = torch.zeros(3, 64, 64)
-        gt = (torch.ones(3, 64, 64) * 0.5) * 2 - 1  # [-1, 1]
+        """PSNR should be lower for very different images."""
+        pred = -torch.ones(3, 64, 64)  # all -1
+        gt = torch.ones(3, 64, 64)     # all +1
         psnr_val = compute_psnr(pred, gt)
         assert psnr_val < 30.0
 
@@ -32,11 +31,10 @@ class TestPSNR:
 
 class TestSSIM:
     def test_identical_images(self):
-        """SSIM should be 1.0 for identical images.
-        compute_ssim expects pred in [0,1] and gt in [-1,1] (dataset format)."""
-        arr = torch.rand(3, 64, 64)
-        pred = arr.clone()  # [0, 1]
-        gt = arr * 2 - 1     # same content, but in [-1, 1]
+        """SSIM should be 1.0 for identical images in [-1,1]."""
+        arr = torch.rand(3, 64, 64) * 2 - 1  # [-1, 1]
+        pred = arr.clone()
+        gt = arr.clone()
         ssim_val = compute_ssim(pred, gt)
         assert abs(ssim_val - 1.0) < 1e-4, f"SSIM != 1.0: {ssim_val}"
 
