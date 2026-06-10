@@ -36,14 +36,14 @@ Il dataset è eterogeneo per contenuto ma uniforme per dimensioni. La distribuzi
 ## 3. Metodi
 
 ### 3.1 Total Variation (TV) — Metodo Variazionale
-La Total Variation è un regolarizzatore classico che penalizza le variazioni 
-locali dell'immagine, preservando i bordi.
+
+La Total Variation è un regolarizzatore classico che penalizza le variazioni locali dell'immagine, preservando i bordi.
 
 **Funzione obiettivo:**
 
 $$\hat{x} = \arg\min_x \|H*x - y\|_2^2 + \lambda \cdot TV(x)$$
 
-dove $H$ è l'operatore di blur gaussiano (σ=2, kernel 9×9) e:
+dove $H$ è l'operatore di blur gaussiano ($\sigma=2$, kernel $9 \times 9$) e:
 
 $$TV(x) = \sum_{i,j} |x_{i+1,j} - x_{i,j}| + |x_{i,j+1} - x_{i,j}|$$
 
@@ -51,9 +51,8 @@ $$TV(x) = \sum_{i,j} |x_{i+1,j} - x_{i,j}| + |x_{i,j+1} - x_{i,j}|$$
 - $\lambda_{reg} = 0.005$ (peso regolarizzazione)
 - 150 iterazioni con ottimizzatore Adam ($lr = 0.001$)
 
-**Pro:** Interpretabile, robusto, non richiede training.  
-**Contro:** Tende a produrre immagini leggermente sovra-lisciate sulle 
-strutture fini (staircasing effect), dettaglio limitato ad alti livelli di rumore.
+**Pro:** Interpretabile, robusto, non richiede training.
+**Contro:** Tende a produrre immagini leggermente sovra-lisciate sulle strutture fini (staircasing effect), dettaglio limitato ad alti livelli di rumore.
 
 ### 3.2 UNet — Metodo Deep Learning End-to-End
 
@@ -118,7 +117,7 @@ $$\rho_t = \lambda \cdot \frac{\sigma^2 \cdot \bar{\alpha}_t}{1 - \bar{\alpha}_t
 | `num_steps` | 15 | Step di sampling (sub-campionati da $t_{\text{start}}$ a 0) |
 | $\lambda$ | 10.0 | Peso data-fidelity |
 | $\zeta$ | 0.0 | Stocasticità (0 = deterministico) |
-| Modello | LightUNet custom | Addestrato su 100 immagini LBC |
+| Modello | LightUNet custom | Addestrato su 50 immagini LBC |
 
 Il sampling parte da $t_{\text{start}}=50$ invece che da $t=1000$ per evitare l'amplificazione degli errori di predizione: quando $\bar{\alpha}_t$ è molto piccolo (tipico per $t>500$), la stima di $x_0$ diventa numericamente instabile poiché $\sqrt{1-\bar{\alpha}_t} / \sqrt{\bar{\alpha}_t}$ amplifica gli errori del modello.
 

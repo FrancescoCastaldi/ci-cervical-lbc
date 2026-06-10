@@ -15,10 +15,14 @@ from src.plots.visualize import show_comparison
 config = load_config()
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 noise_levels = config["degradation"]["noise_levels"]
-results_dir = Path(config["eval"]["results_dir"])
-results_dir.mkdir(parents=True, exist_ok=True)
-kernel_size = config["degradation"]["kernel_size"] 
-blur_sigma  = config["degradation"]["blur_sigma"] 
+kernel_size = config["degradation"]["kernel_size"]
+blur_sigma = config["degradation"]["blur_sigma"]
+
+method_name = "unet"
+output_dir = Path(config["eval"]["results_dir"]) / method_name
+qual_dir = output_dir / "qualitative"
+output_dir.mkdir(parents=True, exist_ok=True)
+qual_dir.mkdir(parents=True, exist_ok=True)
 
 train_dataset = LBCDataset("data/splits/train.txt", config["dataset"]["image_size"])
 train_loader = DataLoader(train_dataset, batch_size=config["unet"]["batch_size"], shuffle=True)
@@ -46,7 +50,7 @@ for epoch in range(config["unet"]["epochs"]):
         total_loss += loss.item()
     print(f"Epoch {epoch+1}/{config['unet']['epochs']} | Loss: {total_loss/len(train_loader):.4f}")
 
-torch.save(model.state_dict(), results_dir / "unet_weights.pth")
+torch.save(model.state_dict(), output_dir / "weights.pth")
 
 model.eval()
 test_dataset = LBCDataset("data/splits/test.txt", config["dataset"]["image_size"])
@@ -55,8 +59,7 @@ for noise_level in noise_levels:
     psnr_list, ssim_list = [], []
     with torch.no_grad():
         for i, gt in enumerate(test_dataset):
-            degraded = degrade(gt, kernel_size=kernel_size, sigma=blur_sigma, 
-                   noise_level=noise_level).unsqueeze(0).to(device)
+            degraded = degrade(gt, kernel_size=kernel_size, sigma=blur_sigma, noise_level=noise_level).unsqueeze(0).to(device)
             restored = model(degraded).squeeze(0).cpu()
             m = evaluate(restored, gt)
             psnr_list.append(m["psnr"])
@@ -64,11 +67,13 @@ for noise_level in noise_levels:
             if i < config["eval"]["save_qualitative"]:
                 show_comparison(
                     {"Degraded": degraded.squeeze(0).cpu(), "UNet": restored, "GT": gt},
-                    save_path=results_dir / f"unet_noise{noise_level}_sample{i}.png"
+                    save_path=qual_dir / f"noise_{noise_level}_sample{i}.png"
                 )
     rows.append({"method": "unet", "noise_level": noise_level,
                  "psnr": sum(psnr_list)/len(psnr_list),
                  "ssim": sum(ssim_list)/len(ssim_list)})
     print(f"[UNet] noise={noise_level} | PSNR={rows[-1]['psnr']:.2f} | SSIM={rows[-1]['ssim']:.4f}")
 
-pd.DataFrame(rows).to_csv(results_dir / "unet_results.csv", index=False)
+csv_path = output_dir / "metrics.csv"
+pd.DataFrame(rows).to_csv(csv_path, index=False)
+print(f"Risultati salvati in {csv_path}")
