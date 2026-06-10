@@ -30,7 +30,7 @@ Inverse problem: recover a high-quality image from a degraded observation (Gauss
 | Method | Family | Status |
 |---|---|---|
 | Total Variation (TV) | Variational | ✅ Completato |
-| UNet | End-to-end | ✅ Completato |
+| **UNet** | **End-to-end** | **✅ Completato** |
 | **DiffPIR** | **Generative (Diffusion)** | **✅ Completato** |
 
 ### Total Variation Results
@@ -50,17 +50,14 @@ It's normal, and there are two reasons:
 
 ### UNet Results
 
-Encoder-decoder with skip connections (31M params), trained with multi-noise augmentation (1 epoch, CPU-limited).
-
-Model reaches 21–24 dB PSNR across noise levels, performing best at low noise (σ=0.005: 24.07 dB).
-Performance is close to DiffPIR at high noise and below TV at all levels, as expected from only 1 training epoch.
+Optimized architecture (1.9M params, GroupNorm, noise conditioning) trained with L1 loss for 50 epochs on CPU.
 
 | σₙ | PSNR | SSIM | Time |
 |---|---|---|---|
-| 0.005 | 24.07 dB | 0.789 | 3.9 s |
-| 0.01 | 24.05 dB | 0.785 | 3.9 s |
-| 0.05 | 23.45 dB | 0.700 | 3.8 s |
-| 0.1 | 21.87 dB | 0.554 | 3.8 s |
+| 0.005 | **29.89 dB** | **0.894** | 0.035 s |
+| 0.01 | **29.89 dB** | **0.894** | 0.034 s |
+| 0.05 | **29.63 dB** | **0.875** | 0.034 s |
+| 0.1 | **28.93 dB** | **0.830** | 0.036 s |
 
 ### DiffPIR Results
 

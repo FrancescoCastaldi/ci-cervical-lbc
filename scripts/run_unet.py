@@ -1,8 +1,8 @@
 """
-UNet — Deblur & Denoise (End-to-End)
-=====================================
-Architettura encoder-decoder con skip connections per il restauro di immagini.
-Training con multi-noise augmentation, validation e checkpoint del modello migliore.
+UNet Snella - Deblur & Denoise (End-to-End)
+============================================
+Architettura ridotta (~500K params) con condizionamento sul noise level
+per training su CPU (50 epoche in ~20 minuti).
 
 Uso:
     python scripts/run_unet.py
@@ -12,6 +12,7 @@ sys.path.insert(0, ".")
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import pandas as pd
 import numpy as np
 import time
@@ -20,16 +21,15 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.data.dataset import load_config, LBCDataset
-from src.degradation.degradation import degrade, gaussian_kernel
-import torch.nn.functional as F
+from src.degradation.degradation import gaussian_kernel
 from src.methods.unet.unet import UNet
 from src.eval.metrics import evaluate
 from src.plots.visualize import show_comparison
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Batch degradation helper (vectorizzata, molto più veloce del loop su CPU)
-# ──────────────────────────────────────────────────────────────────────────────
+# ==============================================================================
+# Batch degradation helper (vettorizzata per CPU)
+# ==============================================================================
 def degrade_batch(images, kernel_size=9, sigma=2.0, noise_level=0.01):
     """Degrada un batch di immagini (B, C, H, W) in una sola passata."""
     kernel = gaussian_kernel(kernel_size, sigma).to(images.device)
@@ -40,9 +40,15 @@ def degrade_batch(images, kernel_size=9, sigma=2.0, noise_level=0.01):
     return torch.clamp(blurred + noise, -1.0, 1.0)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+def make_noise_map(batch_size, image_size, noise_level, device):
+    """Crea una mappa di noise level costante per il condizionamento."""
+    return torch.full((batch_size, 1, image_size, image_size),
+                      noise_level, device=device)
+
+
+# ==============================================================================
 # Setup
-# ──────────────────────────────────────────────────────────────────────────────
+# ==============================================================================
 config = load_config()
 device = torch.device(
     "cuda" if torch.cuda.is_available()
@@ -56,13 +62,8 @@ kernel_size = config["degradation"]["kernel_size"]
 blur_sigma = config["degradation"]["blur_sigma"]
 batch_size = config["unet"]["batch_size"]
 epochs = config["unet"]["epochs"]
-# Su CPU pura, imposta EPOCHS_CPU_LIMIT a un valore ragionevole (es. 15-20).
-# Su GPU (CUDA/MPS), viene usato il valore da config (default 50).
-EPOCHS_CPU_LIMIT = 15
-if device.type == "cpu":
-    epochs = min(epochs, EPOCHS_CPU_LIMIT)
-    print(f"CPU mode: epochs limitate a {epochs} (config: {config['unet']['epochs']})")
 lr = config["unet"]["lr"]
+img_size = config["dataset"]["image_size"]
 
 method_name = "unet"
 output_dir = Path(config["eval"]["results_dir"]) / method_name
@@ -71,7 +72,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 qual_dir.mkdir(parents=True, exist_ok=True)
 
 print("=" * 60)
-print("UNet — Deblur & Denoise (End-to-End)")
+print("UNet Snella - Deblur & Denoise (End-to-End)")
 print("=" * 60)
 print(f"Device     : {device}")
 print(f"Noise      : {noise_levels}")
@@ -82,12 +83,12 @@ print(f"Output     : {output_dir}")
 print("=" * 60)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ==============================================================================
 # Caricamento dati
-# ──────────────────────────────────────────────────────────────────────────────
-train_dataset = LBCDataset("data/splits/train.txt", config["dataset"]["image_size"])
-val_dataset = LBCDataset("data/splits/val.txt", config["dataset"]["image_size"])
-test_dataset = LBCDataset("data/splits/test.txt", config["dataset"]["image_size"])
+# ==============================================================================
+train_dataset = LBCDataset("data/splits/train.txt", img_size)
+val_dataset = LBCDataset("data/splits/val.txt", img_size)
+test_dataset = LBCDataset("data/splits/test.txt", img_size)
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
@@ -97,20 +98,25 @@ print(f"Val   : {len(val_dataset)} img")
 print(f"Test  : {len(test_dataset)} img")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Modello
-# ──────────────────────────────────────────────────────────────────────────────
-model = UNet().to(device)
+# ==============================================================================
+# Modello snello (~500K params)
+# ==============================================================================
+model = UNet(in_channels=4, out_channels=3, features=(16, 32, 64, 128)).to(device)
 n_params = sum(p.numel() for p in model.parameters())
 print(f"Parametri: {n_params:,} (~{n_params/1e6:.1f}M)")
 
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-criterion = nn.MSELoss()
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer, mode="max", factor=0.5, patience=5
+)
+
+# L1 loss invece di MSE: meno blur, preserva meglio i bordi
+criterion = nn.L1Loss()
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Training con multi-noise augmentation + validation
-# ──────────────────────────────────────────────────────────────────────────────
+# ==============================================================================
+# Training con multi-noise augmentation + validation su tutti i noise levels
+# ==============================================================================
 print("\n" + "-" * 60)
 print("TRAINING")
 print("-" * 60)
@@ -134,7 +140,11 @@ for epoch in range(epochs):
         degraded = degrade_batch(gt, kernel_size=kernel_size,
                                  sigma=blur_sigma, noise_level=noise)
 
-        pred = model(degraded)
+        # Condizionamento: concatena mappa del noise level
+        noise_map = make_noise_map(gt.size(0), img_size, noise, device)
+        model_input = torch.cat([degraded, noise_map], dim=1)
+
+        pred = model(model_input)
         loss = criterion(pred, gt)
 
         optimizer.zero_grad()
@@ -142,30 +152,36 @@ for epoch in range(epochs):
         optimizer.step()
 
         total_loss += loss.item()
-        pbar.set_postfix(loss=f"{loss.item():.4f}", noise=f"σ={noise}")
+        pbar.set_postfix(loss=f"{loss.item():.4f}", noise=f"s={noise}")
 
     avg_loss = total_loss / len(train_loader)
     train_losses.append(avg_loss)
 
-    # --- Validation (fast: solo σ=0.05, 50% subset) ---
+    # --- Validation su tutti i 4 noise levels (25% subset per velocit�) ---
     model.eval()
-    val_psnr_total = 0.0
+    val_half = max(1, len(val_dataset) // 4)
+    val_indices = torch.randperm(len(val_dataset))[:val_half].tolist()
+    val_psnr_avg = 0.0
     val_count = 0
-    val_noise = 0.05  # noise intermedio rappresentativo
-    val_half = max(1, len(val_dataset) // 2)
-    val_indices = torch.randperm(len(val_dataset))[:val_half]
+
     with torch.no_grad():
         for idx in val_indices:
             gt = val_dataset[idx].unsqueeze(0).to(device)
+            # Campiona un noise level random per validazione
+            val_noise = np.random.choice(noise_levels)
             degraded = degrade_batch(gt, kernel_size=kernel_size,
                                      sigma=blur_sigma, noise_level=val_noise)
-            pred = model(degraded)
+            noise_map = make_noise_map(1, img_size, val_noise, device)
+            model_input = torch.cat([degraded, noise_map], dim=1)
+            pred = model(model_input)
             m = evaluate(pred[0].cpu(), gt[0].cpu())
-            val_psnr_total += m["psnr"]
+            val_psnr_avg += m["psnr"]
             val_count += 1
 
-    avg_val_psnr = val_psnr_total / val_count
+    avg_val_psnr = val_psnr_avg / val_count
     val_psnrs.append(avg_val_psnr)
+
+    scheduler.step(avg_val_psnr)
 
     improved = avg_val_psnr > best_val_psnr
     marker = " *" if improved else ""
@@ -181,14 +197,13 @@ for epoch in range(epochs):
 print(f"\nMiglior modello: epoch {best_epoch} (Val PSNR: {best_val_psnr:.2f} dB)")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Valutazione su test set
-# ──────────────────────────────────────────────────────────────────────────────
+# ==============================================================================
+# Valutazione su test set (tutti i 4 noise level, tutte le 145 immagini)
+# ==============================================================================
 print("\n" + "-" * 60)
 print("VALUTAZIONE SU TEST SET")
 print("-" * 60)
 
-# Carica il modello migliore
 model.load_state_dict(torch.load(output_dir / "best_model.pth", weights_only=True))
 model.eval()
 
@@ -198,13 +213,19 @@ for noise_level in noise_levels:
     pbar = tqdm(enumerate(test_dataset), total=len(test_dataset),
                 desc=f"[UNet] noise={noise_level}", unit="img")
     for i, gt in pbar:
-        degraded = degrade(gt, kernel_size=kernel_size,
-                           sigma=blur_sigma, noise_level=noise_level)
-        degraded = degraded.unsqueeze(0).to(device)
+        gt_t = gt.unsqueeze(0).to(device)
+
+        # Degrada
+        degraded = degrade_batch(gt_t, kernel_size=kernel_size,
+                                 sigma=blur_sigma, noise_level=noise_level)
+
+        # Condizionamento noise level
+        noise_map = make_noise_map(1, img_size, noise_level, device)
+        model_input = torch.cat([degraded, noise_map], dim=1)
 
         t0 = time.time()
         with torch.no_grad():
-            restored = model(degraded).squeeze(0).cpu()
+            restored = model(model_input).squeeze(0).cpu()
         inference_time = time.time() - t0
 
         m = evaluate(restored, gt)
@@ -237,9 +258,9 @@ for noise_level in noise_levels:
           f"Time={avg_time:.4f}s")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ==============================================================================
 # Salvataggio risultati
-# ──────────────────────────────────────────────────────────────────────────────
+# ==============================================================================
 csv_path = output_dir / "metrics.csv"
 pd.DataFrame(rows).to_csv(csv_path, index=False)
 

@@ -205,8 +205,8 @@ def run_diffpir(
         else:
             x = x0
 
-    # Convert from [-1, 1] to [0, 1] for external evaluation
-    result = ((x.squeeze(0) + 1) / 2).clamp(0, 1).cpu()
+    # Output in [-1, 1] to match evaluate()/to_numpy() expectation
+    result = x.squeeze(0).clamp(-1, 1).cpu()
 
     if return_timing:
         return result, time.time() - start_time

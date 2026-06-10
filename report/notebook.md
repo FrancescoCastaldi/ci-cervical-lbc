@@ -109,16 +109,16 @@ Per ogni livello di rumore, il notebook mostra: [GT] [Degraded] [Restored]. L'ou
 Il notebook carica automaticamente i risultati dai file `results/<metodo>/metrics.csv` e produce una tabella pivot:
 
 | $\sigma_n$ | TV (PSNR) | UNet (PSNR) | DiffPIR (PSNR) | TV (SSIM) | UNet (SSIM) | DiffPIR (SSIM) |
-|---|---|---|---|---|---|---|---|
-| 0.005 | **32.09 dB** | 24.07 dB | 16.67 dB | **0.911** | 0.789 | 0.235 |
-| 0.01 | **32.04 dB** | 24.05 dB | 17.32 dB | **0.909** | 0.785 | 0.270 |
-| 0.05 | **30.42 dB** | 23.45 dB | 22.49 dB | **0.837** | 0.700 | 0.512 |
-| 0.1 | **26.54 dB** | 21.87 dB | 24.68 dB | **0.586** | 0.554 | 0.664 |
+|---|---|---|---|---|---|---|---|---|
+| 0.005 | **32.09 dB** 🥇 | 29.89 dB 🥈 | 16.67 dB | **0.911** 🥇 | 0.894 🥈 | 0.235 |
+| 0.01 | **32.04 dB** 🥇 | 29.89 dB 🥈 | 17.32 dB | **0.909** 🥇 | 0.894 🥈 | 0.270 |
+| 0.05 | **30.42 dB** 🥇 | 29.63 dB 🥈 | 22.49 dB | **0.837** 🥇 | 0.875 🥈 | 0.512 |
+| 0.1 | 26.54 dB 🥈 | **28.93 dB** 🥇 | 24.68 dB | 0.586 | **0.830** 🥇 | 0.664 🥈 |
 
-I risultati TV sono stati generati tramite `python scripts/run_tv.py`. UNet è stato valutato dal checkpoint dell'epoca 1:
-- TV: ✅ completato (PSNR 32.09 → 26.54 dB dal noise più basso al più alto)
-- UNet: ✅ completato, 1 epoca CPU (PSNR 24.07 → 21.87 dB)
-- DiffPIR: ✅ completato (PSNR 24.68 dB a σ=0.1, miglior metodo ad alto rumore)
+TV, UNet, e DiffPIR sono tutti completati:
+- TV: ✅ PSNR 32.09 → 26.54 dB (dal noise più basso al più alto)
+- UNet: ✅ **50 epoche CPU**, architettura ottimizzata (1.9M params, GroupNorm, L1 loss), PSNR 29.89 → 28.93 dB — miglioramento di **+5.8/+7.1 dB** rispetto al vecchio modello
+- DiffPIR: ✅ PSNR 24.68 dB a σ=0.1 (miglior metodo ad alto rumore)
 
 #### 6. Struttura dei Risultati
 

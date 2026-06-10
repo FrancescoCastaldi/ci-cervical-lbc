@@ -7,7 +7,7 @@
 
 ---
 
-## 1. Cosa Chiede l'Assignment (PDF Group R)
+## 1. Cosa Chiede l'Assignment (PDF Group R)e python scripts/plot_results.p
 
 ### Task
 **Deblur + Denoise** di immagini di citologia cervicale.
@@ -111,11 +111,11 @@
 ### Tabella Comparativa Finale
 
 | σₙ | **TV** PSNR | **TV** SSIM | **UNet** PSNR | **UNet** SSIM | **DiffPIR** PSNR | **DiffPIR** SSIM |
-|---|---|---|---|---|---|---|
-| 0.005 | **32.09 dB** 🥇 | **0.911** | 24.07 dB | 0.789 | 16.67 dB | 0.235 |
-| 0.01 | **32.04 dB** 🥇 | **0.909** | 24.05 dB | 0.785 | 17.32 dB | 0.270 |
-| 0.05 | **30.42 dB** 🥇 | **0.837** | 23.45 dB | 0.700 | 22.49 dB | 0.512 |
-| 0.1 | 26.54 dB | 0.586 | 21.87 dB | 0.554 | **24.68 dB** 🥇 | **0.664** |
+|---|---|---|---|---|---|---|---|
+| 0.005 | **32.09 dB** 🥇 | **0.911** 🥇 | 29.89 dB 🥈 | 0.894 🥈 | 16.67 dB | 0.235 |
+| 0.01 | **32.04 dB** 🥇 | **0.909** 🥇 | 29.89 dB 🥈 | 0.894 🥈 | 17.32 dB | 0.270 |
+| 0.05 | **30.42 dB** 🥇 | **0.837** 🥇 | 29.63 dB 🥈 | **0.875** 🥈 | 22.49 dB | 0.512 |
+| 0.1 | 26.54 dB 🥈 | 0.586 | **28.93 dB** 🥇 | **0.830** 🥇 | 24.68 dB 🥉 | 0.664 🥈 |
 
 ### Tempi di Inferenza
 | Metodo | Tempo per immagine |

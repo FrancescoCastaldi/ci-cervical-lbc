@@ -95,14 +95,14 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 | 0.05 | 30.42 dB | 0.837 |
 | 0.1 | 26.54 dB | 0.586 |
 
-### UNet (145 immagini test × 4 noise level, 1 epoca)
+### UNet (145 immagini test × 4 noise level, 50 epoche CPU)
 
 | σ_n | PSNR | SSIM | Tempo |
 |---|---|---|---|
-| 0.005 | 24.07 dB | 0.789 | 3.9 s |
-| 0.01 | 24.05 dB | 0.785 | 3.9 s |
-| 0.05 | 23.45 dB | 0.700 | 3.8 s |
-| 0.1 | 21.87 dB | 0.554 | 3.8 s |
+| 0.005 | **29.89 dB** | **0.894** | **0.035 s** |
+| 0.01 | **29.89 dB** | **0.894** | **0.034 s** |
+| 0.05 | **29.63 dB** | **0.875** | **0.034 s** |
+| 0.1 | **28.93 dB** | **0.830** | **0.036 s** |
 
 ### Output organizzati
 ```

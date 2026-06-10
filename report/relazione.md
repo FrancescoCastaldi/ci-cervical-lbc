@@ -454,34 +454,34 @@ Test su **145 immagini** del test set, per ognuno dei 4 livelli di rumore:
 
 ### 5.4 UNet
 
-L'UNet è stato addestrato per **1 epoca** su CPU con multi-noise augmentation (σ campionato randomicamente per ogni batch tra i 4 livelli). I risultati su 145 immagini di test:
+L'UNet è stato ottimizzato con un'architettura **snella** (1.9M parametri, features=[16,32,64,128]) con GroupNorm, condizionamento del noise level (4 canali input: RGB + noise map) e loss L1. Addestrato per **50 epoche** su CPU con multi-noise augmentation (σ random per batch) e ReduceLROnPlateau. I risultati su 145 immagini di test:
 
 | $\sigma_n$ | PSNR | SSIM | Tempo |
 |---|---|---|---|
-| 0.005 | 24.07 dB | 0.789 | 3.9 s |
-| 0.01 | 24.05 dB | 0.785 | 3.9 s |
-| 0.05 | 23.45 dB | 0.700 | 3.8 s |
-| 0.1 | 21.87 dB | 0.554 | 3.8 s |
+| 0.005 | **29.89 dB** | **0.894** | **0.035 s** |
+| 0.01 | **29.89 dB** | **0.894** | **0.034 s** |
+| 0.05 | **29.63 dB** | **0.875** | **0.034 s** |
+| 0.1 | **28.93 dB** | **0.830** | **0.036 s** |
 
-**Analisi dei risultati con 1 sola epoca:**
-- PSNR decresce con l'aumentare del rumore (24.07 → 21.87 dB), comportamento atteso
-- L'UNet mostra già capacità di denoising significativa anche dopo 1 epoca, raggiungendo ~24 dB a basso rumore
-- Performance inferiori a TV (che è un metodo senza training), ma superiori a DiffPIR a basso rumore (dove DiffPIR ottiene solo ~17 dB)
-- Con più epoche di training ci si aspetta un miglioramento significativo, specialmente a noise level medio-alti
-- Il tempo di inferenza (~3.8s per 145 immagini = 26 ms/img) è competitivo anche su CPU
+**Analisi dei risultati dopo 50 epoche:**
+- Il modello raggiunge **~29.9 dB** a basso rumore, in linea con le performance di TV (32 dB) a soli ~2 dB di distanza
+- La degradazione all'aumentare del rumore è **molto contenuta**: solo ~1 dB di perdita da σ=0.005 a σ=0.1 (contro i ~5.5 dB della TV)
+- A σ=0.1, l'UNet **supera TV** (28.93 vs 26.54 dB) — il modello apprende un prior efficace anche in condizioni di rumore elevato
+- SSIM elevato (0.83-0.89) in tutti i noise level, dimostrando buona fedeltà strutturale
+- Il tempo di inferenza (~0.035 s/img) è **il più veloce** tra tutti i metodi, rendendolo ideale per applicazioni real-time
 
-**Limitazione principale:** 1 sola epoca di training su CPU non permette al modello di convergere. Il modello ha 31M parametri e richiederebbe GPU per un training adeguato (50 epoche).
+**Miglioramento rispetto alla versione precedente:** L'architettura ottimizzata (1.9M vs 31M params) con GroupNorm, L1 loss e noise conditioning ha permesso un incremento di **+5.8 dB** a basso rumore e **+7.1 dB** ad alto rumore rispetto al modello precedente (1 epoca).
 
 ### 5.5 Confronto Comparativo
 
 | $\sigma_n$ | TV (PSNR / SSIM) | UNet (PSNR / SSIM) | DiffPIR (PSNR / SSIM) |
-|---|---|---|---|---|
-| 0.005 | **32.09** / **0.911** | 24.07 / 0.789 | 16.67 / 0.235 |
-| 0.01 | **32.04** / **0.909** | 24.05 / 0.785 | 17.32 / 0.270 |
-| 0.05 | **30.42** / **0.837** | 23.45 / 0.700 | 22.49 / 0.512 |
-| 0.1 | **26.54** / **0.586** | 21.87 / 0.554 | 24.68 / 0.664 |
+|---|---|---|---|---|---|
+| 0.005 | **32.09** / **0.911** 🥇 | 29.89 / 0.894 🥈 | 16.67 / 0.235 |
+| 0.01 | **32.04** / **0.909** 🥇 | 29.89 / 0.894 🥈 | 17.32 / 0.270 |
+| 0.05 | **30.42** / **0.837** 🥇 | 29.63 / 0.875 🥈 | 22.49 / 0.512 |
+| 0.1 | 26.54 / 0.586 🥈 | **28.93** / **0.830** 🥇 | 24.68 / 0.664 🥉 |
 
-Il plot comparativo sarà generato dopo l'esecuzione di UNet tramite:
+Il plot comparativo è stato generato tramite:
 
 ```bash
 python scripts/plot_results.py
@@ -558,12 +558,12 @@ Questo progetto ha esplorato tre approcci fondamentalmente diversi al problema d
 
 2. **DiffPIR eccelle ad alto rumore (PSNR 24.68 dB per $\sigma_n=0.1$)** — quando il segnale è fortemente degradato, il prior generativo aiuta a ricostruire dettagli che metodi classici non possono recuperare. Il prezzo è duplice: lentezza in inferenza (~2 sec/img) e allucinazioni a basso rumore (peggiora invece di migliorare).
 
-3. **UNet con 1 epoca raggiunge ~24 dB PSNR** — nonostante il training minimo (1 epoca, CPU), il modello mostra già capacità di denoising significativa. Con 24.07 dB a basso rumore supera DiffPIR (17 dB), mentre a rumore alto (21.87 dB) è inferiore sia a TV (26.54 dB) che a DiffPIR (24.68 dB). L'inferenza è molto rapida (~26 ms/img), confermando il potenziale come metodo veloce. Con training completo su GPU (50 epoche), ci si aspetta che l'UNet eguagli o superi TV a tutti i livelli di rumore.
+3. **UNet ottimizzato raggiunge ~29.9 dB PSNR dopo 50 epoche CPU** — con architettura snella (1.9M params, GroupNorm, L1 loss) e noise conditioning, il modello eguaglia quasi TV a basso rumore (29.89 vs 32.09 dB, a soli 2 dB di distanza) e **supera TV ad alto rumore** (28.93 vs 26.54 dB a σ=0.1). La degradazione all'aumentare del rumore è minima (~1 dB), dimostrando che un modello ben progettato può essere robusto su tutto lo spettro di rumore. L'inferenza è la più rapida (~0.035 s/img), ideale per applicazioni real-time.
 
 ### Lezioni Apprese
 
 - **Nessun metodo domina su tutti i regimi di rumore.** La scelta del metodo dipende dal contesto applicativo: se il rumore è basso, TV è la scelta pragmatica; se è alto e si può tollerare latenza, DiffPIR offre qualità superiore; se serve throughput elevato, UNet è imbattibile.
-- **Il training su CPU è un collo di bottiglia reale.** Con 31M parametri e 673 immagini, 1 sola epoca ha richiesto ~80 minuti e ha prodotto un modello con circa 24 dB PSNR. Su GPU lo stesso training richiederebbe secondi per epoca, consentendo 50+ epoche e risultati molto migliori. Questo ha limitato la nostra capacità di sperimentare con iperparametri e architetture alternative.
+- **Il training su CPU è un collo di bottiglia reale.** Nonostante l'ottimizzazione dell'architettura (1.9M params, 50 epoche in ~85 minuti totali), l'assenza di GPU ha impedito di sperimentare con architetture più profonde, batch più grandi, e validation più frequenti. Su GPU lo stesso training richiederebbe secondi per epoca.
 - **La riproducibilità è fondamentale nel confronto.** Usare la stessa pipeline di degradazione, lo stesso seed, e le stesse metriche garantisce che le differenze osservate siano attribuibili solo ai metodi.
 - **I modelli generativi vanno usati con cautela a basso rumore.** Il comportamento controintuitivo di DiffPIR (PSNR più basso a rumore più basso) è una lezione importante: un prior generativo forte può "immaginare" dettagli assenti, peggiorando la fedeltà all'originale.
 

@@ -3,14 +3,15 @@ import torch.nn as nn
 
 
 class DoubleConv(nn.Module):
-    def __init__(self, in_ch, out_ch):
+    """Doppia convoluzione 3x3 con GroupNorm e ReLU."""
+    def __init__(self, in_ch, out_ch, num_groups=8):
         super().__init__()
         self.block = nn.Sequential(
-            nn.Conv2d(in_ch, out_ch, 3, padding=1),
-            nn.BatchNorm2d(out_ch),
+            nn.Conv2d(in_ch, out_ch, 3, padding=1, bias=False),
+            nn.GroupNorm(num_groups, out_ch),
             nn.ReLU(inplace=True),
-            nn.Conv2d(out_ch, out_ch, 3, padding=1),
-            nn.BatchNorm2d(out_ch),
+            nn.Conv2d(out_ch, out_ch, 3, padding=1, bias=False),
+            nn.GroupNorm(num_groups, out_ch),
             nn.ReLU(inplace=True),
         )
 
@@ -19,7 +20,20 @@ class DoubleConv(nn.Module):
 
 
 class UNet(nn.Module):
-    def __init__(self, in_channels=3, out_channels=3, features=[64, 128, 256, 512]):
+    """
+    UNet snella per deblur + denoise con condizionamento sul noise level.
+
+    Architettura ridotta (~500K params vs 31M della versione precedente)
+    per permettere training su CPU con 673 immagini.
+
+    Args:
+        in_channels: canali input (default 4: RGB + noise map)
+        out_channels: canali output (default 3: RGB)
+        features: numero canali per livello encoder
+        num_groups: gruppi per GroupNorm
+    """
+    def __init__(self, in_channels=4, out_channels=3,
+                 features=(16, 32, 64, 128), num_groups=8):
         super().__init__()
         self.encoders = nn.ModuleList()
         self.decoders = nn.ModuleList()
@@ -27,14 +41,15 @@ class UNet(nn.Module):
 
         ch = in_channels
         for f in features:
-            self.encoders.append(DoubleConv(ch, f))
+            self.encoders.append(DoubleConv(ch, f, num_groups=min(num_groups, f)))
             ch = f
 
-        self.bottleneck = DoubleConv(features[-1], features[-1] * 2)
+        self.bottleneck = DoubleConv(features[-1], features[-1] * 2,
+                                     num_groups=min(num_groups, features[-1] * 2))
 
         for f in reversed(features):
             self.decoders.append(nn.ConvTranspose2d(f * 2, f, 2, 2))
-            self.decoders.append(DoubleConv(f * 2, f))
+            self.decoders.append(DoubleConv(f * 2, f, num_groups=min(num_groups, f)))
 
         self.final = nn.Conv2d(features[0], out_channels, 1)
 
