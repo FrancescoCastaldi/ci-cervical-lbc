@@ -70,7 +70,7 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 - ✅ `report/notebook.md` — riassunto notebook
 - ✅ `slides/presentazione.pptx` — 10 slide PowerPoint
 - ✅ `notebooks/01_eda.ipynb` through `04_diffpir.ipynb`
-- ✅ 32 test unitari: degradation (10), metrics (9), diffpir (7), unet (6)
+- ✅ 34 test unitari: degradation (10), metrics (9), diffpir (7), unet (8), tv (8)
 - ✅ `README.md` — aggiornato con tutti i risultati
 
 ---
@@ -165,7 +165,7 @@ ci-cervical-lbc/
 Il progetto sarà valutato su:
 
 1. **Stessi input degradati** per tutti i metodi ✅ (`src/degradation/degradation.py`)
-2. **Scelte motivate dei parametri** (riportato in `report/teoria.md`)
+2. **Scelte motivate dei parametri** (riportato in `report/theory.md`)
 3. **Confronto serio** (non solo PSNR più alto)
 4. **Esempi di successi e fallimenti**
 5. **Organizzazione del codice** — modulare, documentato
