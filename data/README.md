@@ -1,25 +1,20 @@
-# Data
+# data/ — Dataset e Dati Processati
 
-This folder is **not tracked by git** (raw data and processed files are excluded via `.gitignore`).
+Contiene il dataset originale, gli split, e i dati degradati pre-calcolati.
 
-## Download
+## Utilità per l'esame
 
-Download the Mendeley LBC Cervical Cancer dataset from:  
-https://data.mendeley.com/datasets/zddtpgzv63/2
+- **Dataset reale**: immagini LBC di citologia cervicale (962 immagini, 4 classi diagnostiche)
+- **Split fissi**: train/val/test 70/15/15 — stesso split per tutti i metodi (confronto equo)
+- **Degradazione identica**: tutti i metodi ricevono la stessa immagine degradata (confronto equo)
 
-## Structure
+## Struttura
 
-After download, place files as follows:
+| Cartella | Contenuto | Tracciato? |
+|---|---|---|
+| `raw/` | Immagini originali del dataset Mendeley | ❌ (`.gitignore`) |
+| `splits/` | `train.txt`, `val.txt`, `test.txt` con percorsi immagini | ❌ (`.gitignore`) |
+| `degraded/` | `.pt` files: GT e immagini degradate per ogni noise level | ❌ (`.gitignore`) |
 
-```
-data/
-├── raw/          # original images as downloaded
-├── processed/    # resized and normalized images (256x256)
-└── splits/       # train.txt, val.txt, test.txt with image paths
-```
-
-Run the preprocessing script to populate `processed/` and `splits/`:
-
-```bash
-python scripts/preprocess.py
-```
+> Il dataset è disponibile su [Mendeley](https://data.mendeley.com/datasets/zddtpgzv63/2).
+> Dopo averlo scaricato in `data/raw/`, esegui `python scripts/preprocess.py` per generare splits e degraded.

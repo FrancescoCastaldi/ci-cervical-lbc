@@ -76,15 +76,22 @@ Custom LightUNet (1.26M params) trained on LBC cervical images with FFT-based da
 # Setup
 pip install -r requirements.txt
 
-# Run TV (Total Variation method)
-python scripts/run_tv.py
+# Generate splits and degraded data (requires raw dataset in data/raw/)
+python scripts/preprocess.py
 
-# Run DiffPIR (generative method)
-python scripts/run_diffpir.py
+# Run all methods
+python scripts/run_tv.py          # Total Variation (variational)
+python scripts/run_unet.py        # UNet (end-to-end)
+python scripts/run_diffpir.py     # DiffPIR (generative)
+
+# Comparison plot
+python scripts/plot_results.py
 
 # Run tests
 python -m pytest tests/ -v
 ```
+
+> **Nota sul dataset:** Il dataset Mendeley LBC Cervical Cancer contiene 962 immagini totali (non 4000 come indicato nella traccia). Abbiamo utilizzato tutte le immagini disponibili. Vedi `report/report.md` per i dettagli.
 
 ## Project Structure
 
@@ -111,6 +118,11 @@ ci-cervical-lbc/
 ├── scripts/                    # Run experiments
 ├── tests/                      # Unit tests
 ├── report/                     # Documentation
+│   ├── report.md               # Full project report
+│   ├── theory.md               # Theoretical background
+│   └── notebook.md             # Notebook summary
+├── roadmap.md                  # Completed steps vs exam requirements
+├── meeting_notes.md            # Team meeting notes
 ├── agents.md                   # Project status & task division
 └── README.md
 ```
