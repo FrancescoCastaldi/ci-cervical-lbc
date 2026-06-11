@@ -33,6 +33,7 @@ data/degraded/
 results/**/*.pth
 results/**/*.pt
 results/**/*.ckpt
+notebooks/results
 
 # Pesi e checkpoint
 *.pth
