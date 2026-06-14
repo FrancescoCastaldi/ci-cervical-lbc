@@ -39,7 +39,10 @@
 ### 1. Introduzione al Computational Imaging `[p.1-2]`
 
 > **Termini**: discretizzazione = convertire segnale continuo in discreto · Nyquist = $f_s \ge 2f_{max}$ · aliasing = artefatto da sottocampionamento (ruote carro) · DICOM = formato medico con metadati · DCT = base JPEG separa frequenze · pixel = unità minima
+
 > **A cosa serve**: capire come campionare senza perdere informazione e comprimere immagini. Dalla fotografia alla risonanza magnetica, senza Nyquist avremmo solo artefatti.
+
+> **Esempio**: fotografi un mulino a vento a bassa frequenza: le pale sembrano ferme = aliasing. JPEG comprime scartando le frequenze che l'occhio non vede.
 
 > **Spiegazioni**: CI inverte il **forward model** $y=Ax+e$: misuri dati indiretti ($y$) e ricostruisci l'immagine ($x$) — come capire cosa c'è in una scatola chiusa dal rumore che fa scuotendola. **Nyquist**: $f_s \ge 2f_{max}$ — se campioni sotto questa frequenza, le alte frequenze si ripiegano su quelle basse (**aliasing**: ruote carro nei film). **JPEG**: DCT + quantizzazione — butta via le alte frequenze che l'occhio non percepisce (come descrivere «sabbia colorata» invece di ogni granello). **DICOM**: standard per imaging medico con metadati.
 
@@ -83,7 +86,10 @@ import imageio      # versatile, supporta DICOM
 ### 2. Pixel Processing `[p.2-3]`
 
 > **Termini**: istogramma = conteggio frequenza livelli grigio · CDF = somma cumulativa · PDF = istogramma normalizzato · equalizzazione = CDF come lookup table · CLAHE = equalizzazione locale a blocchi con clipping · gaussiano = rumore normale · salt&pepper = pixel bianchi/neri · Poisson = rumore dipendente dal segnale
+
 > **A cosa serve**: migliorare la qualita di un'immagine grezza. Aumentare contrasto, regolare luminosita, correggere colori — operazioni base prima di qualsiasi analisi.
+
+> **Esempio**: foto in controluce: il viso e tutto nero. Equalizzazione spalma l'istogramma e ora vedi occhi e naso.
 
 > **Spiegazioni**: **Istogramma** $h(k)$ = conteggio pixel per ogni intensità $k$. **Equalizzazione**: usa la **CDF** come lookup table per distribuire i livelli uniformemente su 0-255 — aumenta il contrasto globale (come alzare le ombre in Photoshop). **CLAHE**: versione locale a blocchi con **contrast clipping** (taglia i picchi dell'istogramma locale per non amplificare rumore nelle zone uniformi). **Rumore gaussiano** $\mathcal{N}(0,\sigma^2)$: grana fine, additivo (ISO alto). **Sale&pepe**: pixel impulsivi a 0 o 255. **Filtro mediano** (non lineare): ordina i pixel nella finestra, sceglie la mediana — rimuove sale&pepe SENZA sfocare perché non media ma seleziona il valore centrale.
 
@@ -129,7 +135,10 @@ Modelli principali:
 ### 3. Filtri e Convoluzione `[p.4-5]`
 
 > **Termini**: LSIS = sistema lineare shift-invariante (stessa risposta ovunque) · PSF = risposta impulsiva · convoluzione = $y=x*h$ · padding = estensione bordi · separable filter = 2D scomposto in 1D (più veloce) · gaussiano = sfocatura a campana · mediano = valore centrale dopo ordinamento · bilaterale = gaussiano + differenza intensità
+
 > **A cosa serve**: ripulire le immagini dal rumore. E il gesto base di qualsiasi elaborazione: come aggiustare una foto sfocata o piena di puntini bianchi prima di usarla.
+
+> **Esempio**: selfie con buccia d'arancia: filtro mediano rimuove i puntini senza sfocare. Bilaterale liscia la pelle ma lascia nitidi occhi e bocca.
 
 > **Spiegazioni**: **Convoluzione** $y = x*h$: kernel $k\times k$ scorre sull'immagine (LSIS, shift-invariante) — moltiplica pesi × pixel e somma, come un timbro che stampa lo stesso kernel su tutto il foglio. **Gaussiano**: pesi a campana, **separabile** $G(x,y)=G(x)G(y)$ — costo $O(k)$ invece di $O(k^2)$. **Mediano** (non lineare): ordina i pixel nella finestra, sceglie la mediana — rimuove sale&pepe preservando i bordi (perché non media). **Bilaterale**: $w = w_s\cdot w_r$ — peso **spaziale** (gaussiano sulla distanza) × peso di **range** (gaussiano sulla differenza d'intensità) — preserva i bordi perché non media pixel di colore diverso (come colorare dentro le linee).
 
@@ -221,7 +230,10 @@ Due pesi:
 ### 4. Trasformata di Fourier `[p.6-8]`
 
 > **Termini**: DFT = da spazio a frequenze · FFT = algoritmo veloce $O(N \log N)$ · magnitudine = ampiezza frequenze · fase = posizione/struttura (più importante) · teo. convoluzione = spazio $*$ freq $\cdot$ · aliasing = frequenze oltre Nyquist si ripiegano · ringing = artefatto da troncamento brusco
+
 > **A cosa serve**: vedere l'immagine "dall'altro lato" — non pixel ma frequenze. Serve a comprimere (JPEG), rimuovere rumori periodici o capire perche un'immagine ha artefatti.
+
+> **Esempio**: foto di un prato: DFT mostra tanti puntini lontani dal centro (erba, alte frequenze). Foto di un cielo: tutto concentrato al centro (basse frequenze).
 
 > **Spiegazioni**: **DFT**: scompone l'immagine in basi di Fourier — come un accordo in note singole. Basse frequenze = zone uniformi (cielo). Alte frequenze = dettagli fini (bordi, erba). **Teorema della convoluzione**: $x*h \xrightarrow{\mathcal{F}} X\cdot H$ — convolvere nello spazio = MOLTIPLICARE in frequenza ($O(N\log N)$ con FFT). **Fase** $\phi$: codifica la POSIZIONE dei bordi — è l'informazione PIÙ importante (esperimento: fase di A + magnitudine di B = si riconosce A). **Magnitudine** $|X|$: energia/contrasto di ogni frequenza. **Aliasing**: frequenze $> f_{Nyquist}$ si ripiegano su frequenze più basse (ruote carro). **Ringing**: artefatto da troncamento brusco in frequenza.
 
@@ -306,7 +318,10 @@ Combinare basse frequenze di un'immagine con alte frequenze di un'altra:
 ### 5. Computational Imaging e Problemi Inversi `[p.8-10]`
 
 > **Termini**: forward model = $y=Ax+e$ · ill-posed = viola esistenza/unicità/stabilità · condizionamento = $\sigma_{max}/\sigma_{min}$ · SVD = $A=U\Sigma V^T$ · $\sigma_i$ = valori singolari · rumore amplificato = $\sigma_i$ piccoli amplificano rumore
+
 > **A cosa serve**: ricostruire un'immagine da misure indirette. TAC, risonanza magnetica, deblurring: senza teoria dei problemi inversi queste applicazioni non esisterebbero.
+
+> **Esempio**: foto mossa di un gatto (deblurring): $y$ = la foto mossa che hai, $x$ = il gatto nitido che vuoi, $A$ = il movimento della fotocamera.
 
 > **Spiegazioni**: **Forward model**: $y = Ax + e$. **Ill-posed** (Hadamard): viola esistenza/unicità/stabilità. Esempio: TAC con poche angolazioni — sistema sotto-determinato ($m < n$), infinite ossa possono dare le stesse ombre. **SVD**: $A = U\Sigma V^T$. **Soluzione naive**: $x = \sum (u_i^T y / \sigma_i) v_i$ — quando $\sigma_i$ (valore singolare) è piccolo, $1/\sigma_i$ AMPLIFICA il rumore (come microfono al massimo: senti anche il fruscio). **Numero di condizionamento**: $\sigma_{max}/\sigma_{min}$ — più alto = peggio condizionato. Servono **prior** (conoscenza a priori: «ossa bianche, aria nera») e regolarizzazione per scegliere la soluzione giusta.
 
@@ -376,7 +391,10 @@ $$\boldsymbol{x}_{naive} = \sum_{i=1}^{n} \frac{\boldsymbol{u}_i^T \boldsymbol{y
 ### 6. Regolarizzazione `[p.10-11]`
 
 > **Termini**: Tikhonov/L2 = $\|x\|^2$ soluzione liscia · TV = $\|\nabla x\|_1$ preserva bordi · L1 = coefficienti nulli (sparsità) · L-curve = curva per scegliere $\lambda$ · $\lambda$ = trade-off fedeltà vs regolarizzazione
+
 > **A cosa serve**: rendere stabile la ricostruzione di un problema inverso. Senza regolarizzazione le immagini sarebbero inutilizzabili. Scegliere L2 o TV cambia il risultato clinico.
+
+> **Esempio**: deblurring senza regolarizzazione = esce solo rumore. Con L2 = immagine liscia ma senza bordi. Con TV = bordi netti e rumore sparito.
 
 > **Spiegazioni**: **Regolarizzazione**: $\hat{x} = \arg\min \|Ax-y\|^2 + \lambda R(x)$. **Data fidelity** ($\|Ax-y\|^2$): spiega i dati misurati. **Regolarizzatore** $R(x)$: premi la semplicità. **L2 (Tikhonov)** $R(x)=\|x\|^2$: tira tutto verso zero — soluzione liscia, nessun bordo netto (palla da bowling). **TV** $R(x)=\|\nabla x\|_1$: somma del gradiente in L1 — permette salti netti (bordi) ma penalizza oscillazioni (ORIGAMI: pieghe nette, facce lisce). **L1** $R(x)=\|x\|_1$: preferisce zeri — soluzione **sparsa** (compressed sensing). **$\lambda$**: trade-off. $\lambda \to 0$ = overfitting (rumoroso), $\lambda \to \infty$ = underfitting (troppo liscio). **L-curve**: metodo empirico per scegliere $\lambda$ ottimale.
 
@@ -418,7 +436,10 @@ Il framework model-based classico usa regolarizzatori **hand-crafted**. Il deep 
 ### 7. Processing Images per Reti Neurali `[p.12-13]`
 
 > **Termini**: tensore = $(B,C,H,W)$ PyTorch · normalizzazione = mean/std del dataset (NON 0-1) · Dataset = classe che carica dati · DataLoader = iteratore batch+shuffle+workers · augmentation = trasformazioni casuali
+
 > **A cosa serve**: preparare le immagini per la rete neurale. Dimensioni giuste, valori normalizzati, batch organizzati. Senza preprocessing la rete non impara.
+
+> **Esempio**: caricare 1000 CT per classificare tumori: le ridimensioni a 224x224, normalizzi, le metti in batch da 32. DataLoader fa tutto con 4 workers in parallelo.
 
 > **Spiegazioni**: **Tensori**: $(B, C, H, W)$ = (batch, canali, altezza, larghezza). **Normalizzazione** $x = (x - \mu)/\sigma$: sottrai la MEDIA del dataset e dividi per la DEVIAZIONE STANDARD (NON portare a [0,1]!) — serve a scalare tutte le feature uniformemente per stabilizzare il training e prevenire gradienti esplosivi. **Dataset + DataLoader**: il DataLoader carica in batch (tante immagini alla volta), mescola (shuffle per evitare correlazione nell'ordine), usa **workers** multipli per parallelizzare il caricamento da disco. **Augmentation**: flip, rotazione, crop, elastic deform — aumenta la varietà dei dati senza raccoglierne di nuovi (data augmentation). Pipeline: end-to-end $y^\delta \xrightarrow{f_\Theta} x_{pred}$ o ibrida FBP + UNet.
 
@@ -481,7 +502,10 @@ loader = DataLoader(dataset, batch_size=32, shuffle=True)
 ### 8. PyTorch Essentials `[p.14-15]`
 
 > **Termini**: autograd = calcolo automatico gradienti · computational graph = grafo forward · backward() = chain rule all'indietro · SGD = $w = w - lr \cdot \nabla w$ · Adam = lr adattivo per parametro · scheduler = riduce lr durante training
+
 > **A cosa serve**: implementare reti neurali con gradienti automatici, GPU e ottimizzatori. E il toolkit essenziale per qualsiasi progetto di deep learning in imaging.
+
+> **Esempio**: definisci una rete (nn.Conv2d, nn.ReLU), fai forward, chiami loss.backward(), optimizer.step(). In 15 righe una CNN funzionante.
 
 > **Spiegazioni**: **Autograd**: costruisce un **computational graph** delle operazioni. `loss.backward()` calcola i gradienti di TUTTI i parametri con **chain rule** in un colpo solo (come domino: la loss è l'ultima pedina). Durante **valutazione** usi `torch.no_grad()` per risparmiare memoria (non serve il grafo). **SGD**: $w = w - lr \cdot \nabla w$ — semplice, può oscillare. **SGD + momentum**: media mobile del gradiente per ridurre oscillazioni. **Adam**: momentum + adaptive lr (media mobile del gradiente quadro) — learning rate DIVERSO per ogni parametro. **Scheduler**: riduce il learning rate quando la loss smette di migliorare (CosineAnnealingLR, StepLR).
 
@@ -544,7 +568,10 @@ IPPy/
 ### 9. Da Machine Learning a Neural Networks `[p.15-16]`
 
 > **Termini**: ReLU = $\max(0,x)$ evita vanishing gradient · sigmoid = $1/(1+e^{-x})$ satura · softmax = output in probabilità · MLP = fully-connected · universal approx = 1 hidden layer approssima qualsiasi funzione · feature = rappresentazioni intermedie · overfitting = memorizza training non generalizza
+
 > **A cosa serve**: capire come un neurone artificiale impara: combinazione lineare + attivazione + ottimizzazione. Serve a risolvere problemi complessi come classificazione e segmentation.
+
+> **Esempio**: riconoscere cane/gatto: MLP prende tutti i pixel, ReLU trova pattern, softmax dice "75% cane, 25% gatto".
 
 > **Spiegazioni**: **ReLU** $\max(0,x)$: non satura — evita **vanishing gradient** (problema della sigmoide/tanh che per grandi valori si appiattiscono e bloccano l'apprendimento). MA **Dying ReLU**: neuroni con input sempre negativi muoiono per sempre. Soluzione: **LeakyReLU** ($\max(\alpha x, x)$) lascia passare un piccolo flusso. **Softmax**: output in probabilità (classificazione). **MLP** (fully-connected): ogni neurone collegato a TUTTI gli altri. **Universal Approximation Theorem**: 1 hidden layer con sufficienti neuroni approssima qualsiasi funzione continua. MA per img 100×100: 10.000 input × 1000 neuroni = 10M parametri — impraticabile. **Feature gerarchiche**: layer bassi (bordi) → intermedi (texture) → alti (oggetti). CNN risolve con **weight sharing** (kernel condiviso = timbro).
 
@@ -590,7 +617,10 @@ Un modello lineare $f(x) = Wx + b$ puo rappresentare solo relazioni lineari.
 ### 10. CNN (Convolutional Neural Networks) `[p.17-18]`
 
 > **Termini**: convoluzione 2D = kernel $k\times k$ scorre sull'immagine · stride = passo (2 = output dimezzato) · padding = bordi extra per mantenere dimensione · pooling = max pooling riduce risoluzione · channel progression = $64 \to 128 \to 256$ · translation equivariance = shift input = shift output
+
 > **A cosa serve**: elaborare immagini in modo efficiente. Invece di connettere ogni pixel a ogni neurone (MLP), le CNN riusano lo stesso pattern su tutta l'immagine. Pochi parametri, grande potenza.
+
+> **Esempio**: kernel 3x3 rileva bordi verticali: STESSI 9 pesi su TUTTA l'immagine. Ovunque c'e un bordo verticale il neurone si attiva (weight sharing).
 
 > **Spiegazioni**: **Convoluzione 2D** (cross-correlation, senza ribaltamento del kernel): kernel scorre su input, moltiplica pesi × pixel e somma. **Weight sharing**: STESSI 9 pesi (kernel 3×3) su tutta l'immagine — ~3500× meno parametri di un MLP. **Stride**: passo del kernel (stride 2 = downsampling 2×). **Padding**: zeri/replicate/reflect ai bordi per mantenere dimensione ($p = (k-1)/2$ per stessa dimensione). **Pooling** (max/average): dimezza risoluzione, seleziona feature più forti (max) o media (avg). **Channel progression**: 64 → 128 → 256 — più canali compensano la riduzione spaziale. **Translation equivariance**: shift dell'input = stesso shift della feature map (grazie a weight sharing). **Stack 3×3 > 7×7**: meno parametri ($27$ vs $49$) + più non-linearità (più ReLU).
 
@@ -651,7 +681,10 @@ dove $K$ e un operatore di blurring e $\boldsymbol{e}$ e rumore gaussiano. Non s
 ### 11. Residual Learning e UNet `[p.18-20]`
 
 > **Termini**: residual learning = impara $f(x)-x$ (più facile di $f(x)$) · receptive field = regione input che influenza un neurone · skip connection = salta layer (autostrada per gradiente) · encoder-decoder = imbuto comprime + ricostruisce · bottleneck = punto di massima compressione
+
 > **A cosa serve**: segmentare e ricostruire immagini mediche. La UNet e lo standard per CT e MRI. Le skip connections hanno reso possibile addestrare reti molto profonde.
+
+> **Esempio**: segmentare polmoni in CT: UNet comprime ("cos'e?"), skip riporta dettagli spaziali ("dov'e?"), decoder ricostruisce la maschera.
 
 > **Spiegazioni**: **ResNet**: impara il **residuo** $f_\Theta(y^\delta) \approx x - y^\delta$, poi $x_{pred} = y^\delta + f_\Theta(y^\delta)$. Più facile quando input e output sono simili (ritoccare un disegno vs rifarlo da capo). **Skip connection**: salta layer — **somma** (ResNet) o **concatenazione** (UNet) — autostrada per il gradiente, risolve **vanishing gradient** (reti con centinaia di layer possibili). **Receptive field**: regione di input che influenza un neurone — $r_L = r_{L-1} + (k_L-1)\prod s_i$. Più deep = RF più grande. **UNet encoder-decoder**: encoder comprime (cosa?), decoder ricostruisce (dove?), **skip connections concatenano** dettagli spaziali dall'encoder al decoder (la compressione perde posizione). **Bottleneck**: punto di massima compressione = contesto globale. Varianti: Residual UNet, Attention UNet, UNet++.
 
@@ -712,7 +745,10 @@ Encoder (downsampling):       Decoder (upsampling):
 ### 12. Vision Transformers e Loss Design `[p.20-22]`
 
 > **Termini**: patch embedding = dividi img in patch e proietta in vettori · self-attention = $\text{softmax}(QK^T/\sqrt{d})V$ · positional encoding = vettore posizione (attention è invariante) · PSNR = pixel a pixel >30 dB buono · SSIM = struttura locale · LPIPS = feature VGG percettiva
+
 > **A cosa serve**: scegliere l'architettura (Transformer vs CNN) e la loss function giusta. MSE da risultati sfocati, LPIPS da risultati realistici. La differenza tra "pixel uguali" e "sembra vero".
+
+> **Esempio**: MSE ricostruisce un volto: faccia sfocata (media di tutti i volti). LPIPS: volto nitido con occhi e bocca definiti.
 
 > **Spiegazioni**: **ViT**: divide l'immagine in **patch** $P\times P$, le proietta in token embeddings. **Self-attention**: $\text{softmax}(QK^T/\sqrt{d})V$ — ogni patch guarda TUTTE le altre (contesto globale, costo $O(N^2)$). $Q$=domanda, $K$=tipo, $V$=contenuto. **MHSA**: $h$ teste in parallelo, ognuna impara relazioni diverse. **Positional encoding**: necessario perché self-attention è **permutation-invariant** («gatto a sinistra» = «gatto a destra» senza posizione). **MSE/L2**: $\frac{1}{n}\|x-\hat{x}\|^2$ — pixel a pixel, produce immagini SFOCATE (media delle soluzioni possibili). **LPIPS**: distanza in **feature space** di VGG pre-addestrata — controlla «sembra un osso?» non «i pixel sono uguali?». **SSIM**: composito (luminanza + contrasto + struttura), range [-1,1]. **PSNR**: $10\log_{10}(MAX^2/\text{MSE})$ dB — tipico 25-40dB in imaging medico.
 
@@ -782,7 +818,10 @@ $$\text{SSIM}(x,y) = \frac{(2\mu_x\mu_y + c_1)(2\sigma_{xy} + c_2)}{(\mu_x^2 + \
 ### 13. Problemi Cross-Domain `[p.22-23]`
 
 > **Termini**: sinogramma = proiezioni a vari angoli · Radon $\mathcal{R}$ = integrale densità lungo linea · FBP = filtro Ramp + backprojection · ramp filter = $|\omega|$ amplifica alte freq · apodization = finestra per ridurre rumore · streaking = strisce con pochi angoli
+
 > **A cosa serve**: fare CT dal mondo reale. Dalla macchina a raggi X all'immagine finale: sinogramma, FBP, e pipeline ibrida con deep learning. Esempio completo di problema inverso risolto.
+
+> **Esempio**: CT torace: raggi X girano attorno al paziente, misurano attenuazione = sinogramma. FBP filtra + backprojection = immagine finale.
 
 > **Spiegazioni**: **Problema cross-domain**: dominio dei dati (sinogramma) ≠ dominio dell'immagine. **CT**: $y = \mathcal{R}x + e$ con **Trasformata di Radon** $\mathcal{R}$ = integrale di densità lungo linee — i raggi X ATTRAVERSANO il corpo a vari angoli e vengono attenuati in base alla densità dei tessuti, producendo un **SINOGRAMMA** (ombre a ogni angolo). **FBP** (Filtered Backprojection): 1) **Ramp filter** $|\omega|$ in frequenza (amplifica alte freq per nitidezza) 2) **Backprojection** = riporta le proiezioni al loro posto spaziale. **Streaking**: artefatti a strisce con pochi angoli. **Apodization**: finestra sul Ramp filter (es. Hann, cosine) — riduce rumore ma perde risoluzione (trade-off). **Pipeline ibrida**: $y \xrightarrow{\text{FBP}} \tilde{x} \xrightarrow{f_\Theta} x_{pred}$ — FBP gestisce la fisica, UNet rimuove artefatti.
 
@@ -822,7 +861,10 @@ $$\boldsymbol{y} \xrightarrow{\text{FBP}} \tilde{\boldsymbol{x}} \xrightarrow{f_
 ### 14. Deep Generative Models: VAE e GAN `[p.23-26]`
 
 > **Termini**: ELBO = ricostruzione - KL (obiettivo VAE) · KL = divergenza da $\mathcal{N}(0,I)$ · reparameterization = $z = \mu + \sigma\varepsilon$ (per backprop) · discriminator = distingue reali da generate · minimax = G minimizza D massimizza · mode collapse = G produce poca varietà · WGAN = Wasserstein distance
+
 > **A cosa serve**: generare immagini sintetiche realistiche. Data augmentation, prior per problemi inversi, compressione. VAE e la base stabile, GAN da risultati piu nitidi.
+
+> **Esempio**: VAE genera 100 facce: un po' sfocate ma tutte diverse (stabile). GAN: nitidissime ma ogni tanto esce la stessa faccia (mode collapse).
 
 > **Spiegazioni**: **VAE**: $x \xrightarrow{E} (\mu, \sigma) \to z = \mu + \sigma\varepsilon \xrightarrow{D} \hat{x}$. **Reparameterization trick**: separa $\mu,\sigma$ dal rumore $\varepsilon$ — rende il campionamento **differenziabile** (altrimenti backprop non funziona sul sampling stocastico). **ELBO** $= \mathbb{E}[\log p(x|z)] - \text{KL}(q(z|x)\|p(z))$: ricostruzione (MSE/L1 tra $x$ e $\hat{x}$) + **KL divergence** (forza $q(z|x)$ verso $\mathcal{N}(0,I)$). VAE: **stabile** ma **sfocato** (minimizza MSE = media delle soluzioni possibili). **GAN**: $\min_G\max_D \mathbb{E}[\log D(x)] + \mathbb{E}[\log(1-D(G(z)))]$ — G genera, D classifica reale/finto. **Non-saturating loss** per G (più stabile del minimax originale). GAN: **nitido** ma **mode collapse** (G impara a produrre sempre la stessa immagine). **WGAN**: Wasserstein distance + gradient penalty — più stabile, meno mode collapse. **DGP**: $z$ ottimizzato con G congelato per inversion.
 
@@ -915,7 +957,10 @@ $$\hat{\boldsymbol{x}} = G(\hat{\boldsymbol{z}})$$
 ### 15. Diffusion Models `[p.26-28]`
 
 > **Termini**: DDPM = aggiunge rumore poi denoizza · forward = $\boldsymbol{x}_t = \sqrt{\alpha_t}\boldsymbol{x}_0 + \sqrt{1-\alpha_t}\boldsymbol{\varepsilon}$ · noise schedule = $\beta_t$ quanto rumore · score matching = modello impara $\nabla \log p(\boldsymbol{x})$ · DDIM = deterministico salta timestep (10× più veloce)
+
 > **A cosa serve**: generare immagini della massima qualita. DALL-E, Stable Diffusion, Midjourney — tutti diffusion models. Imparano a trasformare rumore puro in immagini perfette.
+
+> **Esempio**: parti da TV statico (rumore puro). 1000 step di denoising = immagine perfetta di un gatto. DDIM: 50 step bastano.
 
 > **Spiegazioni**: **Forward process** (DDPM): $q(x_t|x_{t-1}) = \mathcal{N}(\sqrt{1-\beta_t}x_{t-1}, \beta_t I)$ — **noise schedule** $\beta_t$ (tipicamente cosine) controlla quanto rumore aggiungere a ogni passo. **Formula chiusa** FONDAMENTALE: $x_t = \sqrt{\alpha_t}x_0 + \sqrt{1-\alpha_t}\varepsilon$, $\alpha_t = \prod_{s=1}^t(1-\beta_s)$ — da $x_0$ salti DIRETTAMENTE a qualsiasi $x_t$ senza iterare. Per $t=T$: $x_T \sim \mathcal{N}(0,I)$. **Training**: $\min \|\varepsilon - \varepsilon_\Theta(x_t, t)\|^2$ — MSE sul rumore (denoising autoencoder). **Score matching**: $\varepsilon_\Theta \approx -\nabla_{x_t}\log p(x_t)$ (score function). **Sampling DDPM**: stocastico, rimuove rumore con rumore. **DDIM**: deterministico, salta timestep ($S \ll T$, es. 50 invece di 1000 = 20× più veloce). Architettura: **DiffusionUNet** con time embedding sinusoidale + self-attention + GroupNorm + SiLU + EMA.
 
@@ -992,7 +1037,10 @@ $$\boldsymbol{x}_{s} = \sqrt{\alpha_s}\,\hat{\boldsymbol{x}}_0 + \sqrt{1-\alpha_
 ### 16. Diffusion Models per Problemi Inversi `[p.29-31]`
 
 > **Termini**: posterior sampling = campiona da $p(\boldsymbol{x}|\boldsymbol{y})$ · likelihood = $\|K\boldsymbol{x} - \boldsymbol{y}\|^2$ · DPS = gradiente likelihood corregge sampling ogni step · DiffPIR = alterna denoising + data consistency · score function = $\nabla \log p(\boldsymbol{x})$ direzione per aumentare probabilità
+
 > **A cosa serve**: unire la qualita dei diffusion models con i dati di misura reali. Ottenere ricostruzioni CT/MRI realistiche che rispettano le misure acquisite. E il fronte della ricerca.
+
+> **Esempio**: CT con poche angolazioni: DPS usa diffusion come "memoria" delle CT vere, il gradiente likelihood guida la ricostruzione a rispettare le misure.
 
 > **Spiegazioni**: **Bayes**: $p(x|y) \propto p(y|x)p(x)$. **Prior** $p(x)$: distribuzione delle immagini imparata dal diffusion model (score function $\nabla \log p(x)$ a tutti i livelli di rumore). **Likelihood** $p(y|x) \propto \exp(-\|Kx-y\|^2/2\sigma_y^2)$: accordo con le misure. **DPS** (Diffusion Posterior Sampling): a ogni step di denoising, correggi con $\nabla_{x_t}\|K\hat{x}_0(x_t,t) - y\|^2$ (gradiente approssimato usando $\hat{x}_0$ = stima dell'immagine pulita) — guida il sampling verso immagini coerenti coi dati. **DiffPIR**: alterna 1) denoising (prior, step DDIM) e 2) **data consistency** $x - \tau K^T(Kx - y)$ (proiezione verso le misure) — più interpretabile, connesso a metodi **proximal** classici. **Prior diffusion > prior GAN**: copre TUTTO lo spazio immagini (non una varietà a bassa dimensione $\mathcal{M}=\{G(z):z\in\mathbb{R}^d\}$) — nessun representation error, riusabile per diversi operatori $K$.
 
