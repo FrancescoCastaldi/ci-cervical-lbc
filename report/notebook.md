@@ -82,11 +82,11 @@ Per ogni livello di rumore, il notebook mostra: [GT] [Degraded] [Restored]. L'ou
 #### 3. Valutazione Quantitativa (10 immagini × 4 noise levels)
 
 | $\sigma_n$ | PSNR (restored) | SSIM (restored) | Tempo medio |
-|---|---|---|---|
-| 0.005 | 16.67 dB | 0.235 | 2.0 s |
-| 0.01 | 17.32 dB | 0.270 | 2.0 s |
-| 0.05 | 22.49 dB | 0.512 | 2.0 s |
-| 0.1 | 24.68 dB | 0.664 | 2.0 s |
+|---|---|---|---|---|
+| 0.005 | 16.67 dB | 0.235 | 3.27 s |
+| 0.01 | 17.32 dB | 0.270 | 3.00 s |
+| 0.05 | 22.49 dB | 0.512 | 2.85 s |
+| 0.1 | 24.68 dB | 0.664 | 2.89 s |
 
 **Osservazioni:**
 - Il PSNR migliora con l'aumentare del rumore ($\sigma_n$) — comportamento inatteso ma spiegabile: a basso rumore, il modello di diffusione rimuove anche dettagli fini (che confonde con rumore), penalizzando il PSNR rispetto a GT. Ad alto rumore, il modello è più aggressivo nella pulizia e il guadagno netto è maggiore.
@@ -98,11 +98,11 @@ Per ogni livello di rumore, il notebook mostra: [GT] [Degraded] [Restored]. L'ou
 |---|---|
 | Degradazione (blur + noise) | ~0.02 sec/img |
 | PSNR/SSIM computation | ~0.01 sec/img |
-| DiffPIR inference (15 step, CPU) | ~2.1 sec/img |
-| TV inference (300 iter, CPU) | ~10 sec/img |
-| UNet inference (GPU) | ~0.1 sec/img |
+| DiffPIR inference (15 step, CPU) | ~3.0 sec/img |
+| TV inference (150 iter, CPU) | ~7 sec/img |
+| UNet inference (CPU) | ~0.035 sec/img |
 
-**Osservazione critica**: DiffPIR è circa 20× più lento della UNet su CPU, ma 5× più veloce di TV. Il tempo di ~2 sec/img è accettabile per un batch di 10 immagini (~20 sec totali).
+**Osservazione critica**: DiffPIR è circa 85× più lento della UNet su CPU, ma ~2× più veloce di TV. Il tempo di ~3 sec/img è accettabile per un batch di 10 immagini (~30 sec totali).
 
 #### 5. Confronto Finale
 
@@ -145,7 +145,7 @@ python scripts/plot_results.py
 #### 7. Limitazioni Note
 
 1. **Modello piccolo**: LightUNet (1.2M param) vs modelli standard (500M+) — qualità inferiore ma training pratico su CPU
-2. **Training limitato**: solo 10 epoche su 50 immagini — un training più lungo e su più dati migliorerebbe i risultati
+2. **Training limitato**: solo 30 epoche su 100 immagini — un training più lungo e su più dati migliorerebbe i risultati
 3. **CPU-only**: Impossibile sfruttare GPU per via dell'hardware AMD senza ROCm/DirectML
 4. **Campione ridotto**: 10 immagini per test invece di 145 (limitato dal tempo di inferenza su CPU)
 5. **$t_{\text{start}}$ ottimale**: Il valore $t_{\text{start}}=50$ è stato determinato empiricamente; potrebbe non essere ottimale per tutti i livelli di rumore

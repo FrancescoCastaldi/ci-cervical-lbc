@@ -122,7 +122,7 @@ $$\rho_t = \lambda \cdot \frac{\sigma^2 \cdot \bar{\alpha}_t}{1 - \bar{\alpha}_t
 Il sampling parte da $t_{\text{start}}=50$ invece che da $t=1000$ per evitare l'amplificazione degli errori di predizione: quando $\bar{\alpha}_t$ è molto piccolo (tipico per $t>500$), la stima di $x_0$ diventa numericamente instabile poiché $\sqrt{1-\bar{\alpha}_t} / \sqrt{\bar{\alpha}_t}$ amplifica gli errori del modello.
 
 **Pro:** Qualità generativa, preserva dettagli fini, deblurring via FFT.
-**Contro:** Lento in inferenza su CPU (~2 sec/img), modello leggero limita la qualità massima.
+**Contro:** Lento in inferenza su CPU (~3 sec/img), modello leggero limita la qualità massima.
 
 ## 4. Metriche di Valutazione
 

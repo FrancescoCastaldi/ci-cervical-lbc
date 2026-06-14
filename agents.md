@@ -31,17 +31,17 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 
 ### Giorni 5–6 — TV (Baseline classica)
 - Implementare Total Variation come baseline
-- λ_reg = 0.1, 300 iterazioni Adam
+- λ_reg = 0.005, 150 iterazioni Adam
 - ✅ `src/methods/tv/tv.py` — implementato
 - ✅ `scripts/run_tv.py` — script di esecuzione
 - ✅ Eseguito con risultati (PSNR: 26.54–32.09 dB)
 
 ### Giorni 7–9 — UNet (Deep Learning End-to-End) ✅
 - Architettura encoder-decoder con skip connections (64→512 canali)
-- Training MSE + Adam, multi-noise augmentation, validation, best model saving
-- ✅ `src/methods/unet/unet.py` — implementato
+- Training L1 + Adam, multi-noise augmentation, validation, best model saving
+- ✅ `src/methods/unet/unet.py` — implementato (1.9M params, GroupNorm, noise conditioning)
 - ✅ `scripts/run_unet.py` — riscritto (multi-noise, validation, CPU-optimized)
-- ✅ Eseguito con risultati (PSNR: 21.87–24.07 dB, 1 epoca CPU)
+- ✅ Eseguito con risultati (PSNR: 28.93–29.89 dB, 50 epoche CPU)
 
 ### Giorni 10–11 — DiffPIR (Generativo) ✅
 - Modello LightUNet custom (1.26M params) addestrato su LBC
@@ -81,10 +81,10 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 
 | σ_n | PSNR | SSIM | Tempo |
 |---|---|---|---|
-| 0.005 | 16.67 dB | 0.235 | 2.0 s |
-| 0.01 | 17.32 dB | 0.270 | 2.0 s |
-| 0.05 | 22.49 dB | 0.512 | 2.0 s |
-| 0.1 | 24.68 dB | 0.664 | 2.0 s |
+| 0.005 | 16.67 dB | 0.235 | 3.27 s |
+| 0.01 | 17.32 dB | 0.270 | 3.00 s |
+| 0.05 | 22.49 dB | 0.512 | 2.85 s |
+| 0.1 | 24.68 dB | 0.664 | 2.89 s |
 
 ### TV (145 immagini test × 4 noise level)
 

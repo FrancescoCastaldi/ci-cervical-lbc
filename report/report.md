@@ -348,7 +348,7 @@ $\rho_t$ bilancia il contributo del prior generativo rispetto alla fedeltà ai d
 |---|---|---|
 | **$t_{\text{start}}$** | **50** | Abbiamo testato $t_{\text{start}} \in \{10, 30, 50, 100, 200\}$. A $t>100$, la stima di $\hat{x}_0$ è numericamente instabile perché $\frac{\sqrt{1-\bar{\alpha}_t}}{\sqrt{\bar{\alpha}_t}}$ amplifica gli errori del modello (a $t=200$, fattore di amplificazione $\approx 7$). A $t<20$, il modello ha troppo poco rumore da rimuovere e non produce miglioramenti. $t=50$ è il punto di bilanciamento: $\bar{\alpha}_{50} \approx 0.97$, fattore di amplificazione $\approx 0.17$, stima stabile e sufficiente capacità generativa. |
 | **$\lambda$** | **10.0** | Peso del data-fidelity. Abbiamo testato $\lambda \in \{0.1, 1.0, 5.0, 10.0, 50.0\}$. Valori troppo bassi ($\lambda < 1$) fanno dominare il generativo, producendo allucinazioni. Valori troppo alti ($\lambda > 50$) rendono il data-fidelity troppo rigido, annullando l'effetto del denoiser. $\lambda=10$ offre il miglior compromesso. |
-| **$num\_steps$** | **15** | Sub-campionamento lineare da $t_{\text{start}}=50$ a $t=0$. Con 15 step si ha un buon rapporto qualità/tempo (~2 sec/img). Abbiamo testato 5, 10, 15, 30 step: con <10 step la qualità degrada, con >20 step il miglioramento è marginale e il tempo raddoppia. |
+| **$num\_steps$** | **15** | Sub-campionamento lineare da $t_{\text{start}}=50$ a $t=0$. Con 15 step si ha un buon rapporto qualità/tempo (~3 sec/img). Abbiamo testato 5, 10, 15, 30 step: con <10 step la qualità degrada, con >20 step il miglioramento è marginale e il tempo raddoppia. |
 | **$\zeta$** | **0.0** | Stocasticità del sampling. $\zeta=0$ corrisponde a DDIM (deterministico), scelto per **riproducibilità**. Con $\zeta>0$ si avrebbe sampling stocastico (DDPM) che potrebbe migliorare leggermente la qualità ma a scapito della determinismo. |
 
 #### 4.4.5 Implementazione
@@ -390,10 +390,10 @@ Test su **10 immagini** del test set (sub-campionate per limiti di tempo computa
 
 | $\sigma_n$ | PSNR (dB) | SSIM | Tempo medio (s) |
 |---|---|---|---|
-| **0.005** | 16.67 | 0.235 | 2.01 |
-| **0.01** | 17.32 | 0.270 | 1.97 |
-| **0.05** | **22.49** | **0.512** | 2.04 |
-| **0.1** | **24.68** | **0.664** | 2.00 |
+| **0.005** | 16.67 | 0.235 | 3.27 |
+| **0.01** | 17.32 | 0.270 | 3.00 |
+| **0.05** | **22.49** | **0.512** | 2.85 |
+| **0.1** | **24.68** | **0.664** | 2.89 |
 
 #### 5.2.1 Analisi dei Risultati — DiffPIR
 
@@ -407,7 +407,7 @@ Test su **10 immagini** del test set (sub-campionate per limiti di tempo computa
 
 **Spiegazione:** la LightUNet (1.26M params) ha capacità limitata. Con poco rumore, ha poca "scusa" per modificare l'immagine, ma il suo prior generativo la spinge comunque ad aggiungere dettagli. Con tanto rumore, è forzata a ricostruire e produce risultati migliori.
 
-**Tempo di inferenza:** costante a circa 2 secondi per immagine su CPU (AMD Ryzen 7). Non dipende dal livello di rumore perché il numero di step di sampling (15) è fisso.
+**Tempo di inferenza:** circa 3 secondi per immagine su CPU (AMD Ryzen 7), con leggere variazioni da 2.85 s (σₙ=0.05) a 3.27 s (σₙ=0.005). Non dipende significativamente dal livello di rumore perché il numero di step di sampling (15) è fisso.
 
 #### 5.2.2 Risultati Qualitativi — DiffPIR
 
@@ -495,11 +495,11 @@ Sulla base dei risultati attuali e della teoria dei tre metodi:
 
 | Metodo | Basso rumore ($\sigma_n < 0.05$) | Alto rumore ($\sigma_n \geq 0.05$) | Tempo |
 |---|---|---|---|
-| **TV** | **Eccellente (32 dB)** — domina a basso rumore | Adeguato (26 dB) — perde dettaglio, staircasing | ~10s/img |
-| **UNet** | Buono (24 dB, 1 epoca) — generalizza bene | Discreto (22 dB, 1 epoca) — margine di miglioramento con più epoche | **~26 ms/img** |
-| **DiffPIR** | Scarso (17 dB) — allucinazioni a basso rumore | **Buono (24 dB)** — il generativo brilla | ~2s/img |
+| **TV** | **Eccellente (32 dB)** — domina a basso rumore | Adeguato (26 dB) — perde dettaglio, staircasing | ~7s/img |
+| **UNet** | **Eccellente (29.89 dB, 50 epoche)** — quasi alla pari con TV | **Eccellente (28.93 dB, 50 epoche)** — supera TV ad alto rumore | **~0.035 s/img** |
+| **DiffPIR** | Scarso (17 dB) — allucinazioni a basso rumore | **Buono (24 dB)** — il generativo brilla | ~3s/img |
 
-**Osservazione chiave:** i tre metodi hanno regimi di funzionamento complementari. TV domina a basso rumore (dove il problema è quasi ben posto), DiffPIR eccelle ad alto rumore (dove serve un prior generativo forte). L'UNet con 1 sola epoca si posiziona come compromesso intermedio: ~24 dB su tutti i livelli, mostrando buona robustezza ma senza eccellere in nessun regime specifico. Con più epoche di training ci si aspetta che l'UNet si avvicini o superi TV, specialmente a noise level medio-alti.
+**Osservazione chiave:** i tre metodi hanno regimi di funzionamento complementari. TV domina a basso rumore (dove il problema è quasi ben posto), DiffPIR eccelle ad alto rumore (dove serve un prior generativo forte). L'UNet ottimizzato con 50 epoche si posiziona come il miglior compromesso complessivo: ~29.89 dB a basso rumore (solo ~2 dB sotto TV) e **supera TV** ad alto rumore (28.93 vs 26.54 dB a σ=0.1), con un'inferenza 200× più veloce di TV e 85× più veloce di DiffPIR.
 
 ---
 
@@ -516,7 +516,7 @@ Il progetto copre 3 famiglie metodologiche diverse, ognuna con presupposti e com
 ### 6.2 Punti di Forza del Progetto
 
 - **Confronto equo:** stessa pipeline di degradazione, stessi dati di test, stesse metriche per tutti i metodi
-- **Riproducibilità:** seed fissi (42), pipeline deterministiche, test automatizzati (26 test unitari)
+- **Riproducibilità:** seed fissi (42), pipeline deterministiche, test automatizzati (34 test unitari)
 - **Codice modulare:** ogni metodo è indipendente in `src/methods/<metodo>/`, condivisi solo preprocessing, degradazione e metriche
 - **GitHub:** repository pubblico con documentazione, test, e struttura chiara
 
@@ -556,7 +556,7 @@ Questo progetto ha esplorato tre approcci fondamentalmente diversi al problema d
 
 1. **TV eccelle a basso rumore (PSNR > 32 dB per $\sigma_n \leq 0.01$)** — quando il problema inverso è quasi ben posto, un regolarizzatore semplice e interpretabile basta. Non richiede training né dati, è immediatamente pronto. Il suo limite è il $\lambda$ fisso: a rumore alto, perde efficacia e introduce staircasing.
 
-2. **DiffPIR eccelle ad alto rumore (PSNR 24.68 dB per $\sigma_n=0.1$)** — quando il segnale è fortemente degradato, il prior generativo aiuta a ricostruire dettagli che metodi classici non possono recuperare. Il prezzo è duplice: lentezza in inferenza (~2 sec/img) e allucinazioni a basso rumore (peggiora invece di migliorare).
+2. **DiffPIR eccelle ad alto rumore (PSNR 24.68 dB per $\sigma_n=0.1$)** — quando il segnale è fortemente degradato, il prior generativo aiuta a ricostruire dettagli che metodi classici non possono recuperare. Il prezzo è duplice: lentezza in inferenza (~3 sec/img) e allucinazioni a basso rumore (peggiora invece di migliorare).
 
 3. **UNet ottimizzato raggiunge ~29.9 dB PSNR dopo 50 epoche CPU** — con architettura snella (1.9M params, GroupNorm, L1 loss) e noise conditioning, il modello eguaglia quasi TV a basso rumore (29.89 vs 32.09 dB, a soli 2 dB di distanza) e **supera TV ad alto rumore** (28.93 vs 26.54 dB a σ=0.1). La degradazione all'aumentare del rumore è minima (~1 dB), dimostrando che un modello ben progettato può essere robusto su tutto lo spettro di rumore. L'inferenza è la più rapida (~0.035 s/img), ideale per applicazioni real-time.
 
@@ -611,12 +611,13 @@ python scripts/plot_results.py
 python -m pytest tests/ -v
 ```
 
-Tutti i 26 test passano (verificato):
+Tutti i 34 test passano (verificato):
 
 ```
 tests/test_degradation.py  ... 10/10 ✅
 tests/test_metrics.py      ...  9/9  ✅
 tests/test_diffpir.py      ...  7/7  ✅
+tests/test_unet.py         ...  8/8  ✅
 ```
 
 ## Appendice B: Struttura del Repository
@@ -651,10 +652,11 @@ ci-cervical-lbc/
 │   ├── run_unet.py             # Esecuzione UNet
 │   ├── run_diffpir.py          # Esecuzione DiffPIR
 │   └── plot_results.py         # Grafico comparativo
-├── tests/                      # 26 unit test
+├── tests/                      # 34 unit test
 │   ├── test_degradation.py
 │   ├── test_metrics.py
-│   └── test_diffpir.py
+│   ├── test_diffpir.py
+│   └── test_unet.py
 ├── report/
 │   ├── teoria.md               # Fondamenti teorici
 │   └── relazione.md            # Questo file
