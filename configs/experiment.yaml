@@ -1,42 +1,44 @@
-seed: 42
-
 dataset:
-  root: data/raw/
-  processed: data/processed/
-  splits: data/splits/
   degraded: data/degraded/
-  subset_size: 4000
   image_size: 256
+  processed: data/processed/
+  root: data/raw/
+  splits: data/splits/
+  subset_size: 4000
+  test_ratio: 0.15
   train_ratio: 0.7
   val_ratio: 0.15
-  test_ratio: 0.15
-
 degradation:
   blur_sigma: 2
   kernel_size: 9
-  noise_levels: [0.005, 0.01, 0.05, 0.1]
-
-tv:
-  lambda_reg: 0.005
-  max_iter: 150
-
-unet:
-  lr: 0.0001
-  batch_size: 16
-  epochs: 50
-  in_channels: 4          # RGB + noise level channel
-  out_channels: 3
-  features: [16, 32, 64, 128]   # architettura snella (~500K params)
-
+  noise_levels:
+  - 0.005
+  - 0.01
+  - 0.05
+  - 0.1
 diffpir:
-  num_steps: 15              # sub-campionati da t_start=50 a 0; pi� step = pi� lento
-  noise_level: 0.05
+  lambda: 10.0
   max_test_images: 10
+  noise_level: 0.05
+  num_steps: 15
+  t_start: 50
   weights: src/methods/diffpir/weights/ddpm_lbc.pt
-  lambda: 10.0             # valore base (adattato per-noise internamente)
-  zeta: 0.0                # deterministico (DDIM); zeta>0 accumula rumore su step multipli
-  t_start: 50              # punto di partenza adatto ai nostri noise level
-
+  zeta: 0.0
 eval:
   results_dir: results/
   save_qualitative: 6
+seed: 42
+tv:
+  lambda_reg: 0.005
+  max_iter: 150
+unet:
+  batch_size: 16
+  epochs: 50
+  features:
+  - 16
+  - 32
+  - 64
+  - 128
+  in_channels: 4
+  lr: 0.0001
+  out_channels: 3
