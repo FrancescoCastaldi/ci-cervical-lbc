@@ -5,9 +5,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
-from src.data.dataset import load_config, LBCDataset
+from src.utils import get_device
+from src.data.dataset import load_config, LBCDataset, PROJECT_ROOT
 from src.methods.diffpir.model import LightUNet
 
 
@@ -31,7 +30,7 @@ def train(epochs=30, lr=1e-4, batch_size=4, num_timesteps=1000, subset=100, save
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device()
     print(f"Dispositivo: {device}")
     print(f"Train: {len(train_dataset)} | Val: {len(val_dataset)} immagini")
     print(f"Timesteps: {num_timesteps}")
@@ -94,7 +93,7 @@ def train(epochs=30, lr=1e-4, batch_size=4, num_timesteps=1000, subset=100, save
         print(f"Epoch {epoch:2d}/{epochs} | Train: {train_loss:.6f} | Val: {val_loss:.6f}")
 
     if save_path is None:
-        save_path = Path(__file__).resolve().parent / "weights" / "ddpm_lbc.pt"
+        save_path = PROJECT_ROOT / "src" / "methods" / "diffpir" / "weights" / "ddpm_lbc.pt"
     save_path = Path(save_path)
     save_path.parent.mkdir(parents=True, exist_ok=True)
     torch.save({

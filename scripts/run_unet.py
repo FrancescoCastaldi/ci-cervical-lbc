@@ -25,6 +25,7 @@ from src.degradation.degradation import gaussian_kernel
 from src.methods.unet.unet import UNet
 from src.eval.metrics import evaluate
 from src.plots.visualize import show_comparison
+from src.utils import get_device
 
 
 # ==============================================================================
@@ -50,11 +51,7 @@ def make_noise_map(batch_size, image_size, noise_level, device):
 # Setup
 # ==============================================================================
 config = load_config()
-device = torch.device(
-    "cuda" if torch.cuda.is_available()
-    else "mps" if torch.backends.mps.is_available()
-    else "cpu"
-)
+device = get_device()
 torch.manual_seed(config["seed"])
 
 noise_levels = config["degradation"]["noise_levels"]

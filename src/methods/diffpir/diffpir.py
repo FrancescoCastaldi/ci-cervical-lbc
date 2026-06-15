@@ -1,9 +1,13 @@
+import sys
 import time
 import torch
 import torch.nn.functional as F
 import numpy as np
 from pathlib import Path
 from .model import LightUNet
+
+from src.data.dataset import PROJECT_ROOT
+from src.utils import get_device
 
 
 _model_cache = {}
@@ -98,12 +102,21 @@ def run_diffpir(
     """
     start_time = time.time()
 
-    device = degraded.device if degraded.is_cuda else torch.device("cpu")
+    device = degraded.device if degraded.device.type != "cpu" else get_device(verbose=True)
     y = degraded.unsqueeze(0).to(device)
 
+    MOD_DIR = PROJECT_ROOT / "src" / "methods" / "diffpir"
     if weights_path is None:
-        weights_path = Path(__file__).resolve().parent / "weights" / "ddpm_lbc.pt"
-    weights_path = Path(weights_path)
+        weights_path = MOD_DIR / "weights" / "ddpm_lbc.pt"
+    else:
+        weights_path = Path(weights_path)
+        if not weights_path.is_absolute():
+            # Relative: try module-specific paths
+            candidates = [
+                MOD_DIR / weights_path,           # module-relative (full path)
+                MOD_DIR / "weights" / weights_path.name,  # weights/ dir (filename only)
+            ]
+            weights_path = candidates[0] if candidates[0].exists() else candidates[1]
     if not weights_path.exists():
         raise FileNotFoundError(
             f"DDPM weights not found at {weights_path}\n"

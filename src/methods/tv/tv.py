@@ -32,7 +32,7 @@ def tv_restore(degraded, kernel_size=9, sigma=2.0,
     Input/output in range [-1, 1].
     """
     channels = degraded.shape[0]
-    kernel = gaussian_kernel_tensor(kernel_size, sigma, channels)
+    kernel = gaussian_kernel_tensor(kernel_size, sigma, channels).to(degraded.device)
 
     x = degraded.clone().unsqueeze(0).requires_grad_(True)  # [1, C, H, W]
     y = degraded.unsqueeze(0)                                # [1, C, H, W]
