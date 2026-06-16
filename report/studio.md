@@ -286,9 +286,9 @@ for epoch in range(epochs):
 
 | Pro | Contro |
 |---|---|
-| ✅ **Inferenza velocissima** (~0.035 s/img) | ❌ **Richiede training** (85 min CPU) |
+| ✅ **Inferenza velocissima** (~0.030 s/img) | ❌ **Richiede training** (85 min CPU) |
 | ✅ **Robusto** su tutto lo spettro di rumore | ❌ **Generalizza** meno fuori distribuzione |
-| ✅ Perde solo ~1 dB da 0.005 a 0.1 (TV: ~5.5 dB) | ❌ Ignora il modello di degradazione (black box) |
+| ✅ Perde solo ~1.3 dB da 0.005 a 0.1 (TV: ~5.5 dB) | ❌ Ignora il modello di degradazione (black box) |
 | ✅ Supera TV ad alto rumore | ❌ Dipende dalla qualità dei dati di training |
 
 ---
@@ -452,25 +452,25 @@ Costo computazionale per immagine. Rilevante per applicazioni real-time.
 
 | $\sigma_n$ | PSNR | SSIM | Tempo |
 |---|---|---|---|
-| 0.005 | **29.89 dB** | **0.894** | **0.035 s** |
-| 0.01 | **29.89 dB** | **0.894** | **0.034 s** |
-| 0.05 | **29.63 dB** | **0.875** | **0.034 s** |
-| 0.1 | **28.93 dB** | **0.830** | **0.036 s** |
+| 0.005 | **29.79 dB** | **0.896** | **0.030 s** |
+| 0.01 | **29.79 dB** | **0.895** | **0.028 s** |
+| 0.05 | **29.44 dB** | **0.864** | **0.027 s** |
+| 0.1 | **28.46 dB** | **0.795** | **0.026 s** |
 
 **Osservazioni:**
-- ~29.9 dB a basso rumore: solo **~2 dB sotto TV**
-- Degradazione **minima**: solo ~1 dB da 0.005 a 0.1 (TV perde ~5.5 dB)
-- A $\sigma=0.1$ **SUPERA TV** (28.93 vs 26.54 dB)
+- ~29.8 dB a basso rumore: solo **~2.3 dB sotto TV**
+- Degradazione **minima**: solo ~1.3 dB da 0.005 a 0.1 (TV perde ~5.5 dB)
+- A $\sigma=0.1$ **SUPERA TV** (28.46 vs 26.54 dB)
 - **Inferenza 200× più veloce** di TV
 
 ### 9.3 DiffPIR (10 immagini test)
 
 | $\sigma_n$ | PSNR | SSIM | Tempo |
 |---|---|---|---|
-| 0.005 | 16.67 dB | 0.235 | 3.27 s |
-| 0.01 | 17.32 dB | 0.270 | 3.00 s |
-| 0.05 | **22.49 dB** | **0.512** | 2.85 s |
-| 0.1 | **24.68 dB** | **0.664** | 2.89 s |
+| 0.005 | 15.78 dB | 0.329 | 3.59 s |
+| 0.01 | 16.45 dB | 0.374 | 3.79 s |
+| 0.05 | **22.64 dB** | **0.677** | 3.73 s |
+| 0.1 | **25.46 dB** | **0.766** | 3.81 s |
 
 **Perché PSNR cresce con il rumore? (È controintuitivo)**
 
@@ -480,7 +480,7 @@ Questo è il comportamento caratteristico dei metodi generativi basati su diffus
 
 - **$\sigma_n=0.05$:** Inizia il recupero. Il modello ha abbastanza "margine" per rimuovere rumore senza introdurre artefatti evidenti. PSNR e SSIM migliorano.
 
-- **$\sigma_n=0.1$:** Il punto migliore. Con tanto rumore, il prior generativo **aiuta** a ricostruire il segnale perso. Il guadagno netto è positivo: PSNR 24.68, SSIM 0.664.
+- **$\sigma_n=0.1$:** Il punto migliore. Con tanto rumore, il prior generativo **aiuta** a ricostruire il segnale perso. Il guadagno netto è positivo: PSNR 25.46, SSIM 0.766.
 
 **Lezione importante:** Un PSNR basso non significa sempre "metodo scarso". Significa che il metodo non è adatto a quel regime di rumore. La scelta del metodo deve essere **contestuale**.
 
@@ -488,10 +488,10 @@ Questo è il comportamento caratteristico dei metodi generativi basati su diffus
 
 | $\sigma_n$ | TV (PSNR/SSIM) | UNet (PSNR/SSIM) | DiffPIR (PSNR/SSIM) |
 |---|---|---|---|
-| **0.005** | **32.09 / 0.911** 🥇 | 29.89 / 0.894 🥈 | 16.67 / 0.235 |
-| **0.01** | **32.04 / 0.909** 🥇 | 29.89 / 0.894 🥈 | 17.32 / 0.270 |
-| **0.05** | **30.42 / 0.837** 🥇 | 29.63 / **0.875** 🥈 | 22.49 / 0.512 |
-| **0.1** | 26.54 / 0.586 🥈 | **28.93 / 0.830** 🥇 | 24.68 / 0.664 🥉 |
+| **0.005** | **32.09 / 0.911** 🥇 | 29.79 / 0.896 🥈 | 15.78 / 0.329 |
+| **0.01** | **32.04 / 0.909** 🥇 | 29.79 / 0.895 🥈 | 16.45 / 0.374 |
+| **0.05** | **30.42 / 0.837** 🥇 | 29.44 / **0.864** 🥈 | 22.64 / 0.677 |
+| **0.1** | 26.54 / 0.586 🥈 | **28.46 / 0.795** 🥇 | 25.46 / 0.766 🥉 |
 
 ### 9.5 Chi Vince e Perché
 
@@ -499,9 +499,9 @@ Questo è il comportamento caratteristico dei metodi generativi basati su diffus
 |---|---|---|
 | **Basso rumore** (0.005) | **TV** (32.09 dB) | TV è un ottimo denoiser quando il problema è quasi ben posto |
 | **Medio rumore** (0.05) | **TV** (30.42 dB) | Ma UNet è a solo 0.8 dB — quasi pari |
-| **Alto rumore** (0.1) | **UNet** (28.93 dB) | Il deep learning regge meglio: degradazione minima (~1 dB) |
-| **Secondo ad alto rumore** | **DiffPIR** (24.68 dB) | Il generativo ricostruisce dettagli che TV non può |
-| **Velocità inferenza** | **UNet** (0.035 s/img) | 200× più veloce di TV, 85× più veloce di DiffPIR |
+| **Alto rumore** (0.1) | **UNet** (28.46 dB) | Il deep learning regge meglio: degradazione minima (~1.3 dB) |
+| **Secondo ad alto rumore** | **DiffPIR** (25.46 dB) | Il generativo ricostruisce dettagli che TV non può |
+| **Velocità inferenza** | **UNet** (0.030 s/img) | 200× più veloce di TV, 85× più veloce di DiffPIR |
 | **Nessun training** | **TV** | Pronto all'uso, zero dati necessari |
 
 ---
@@ -514,10 +514,10 @@ Questo è il comportamento caratteristico dei metodi generativi basati su diffus
 |---|---|---|---|
 | **Dati necessari** | **Nessuno** | 673 coppie (degraded, clean) | 673 immagini clean (solo per prior) |
 | **Training** | **No** | ~85 min CPU | ~30 epoche CPU |
-| **Inferenza** | ~7 s/img | **~0.035 s/img** | ~3 s/img |
-| **Basso $\sigma_n$** | **Eccellente** (32 dB) | Buono (29.9 dB) | Scarso (16.7 dB) — allucina |
-| **Alto $\sigma_n$** | Adeguato (26.5 dB) | **Eccellente** (28.9 dB) | Buono (24.7 dB) |
-| **Degradazione** | Severa (−5.5 dB) | **Minima** (−1 dB) | Inversa (PSNR cresce) |
+| **Inferenza** | ~7 s/img | **~0.030 s/img** | ~3.5-3.8 s/img |
+| **Basso $\sigma_n$** | **Eccellente** (32 dB) | Buono (29.8 dB) | Scarso (15.8 dB) — allucina |
+| **Alto $\sigma_n$** | Adeguato (26.5 dB) | **Eccellente** (28.5 dB) | Buono (25.5 dB) |
+| **Degradazione** | Severa (−5.5 dB) | **Minima** (−1.3 dB) | Inversa (PSNR cresce) |
 | **Interpretabilità** | **Alta** (formula chiusa) | Bassa (black box) | Media (passi separati) |
 | **Robustezza** | Alta (nessun training) | Media (dipende dai dati) | Bassa (allucinazioni) |
 | **Riproducibilità** | **Totale** | Dipende dal seed | Deterministico (DDIM) |

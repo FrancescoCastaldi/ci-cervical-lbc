@@ -16,14 +16,14 @@
 
 - Architettura snella: 16→32→64→128 canali (~500K params poi 1.9M)
 - GroupNorm, L1 loss, noise conditioning
-- 50 epoche CPU → **29.89 dB** (+5.8 dB)
-- Supera TV ad alto rumore (28.93 vs 26.54 dB a σ=0.1)
+- 50 epoche CPU → **29.79 dB** (+5.8 dB)
+- Supera TV ad alto rumore (28.46 vs 26.54 dB a σ=0.1)
 
 ## Riunione 4 — DiffPIR Completato, Confronto Finale
 
 - DiffPIR: LightUNet 1.26M params, FFT data-fidelity, DDIM sampling
 - Parametri euristici: t_start=50, λ=10, num_steps=15, ζ=0
-- Risultati: PSNR cresce col rumore (16.67→24.68 dB)
+- Risultati: PSNR cresce col rumore (15.78→25.46 dB)
 - Generato comparison.png, qualitative per tutti i metodi
 
 ## Riunione 5 — Report, Slide e Consegna
@@ -40,8 +40,8 @@
 |---|---|
 | Dataset preprocessing | ✅ Completato |
 | TV (variazionale) | ✅ Completato — PSNR 26.54–32.09 dB |
-| UNet (end-to-end) | ✅ Completato — PSNR 28.93–29.89 dB |
-| DiffPIR (generativo) | ✅ Completato — PSNR 16.67–24.68 dB |
+| UNet (end-to-end) | ✅ Completato — PSNR 28.46–29.79 dB |
+| DiffPIR (generativo) | ✅ Completato — PSNR 15.78–25.46 dB |
 | Weighted TV | ❌ Escluso (2 studenti) |
 | Confronto quantitativo | ✅ PSNR/SSIM per tutti |
 | Confronto qualitativo | ✅ 24 immagini per metodo |

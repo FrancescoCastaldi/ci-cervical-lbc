@@ -390,10 +390,10 @@ Test su **10 immagini** del test set (sub-campionate per limiti di tempo computa
 
 | $\sigma_n$ | PSNR (dB) | SSIM | Tempo medio (s) |
 |---|---|---|---|
-| **0.005** | 16.67 | 0.235 | 3.27 |
-| **0.01** | 17.32 | 0.270 | 3.00 |
-| **0.05** | **22.49** | **0.512** | 2.85 |
-| **0.1** | **24.68** | **0.664** | 2.89 |
+| **0.005** | 15.78 | 0.329 | 3.59 |
+| **0.01** | 16.45 | 0.374 | 3.79 |
+| **0.05** | **22.64** | **0.677** | 3.73 |
+| **0.1** | **25.46** | **0.766** | 3.81 |
 
 #### 5.2.1 Analisi dei Risultati — DiffPIR
 
@@ -401,13 +401,13 @@ Test su **10 immagini** del test set (sub-campionate per limiti di tempo computa
 
 1. **A basso rumore ($\sigma_n=0.005$, $0.01$):** l'immagine degradata è già visivamente buona. Il modello generativo, però, **introduce artefatti e dettagli fittizi** (allucinazioni) perché "immagina" texture assenti nell'originale. Il risultato è **peggiore del degradato** stesso — si perde fedeltà.
 
-2. **A medio rumore ($\sigma_n=0.05$):** PSNR=22.49, SSIM=0.512. Il modello inizia a recuperare: c'è un miglioramento netto rispetto al degradato. I dettagli cellulari (nuclei, membrane) sono parzialmente ricostruiti.
+2. **A medio rumore ($\sigma_n=0.05$):** PSNR=22.64, SSIM=0.677. Il modello inizia a recuperare: c'è un miglioramento netto rispetto al degradato. I dettagli cellulari (nuclei, membrane) sono parzialmente ricostruiti.
 
-3. **Ad alto rumore ($\sigma_n=0.1$):** il punto migliore. PSNR=24.68, SSIM=0.664. Con tanto rumore, il modello ha abbastanza "margine" per ricostruire senza introdurre artefatti evidenti. Il generativo brilla quando deve ricostruire tanto segnale perso.
+3. **Ad alto rumore ($\sigma_n=0.1$):** il punto migliore. PSNR=25.46, SSIM=0.766. Con tanto rumore, il modello ha abbastanza "margine" per ricostruire senza introdurre artefatti evidenti. Il generativo brilla quando deve ricostruire tanto segnale perso.
 
 **Spiegazione:** la LightUNet (1.26M params) ha capacità limitata. Con poco rumore, ha poca "scusa" per modificare l'immagine, ma il suo prior generativo la spinge comunque ad aggiungere dettagli. Con tanto rumore, è forzata a ricostruire e produce risultati migliori.
 
-**Tempo di inferenza:** circa 3 secondi per immagine su CPU (AMD Ryzen 7), con leggere variazioni da 2.85 s (σₙ=0.05) a 3.27 s (σₙ=0.005). Non dipende significativamente dal livello di rumore perché il numero di step di sampling (15) è fisso.
+**Tempo di inferenza:** circa 3.5-3.8 secondi per immagine su CPU (AMD Ryzen 7), con leggere variazioni da 3.73 s (σₙ=0.05) a 3.59 s (σₙ=0.005). Non dipende significativamente dal livello di rumore perché il numero di step di sampling (15) è fisso.
 
 #### 5.2.2 Risultati Qualitativi — DiffPIR
 
@@ -458,17 +458,17 @@ L'UNet è stato ottimizzato con un'architettura **snella** (1.9M parametri, feat
 
 | $\sigma_n$ | PSNR | SSIM | Tempo |
 |---|---|---|---|
-| 0.005 | **29.89 dB** | **0.894** | **0.035 s** |
-| 0.01 | **29.89 dB** | **0.894** | **0.034 s** |
-| 0.05 | **29.63 dB** | **0.875** | **0.034 s** |
-| 0.1 | **28.93 dB** | **0.830** | **0.036 s** |
+| 0.005 | **29.79 dB** | **0.896** | **0.030 s** |
+| 0.01 | **29.79 dB** | **0.895** | **0.028 s** |
+| 0.05 | **29.44 dB** | **0.864** | **0.027 s** |
+| 0.1 | **28.46 dB** | **0.795** | **0.026 s** |
 
 **Analisi dei risultati dopo 50 epoche:**
-- Il modello raggiunge **~29.9 dB** a basso rumore, in linea con le performance di TV (32 dB) a soli ~2 dB di distanza
-- La degradazione all'aumentare del rumore è **molto contenuta**: solo ~1 dB di perdita da σ=0.005 a σ=0.1 (contro i ~5.5 dB della TV)
-- A σ=0.1, l'UNet **supera TV** (28.93 vs 26.54 dB) — il modello apprende un prior efficace anche in condizioni di rumore elevato
-- SSIM elevato (0.83-0.89) in tutti i noise level, dimostrando buona fedeltà strutturale
-- Il tempo di inferenza (~0.035 s/img) è **il più veloce** tra tutti i metodi, rendendolo ideale per applicazioni real-time
+- Il modello raggiunge **~29.8 dB** a basso rumore, in linea con le performance di TV (32 dB) a soli ~2.3 dB di distanza
+- La degradazione all'aumentare del rumore è **molto contenuta**: solo ~1.3 dB di perdita da σ=0.005 a σ=0.1 (contro i ~5.5 dB della TV)
+- A σ=0.1, l'UNet **supera TV** (28.46 vs 26.54 dB) — il modello apprende un prior efficace anche in condizioni di rumore elevato
+- SSIM elevato (0.80-0.90) in tutti i noise level, dimostrando buona fedeltà strutturale
+- Il tempo di inferenza (~0.030 s/img) è **il più veloce** tra tutti i metodi, rendendolo ideale per applicazioni real-time
 
 **Miglioramento rispetto alla versione precedente:** L'architettura ottimizzata (1.9M vs 31M params) con GroupNorm, L1 loss e noise conditioning ha permesso un incremento di **+5.8 dB** a basso rumore e **+7.1 dB** ad alto rumore rispetto al modello precedente (1 epoca).
 
@@ -476,10 +476,10 @@ L'UNet è stato ottimizzato con un'architettura **snella** (1.9M parametri, feat
 
 | $\sigma_n$ | TV (PSNR / SSIM) | UNet (PSNR / SSIM) | DiffPIR (PSNR / SSIM) |
 |---|---|---|---|---|---|
-| 0.005 | **32.09** / **0.911** 🥇 | 29.89 / 0.894 🥈 | 16.67 / 0.235 |
-| 0.01 | **32.04** / **0.909** 🥇 | 29.89 / 0.894 🥈 | 17.32 / 0.270 |
-| 0.05 | **30.42** / **0.837** 🥇 | 29.63 / 0.875 🥈 | 22.49 / 0.512 |
-| 0.1 | 26.54 / 0.586 🥈 | **28.93** / **0.830** 🥇 | 24.68 / 0.664 🥉 |
+| 0.005 | **32.09** / **0.911** 🥇 | 29.79 / 0.896 🥈 | 15.78 / 0.329 |
+| 0.01 | **32.04** / **0.909** 🥇 | 29.79 / 0.895 🥈 | 16.45 / 0.374 |
+| 0.05 | **30.42** / **0.837** 🥇 | 29.44 / 0.864 🥈 | 22.64 / 0.677 |
+| 0.1 | 26.54 / 0.586 🥈 | **28.46** / **0.795** 🥇 | 25.46 / 0.766 🥉 |
 
 Il plot comparativo è stato generato tramite:
 
@@ -496,10 +496,10 @@ Sulla base dei risultati attuali e della teoria dei tre metodi:
 | Metodo | Basso rumore ($\sigma_n < 0.05$) | Alto rumore ($\sigma_n \geq 0.05$) | Tempo |
 |---|---|---|---|
 | **TV** | **Eccellente (32 dB)** — domina a basso rumore | Adeguato (26 dB) — perde dettaglio, staircasing | ~7s/img |
-| **UNet** | **Eccellente (29.89 dB, 50 epoche)** — quasi alla pari con TV | **Eccellente (28.93 dB, 50 epoche)** — supera TV ad alto rumore | **~0.035 s/img** |
+| **UNet** | **Eccellente (29.79 dB, 50 epoche)** — quasi alla pari con TV | **Eccellente (28.46 dB, 50 epoche)** — supera TV ad alto rumore | **~0.030 s/img** |
 | **DiffPIR** | Scarso (17 dB) — allucinazioni a basso rumore | **Buono (24 dB)** — il generativo brilla | ~3s/img |
 
-**Osservazione chiave:** i tre metodi hanno regimi di funzionamento complementari. TV domina a basso rumore (dove il problema è quasi ben posto), DiffPIR eccelle ad alto rumore (dove serve un prior generativo forte). L'UNet ottimizzato con 50 epoche si posiziona come il miglior compromesso complessivo: ~29.89 dB a basso rumore (solo ~2 dB sotto TV) e **supera TV** ad alto rumore (28.93 vs 26.54 dB a σ=0.1), con un'inferenza 200× più veloce di TV e 85× più veloce di DiffPIR.
+**Osservazione chiave:** i tre metodi hanno regimi di funzionamento complementari. TV domina a basso rumore (dove il problema è quasi ben posto), DiffPIR eccelle ad alto rumore (dove serve un prior generativo forte). L'UNet ottimizzato con 50 epoche si posiziona come il miglior compromesso complessivo: ~29.79 dB a basso rumore (solo ~2.3 dB sotto TV) e **supera TV** ad alto rumore (28.46 vs 26.54 dB a σ=0.1), con un'inferenza 200× più veloce di TV e 85× più veloce di DiffPIR.
 
 ---
 
@@ -556,9 +556,9 @@ Questo progetto ha esplorato tre approcci fondamentalmente diversi al problema d
 
 1. **TV eccelle a basso rumore (PSNR > 32 dB per $\sigma_n \leq 0.01$)** — quando il problema inverso è quasi ben posto, un regolarizzatore semplice e interpretabile basta. Non richiede training né dati, è immediatamente pronto. Il suo limite è il $\lambda$ fisso: a rumore alto, perde efficacia e introduce staircasing.
 
-2. **DiffPIR eccelle ad alto rumore (PSNR 24.68 dB per $\sigma_n=0.1$)** — quando il segnale è fortemente degradato, il prior generativo aiuta a ricostruire dettagli che metodi classici non possono recuperare. Il prezzo è duplice: lentezza in inferenza (~3 sec/img) e allucinazioni a basso rumore (peggiora invece di migliorare).
+2. **DiffPIR eccelle ad alto rumore (PSNR 25.46 dB per $\sigma_n=0.1$)** — quando il segnale è fortemente degradato, il prior generativo aiuta a ricostruire dettagli che metodi classici non possono recuperare. Il prezzo è duplice: lentezza in inferenza (~3.5-3.8 sec/img) e allucinazioni a basso rumore (peggiora invece di migliorare).
 
-3. **UNet ottimizzato raggiunge ~29.9 dB PSNR dopo 50 epoche CPU** — con architettura snella (1.9M params, GroupNorm, L1 loss) e noise conditioning, il modello eguaglia quasi TV a basso rumore (29.89 vs 32.09 dB, a soli 2 dB di distanza) e **supera TV ad alto rumore** (28.93 vs 26.54 dB a σ=0.1). La degradazione all'aumentare del rumore è minima (~1 dB), dimostrando che un modello ben progettato può essere robusto su tutto lo spettro di rumore. L'inferenza è la più rapida (~0.035 s/img), ideale per applicazioni real-time.
+3. **UNet ottimizzato raggiunge ~29.8 dB PSNR dopo 50 epoche CPU** — con architettura snella (1.9M params, GroupNorm, L1 loss) e noise conditioning, il modello eguaglia quasi TV a basso rumore (29.79 vs 32.09 dB, a soli ~2.3 dB di distanza) e **supera TV ad alto rumore** (28.46 vs 26.54 dB a σ=0.1). La degradazione all'aumentare del rumore è minima (~1.3 dB), dimostrando che un modello ben progettato può essere robusto su tutto lo spettro di rumore. L'inferenza è la più rapida (~0.030 s/img), ideale per applicazioni real-time.
 
 ### Lezioni Apprese
 

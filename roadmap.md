@@ -52,7 +52,7 @@ Ogni voce include: **richiesta** → **stato** → **posizione nel progetto** �
 | 4.2 | **Architettura motivata** in relazione al task | ✅ | `report/report.md §4.3.2`, `src/methods/unet/unet.py` | Encoder-decoder con skip connections: encoder 16→32→64→128 canali, bottleneck 128→256, decoder simmetrico. Skip connections preservano dettagli spaziali fini (nuclei cellulari). Output tanh per range [-1,1] |
 | 4.3 | **Training configurato e giustificato** | ✅ | `report/report.md §4.3.3`, `scripts/run_unet.py` | Loss L1 (preserva bordi meglio di MSE), Adam lr=$10^{-4}$, batch=16 (max su CPU), 50 epoche, multi-noise augmentation (σ random per batch) |
 | 4.4 | **Validation + best model saving** | ✅ | `scripts/run_unet.py:160-195` | Validation su 25% del validation set (36 immagini) con PSNR medio su noise level random. Salva `best_model.pth` quando Val PSNR migliora |
-| 4.5 | **Risultati quantitativi** (PSNR, SSIM, tempo) | ✅ | `results/unet/metrics.csv`, `report/report.md §5.4` | 145 test images × 4 noise level: PSNR 28.93–29.89 dB, SSIM 0.830–0.894, tempo ~0.035 s/img |
+| 4.5 | **Risultati quantitativi** (PSNR, SSIM, tempo) | ✅ | `results/unet/metrics.csv`, `report/report.md §5.4` | 145 test images × 4 noise level: PSNR 28.46–29.79 dB, SSIM 0.795–0.896, tempo ~0.026-0.030 s/img |
 | 4.6 | **Risultati qualitativi** | ✅ | `results/unet/qualitative/` | 24 immagini (6 per noise level) |
 
 ---
@@ -66,7 +66,7 @@ Ogni voce include: **richiesta** → **stato** → **posizione nel progetto** �
 | 5.3 | **DDPM training** descritto | ✅ | `report/report.md §4.4.2`, `src/methods/diffpir/train.py` | 1000 timestep, scheduler lineare $\beta_1=10^{-4}, \beta_T=0.02$, MSE sulla predizione del rumore $\varepsilon_\theta(x_t, t)$, 30 epoche |
 | 5.4 | **Parametri euristici** discussi | ✅ | `report/report.md §4.4.4, §6.4` | $t_{start}=50$ testato $\{10,30,50,100,200\}$ (stabilità numerica), $\lambda=10$ testato $\{0.1,1,5,10,50\}$ (bilanciamento data-fidelity/prior), $num\_steps=15$ testato $\{5,10,15,30\}$ (qualità/tempo), $\zeta=0$ (riproducibilità DDIM) |
 | 5.5 | **Spiegazione dell'uso** di DiffPIR nel contesto | ✅ | `report/report.md §4.4` | Alternanza denoising (prior generativo) e data-fidelity (FFT). Peso dinamico $\rho_t$ che bilancia i due termini in base al timestep |
-| 5.6 | **Risultati quantitativi** (PSNR, SSIM, tempo) | ✅ | `results/diffpir/metrics.csv`, `report/report.md §5.2` | 10 test images × 4 noise level: PSNR 16.67–24.68 dB (cresce col rumore), tempo ~2 s/img |
+| 5.6 | **Risultati quantitativi** (PSNR, SSIM, tempo) | ✅ | `results/diffpir/metrics.csv`, `report/report.md §5.2` | 10 test images × 4 noise level: PSNR 15.78–25.46 dB (cresce col rumore), tempo ~3.6-3.8 s/img |
 | 5.7 | **Risultati qualitativi** | ✅ | `results/diffpir/qualitative/` | 24 immagini (6 per noise level) |
 
 ---

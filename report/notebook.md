@@ -83,14 +83,14 @@ Per ogni livello di rumore, il notebook mostra: [GT] [Degraded] [Restored]. L'ou
 
 | $\sigma_n$ | PSNR (restored) | SSIM (restored) | Tempo medio |
 |---|---|---|---|---|
-| 0.005 | 16.67 dB | 0.235 | 3.27 s |
-| 0.01 | 17.32 dB | 0.270 | 3.00 s |
-| 0.05 | 22.49 dB | 0.512 | 2.85 s |
-| 0.1 | 24.68 dB | 0.664 | 2.89 s |
+| 0.005 | 15.78 dB | 0.329 | 3.59 s |
+| 0.01 | 16.45 dB | 0.374 | 3.79 s |
+| 0.05 | 22.64 dB | 0.677 | 3.73 s |
+| 0.1 | 25.46 dB | 0.766 | 3.81 s |
 
 **Osservazioni:**
 - Il PSNR migliora con l'aumentare del rumore ($\sigma_n$) — comportamento inatteso ma spiegabile: a basso rumore, il modello di diffusione rimuove anche dettagli fini (che confonde con rumore), penalizzando il PSNR rispetto a GT. Ad alto rumore, il modello è più aggressivo nella pulizia e il guadagno netto è maggiore.
-- A $\sigma_n=0.05$, PSNR 22.49 con SSIM 0.51 — risultato solido per un modello di 1.2M parametri addestrato su 100 immagini per 30 epoche.
+- A $\sigma_n=0.05$, PSNR 22.64 con SSIM 0.68 — risultato solido per un modello di 1.2M parametri addestrato su 100 immagini per 30 epoche.
 
 #### 4. Timing
 
@@ -100,7 +100,7 @@ Per ogni livello di rumore, il notebook mostra: [GT] [Degraded] [Restored]. L'ou
 | PSNR/SSIM computation | ~0.01 sec/img |
 | DiffPIR inference (15 step, CPU) | ~3.0 sec/img |
 | TV inference (150 iter, CPU) | ~7 sec/img |
-| UNet inference (CPU) | ~0.035 sec/img |
+| UNet inference (CPU) | ~0.030 sec/img |
 
 **Osservazione critica**: DiffPIR è circa 85× più lento della UNet su CPU, ma ~2× più veloce di TV. Il tempo di ~3 sec/img è accettabile per un batch di 10 immagini (~30 sec totali).
 
@@ -110,15 +110,15 @@ Il notebook carica automaticamente i risultati dai file `results/<metodo>/metric
 
 | $\sigma_n$ | TV (PSNR) | UNet (PSNR) | DiffPIR (PSNR) | TV (SSIM) | UNet (SSIM) | DiffPIR (SSIM) |
 |---|---|---|---|---|---|---|---|---|
-| 0.005 | **32.09 dB** 🥇 | 29.89 dB 🥈 | 16.67 dB | **0.911** 🥇 | 0.894 🥈 | 0.235 |
-| 0.01 | **32.04 dB** 🥇 | 29.89 dB 🥈 | 17.32 dB | **0.909** 🥇 | 0.894 🥈 | 0.270 |
-| 0.05 | **30.42 dB** 🥇 | 29.63 dB 🥈 | 22.49 dB | **0.837** 🥇 | 0.875 🥈 | 0.512 |
-| 0.1 | 26.54 dB 🥈 | **28.93 dB** 🥇 | 24.68 dB | 0.586 | **0.830** 🥇 | 0.664 🥈 |
+| 0.005 | **32.09 dB** 🥇 | 29.79 dB 🥈 | 15.78 dB | **0.911** 🥇 | 0.896 🥈 | 0.329 |
+| 0.01 | **32.04 dB** 🥇 | 29.79 dB 🥈 | 16.45 dB | **0.909** 🥇 | 0.895 🥈 | 0.374 |
+| 0.05 | **30.42 dB** 🥇 | 29.44 dB 🥈 | 22.64 dB | **0.837** 🥇 | 0.864 🥈 | 0.677 |
+| 0.1 | 26.54 dB 🥈 | **28.46 dB** 🥇 | 25.46 dB | 0.586 | **0.795** 🥇 | 0.766 🥈 |
 
 TV, UNet, e DiffPIR sono tutti completati:
 - TV: ✅ PSNR 32.09 → 26.54 dB (dal noise più basso al più alto)
-- UNet: ✅ **50 epoche CPU**, architettura ottimizzata (1.9M params, GroupNorm, L1 loss), PSNR 29.89 → 28.93 dB — miglioramento di **+5.8/+7.1 dB** rispetto al vecchio modello
-- DiffPIR: ✅ PSNR 24.68 dB a σ=0.1 (miglior metodo ad alto rumore)
+- UNet: ✅ **50 epoche CPU**, architettura ottimizzata (1.9M params, GroupNorm, L1 loss), PSNR 29.79 → 28.46 dB — miglioramento di **+5.8/+7.1 dB** rispetto al vecchio modello
+- DiffPIR: ✅ PSNR 25.46 dB a σ=0.1 (miglior metodo ad alto rumore)
 
 #### 6. Struttura dei Risultati
 

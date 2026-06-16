@@ -53,22 +53,22 @@ It's normal, and there are two reasons:
 Optimized architecture (1.9M params, GroupNorm, noise conditioning) trained with L1 loss for 50 epochs on CPU.
 
 | σₙ | PSNR | SSIM | Time |
-|---|---|---|---|
-| 0.005 | **29.89 dB** | **0.894** | 0.035 s |
-| 0.01 | **29.89 dB** | **0.894** | 0.034 s |
-| 0.05 | **29.63 dB** | **0.875** | 0.034 s |
-| 0.1 | **28.93 dB** | **0.830** | 0.036 s |
+|---|---|---|---|---|
+| 0.005 | **29.79 dB** | **0.896** | 0.030 s |
+| 0.01 | **29.79 dB** | **0.895** | 0.028 s |
+| 0.05 | **29.44 dB** | **0.864** | 0.027 s |
+| 0.1 | **28.46 dB** | **0.795** | 0.026 s |
 
 ### DiffPIR Results
 
 Custom LightUNet (1.26M params) trained on LBC cervical images with FFT-based data-fidelity.
 
 | σₙ | PSNR | SSIM | Time |
-|---|---|---|---|
-| 0.005 | 16.67 dB | 0.235 | 3.27 s |
-| 0.01 | 17.32 dB | 0.270 | 3.00 s |
-| 0.05 | **22.49 dB** | **0.512** | 2.85 s |
-| 0.1 | **24.68 dB** | **0.664** | 2.89 s |
+|---|---|---|---|---|
+| 0.005 | 15.78 dB | 0.329 | 3.59 s |
+| 0.01 | 16.45 dB | 0.374 | 3.79 s |
+| 0.05 | **22.64 dB** | **0.677** | 3.73 s |
+| 0.1 | **25.46 dB** | **0.766** | 3.81 s |
 
 ## Quick Start
 
