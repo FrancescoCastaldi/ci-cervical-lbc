@@ -91,7 +91,7 @@ Ogni voce include: **richiesta** → **stato** → **posizione nel progetto** �
 | 7.4 | **Report** con metodi, setup e discussione | ✅ | `report/report.md` (673 righe) | Sezioni: dataset, task, metodi (TV/UNet/DiffPIR), risultati, discussione, parametri euristici, conclusioni |
 | 7.5 | **Fondamenti teorici** | ✅ | `report/theory.md` | Problema inverso, regolarizzazione TV, UNet, modelli diffusivi, metriche PSNR/SSIM |
 | 7.6 | **Codice documentato** su GitHub | ✅ | Intero repository, README.md, README in ogni cartella, `src/methods/*/README.md`, `scripts/README.md` | Struttura modulare, docstring, README esplicativi per ogni modulo |
-| 7.7 | **Presentazione PowerPoint/Beamer** | ✅ | `slides/presentazione.pptx` | 10 slide: copertina, problema, dataset, metodi (TV/UNet/DiffPIR), risultati, confronto, discussioni |
+| 7.7 | **Presentazione Beamer** | ✅ | `slides/presentazione.tex` | 10 slide: copertina, problema, dataset, metodi (TV/UNet/DiffPIR), risultati, confronto, discussioni |
 | 7.8 | **Link GitHub** consegnato all'orale | ✅ | `report/report.md:12`, `README.md` | `https://github.com/FrancescoCastaldi/ci-cervical-lbc` |
 
 ---

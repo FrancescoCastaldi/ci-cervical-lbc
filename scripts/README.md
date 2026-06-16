@@ -16,11 +16,17 @@ python scripts/preprocess.py
 
 # 2. Esecuzione metodi (indipendenti, ordine arbitrario)
 python scripts/run_tv.py          # Total Variation
-python scripts/run_unet.py        # UNet
-python scripts/run_diffpir.py     # DiffPIR
+python scripts/run_unet.py        # UNet (training + evaluation)
+python scripts/run_diffpir.py     # DiffPIR (inference su test set)
 
-# 3. Confronto finale
-python scripts/plot_results.py
+# 3. Confronto finale e metriche
+python scripts/plot_results.py    # Grafico comparativo PSNR/SSIM
+
+# 4. Immagini per presentazione (opzionale)
+python scripts/generate_noise_strip.py       # noise_strip_crops.png
+python scripts/generate_crop_images.py       # crop_comparison.png + crop_diff_comparison.png
+python scripts/generate_qualitative_pngs.py  # PNG qualitative supplementari
+python scripts/generate_diffpir_2x4.py       # DiffPIR 2×4 comparison
 ```
 
 ## File
@@ -32,5 +38,9 @@ python scripts/plot_results.py
 | `run_unet.py` | Training + evaluation UNet, salva modello e risultati |
 | `run_diffpir.py` | Esegue DiffPIR su test set, salva metriche e qualitative |
 | `plot_results.py` | Carica metriche di tutti i metodi, genera grafico comparativo |
+| `generate_noise_strip.py` | Genera `noise_strip_crops.png` per presentazione |
+| `generate_crop_images.py` | Genera `crop_comparison.png` + `crop_diff_comparison.png` per slide |
+| `generate_qualitative_pngs.py` | PNG qualitative supplementari |
+| `generate_diffpir_2x4.py` | Comparison DiffPIR 2×4 immagini |
 | `gen_tv_qual.py` | Script helper — genera solo qualitative TV |
 | `eval_unet.py` | Script helper — solo evaluation UNet (modello già addestrato) |

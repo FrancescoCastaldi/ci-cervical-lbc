@@ -68,7 +68,7 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 - ✅ `report/teoria.md` — teoria completa
 - ✅ `report/relazione.md` — relazione completa (673 righe)
 - ✅ `report/notebook.md` — riassunto notebook
-- ✅ `slides/presentazione.pptx` — 10 slide PowerPoint
+- ✅ `slides/presentazione.tex` — Presentazione Beamer (LaTeX)
 - ✅ `notebooks/01_eda.ipynb` through `04_diffpir.ipynb`
 - ✅ 34 test unitari: degradation (10), metrics (9), diffpir (7), unet (8), tv (8)
 - ✅ `README.md` — aggiornato con tutti i risultati
