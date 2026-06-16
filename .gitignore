@@ -53,3 +53,9 @@ external/
 
 # Agent workspace
 thoughts/
+
+# Tools
+excalidraw.log
+
+# Slide PDFs (large files, compile locally)
+slides/*.pdf
