@@ -110,7 +110,7 @@ else:
 # ── Processa σ_n = 0.01 e 0.1 ──────────────────────────────────────────
 results = {}
 for nl in [0.01, 0.1]:
-    print(f"\nProcessing σ_n = {nl}...")
+    print(f"\nProcessing sigma_n = {nl}...")
     degraded = degrade(gt, kernel_size=kernel_size, sigma=blur_sigma, noise_level=nl)
     deg_np = tensor_to_np(degraded)
     entry = {"gt": gt_np, "degraded": deg_np}
