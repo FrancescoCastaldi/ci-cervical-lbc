@@ -122,7 +122,7 @@ ci-cervical-lbc/
 │   ├── theory.md               # Theoretical background
 │   └── notebook.md             # Notebook summary
 ├── roadmap.md                  # Completed steps vs exam requirements
-├── meeting_notes.md            # Team meeting notes
+
 ├── agents.md                   # Project status & task division
 └── README.md
 ```

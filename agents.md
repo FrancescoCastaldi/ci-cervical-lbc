@@ -170,10 +170,7 @@ Il progetto sarà valutato su:
 4. **Esempi di successi e fallimenti**
 5. **Organizzazione del codice** — modulare, documentato
 
-## Prossimi Passi
+## Stato Finale
 
-1. ~~Paolo: eseguire `python scripts/run_tv.py`~~ ✅ Completato
-2. ~~UNet in esecuzione: `python scripts/run_unet.py`~~ ✅ Completato
-3. ~~Entrambi: eseguire `python scripts/plot_results.py` per confronto finale~~ ✅ Completato
-4. ~~Entrambi: preparare slide presentazione orale~~ ✅ Completato
-5. ~~Entrambi: finalizzare `README.md` e push su GitHub~~ ✅ Completato
+Il progetto è completato. Tutti i metodi sono implementati, valutati e confrontati.
+Vedi `README.md` per i risultati completi e `report/report.md` per la discussione.

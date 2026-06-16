@@ -1,7 +1,9 @@
-# Roadmap — Verifica Requisiti Esame (Gruppo R)
+# Roadmap — Verifica Requisiti Esame (Gruppo R) ✅
 
 Analisi puntuale delle richieste del professore e verifica della loro presenza nel progetto.
 Ogni voce include: **richiesta** → **stato** → **posizione nel progetto** → **giustificazione**.
+
+> **Stato: COMPLETATO** — Tutti i 46 requisiti verificati. 44 ✅, 1 ⚠️ (giustificato), 1 ❌ (esclusione consentita).
 
 ---
 
