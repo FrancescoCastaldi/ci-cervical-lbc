@@ -617,7 +617,7 @@ sarebbero perse nel bottleneck.
 ``Il training usa la loss L1, che abbiamo preferito alla MSE perché è più robusta
 agli outlier — e nel restauro di immagini, gli outlier corrispondono a dettagli
 fini importanti che vogliamo preservare. L'ottimizzatore è Adam con learning rate
-conservativo 10^{-4}.
+conservativo $10^{-4}$.
 
 Usiamo batch size 16 e 50 epoche, sufficienti per convergere sui 673 esempi
 di training.
@@ -744,7 +744,7 @@ e si alterna con un passo di data-fidelity.
 
 \textbf{DDPM (Ho et al., NeurIPS 2020):}
 \begin{itemize}
-  ��� Forward: $q(x_t|x_{t-1}) = \mathcal{N}(\sqrt{1-\beta_t}x_{t-1}, \beta_t I)$
+  \item Forward: $q(x_t|x_{t-1}) = \mathcal{N}(\sqrt{1-\beta_t}x_{t-1}, \beta_t I)$
   \item Reverse: $p_\theta(x_{t-1}|x_t) = \mathcal{N}(\mu_\theta(x_t,t), \Sigma_\theta)$
   \item Training: MSE su $\varepsilon_\theta(x_t, t)$
   \item Scheduler lineare: $\beta_1=10^{-4}$, $\beta_T=0.02$, 1000 timestep
@@ -764,7 +764,7 @@ e si alterna con un passo di data-fidelity.
 
 Il DDPM definisce un processo forward in cui aggiungiamo gradualmente rumore
 gaussiano all'immagine per 1000 timestep, secondo uno scheduler lineare che
-parte da beta 10^{-4} e arriva a 0.02. Il modello impara a invertire questo
+parte da $\beta_1=10^{-4}$ e arriva a $\beta_T=0.02$. Il modello impara a invertire questo
 processo: dato $x_t$ rumoroso, predice il rumore $\varepsilon$ che è stato
 aggiunto.
 
