@@ -47,13 +47,12 @@ It's normal, and there are two reasons:
 1. The inverse problem becomes more difficult—with noise=0.1, the signal is much more corrupted, so there's less useful information to start with for reconstruction.
 2. Lambda is fixed—lambda_reg=0.005 for all levels, but the optimal parameter changes with noise. For noise=0.1, a higher lambda would be needed for more damping.
 
-
 ### UNet Results
 
 Optimized architecture (1.9M params, GroupNorm, noise conditioning) trained with L1 loss for 50 epochs on CPU.
 
 | σₙ | PSNR | SSIM | Time |
-|---|---|---|---|---|
+|---|---|---|---|
 | 0.005 | **29.79 dB** | **0.896** | 0.030 s |
 | 0.01 | **29.79 dB** | **0.895** | 0.028 s |
 | 0.05 | **29.44 dB** | **0.864** | 0.027 s |
@@ -64,7 +63,7 @@ Optimized architecture (1.9M params, GroupNorm, noise conditioning) trained with
 Custom LightUNet (1.26M params) trained on LBC cervical images with FFT-based data-fidelity.
 
 | σₙ | PSNR | SSIM | Time |
-|---|---|---|---|---|
+|---|---|---|---|
 | 0.005 | 15.78 dB | 0.329 | 3.59 s |
 | 0.01 | 16.45 dB | 0.374 | 3.79 s |
 | 0.05 | **22.64 dB** | **0.677** | 3.73 s |
@@ -122,18 +121,8 @@ ci-cervical-lbc/
 │   ├── theory.md               # Theoretical background
 │   └── notebook.md             # Notebook summary
 ├── roadmap.md                  # Completed steps vs exam requirements
-
 ├── agents.md                   # Project status & task division
 └── README.md
-```
-
-## Running Experiments
-
-```bash
-python scripts/run_tv.py          # Total Variation baseline
-python scripts/run_unet.py        # UNet end-to-end
-python scripts/run_diffpir.py     # DiffPIR generative
-python scripts/plot_results.py    # Comparison plot
 ```
 
 ## Reproducibility
