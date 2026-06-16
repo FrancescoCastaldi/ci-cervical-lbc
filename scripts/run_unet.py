@@ -157,7 +157,7 @@ for epoch in range(epochs):
     avg_loss = total_loss / len(train_loader)
     train_losses.append(avg_loss)
 
-    # --- Validation su tutti i 4 noise levels (25% subset per velocit�) ---
+    # --- Validation su tutti i 4 noise levels (25% subset per velocità) ---
     model.eval()
     val_half = max(1, len(val_dataset) // 4)
     val_indices = torch.randperm(len(val_dataset))[:val_half].tolist()

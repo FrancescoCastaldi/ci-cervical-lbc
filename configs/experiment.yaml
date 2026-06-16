@@ -29,7 +29,7 @@ unet:
   features: [16, 32, 64, 128]   # architettura snella (~500K params)
 
 diffpir:
-  num_steps: 15              # sub-campionati da t_start=50 a 0; pi� step = pi� lento
+  num_steps: 15              # sub-campionati da t_start=50 a 0; più step = più lento
   noise_level: 0.05
   max_test_images: 10
   weights: src/methods/diffpir/weights/ddpm_lbc.pt
