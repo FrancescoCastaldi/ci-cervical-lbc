@@ -65,8 +65,8 @@ e visualizzazione sono condivisi (`src/data/`, `src/degradation/`, `src/eval/`, 
 - Scrivere report (teoria + risultati)
 - Preparare slide
 - Pulire repo e README
-- ✅ `report/teoria.md` — teoria completa
-- ✅ `report/relazione.md` — relazione completa (673 righe)
+- ✅ `report/theory.md` — teoria completa
+- ✅ `report/report.md` — relazione completa (673 righe)
 - ✅ `report/notebook.md` — riassunto notebook
 - ✅ `slides/presentazione.tex` — Presentazione Beamer (LaTeX)
 - ✅ `notebooks/01_eda.ipynb` through `04_diffpir.ipynb`
@@ -154,7 +154,8 @@ ci-cervical-lbc/
 │   ├── run_diffpir.py       # Esecuzione DiffPIR
 │   └── plot_results.py      # Grafico comparativo finale
 ├── report/
-│   ├── teoria.md            # Fondamenti teorici (inverso, metodi, metriche)
+│   ├── theory.md            # Fondamenti teorici (inverso, metodi, metriche)
+│   ├── report.md            # Relazione completa
 │   └── notebook.md          # Riassunto risultati notebook
 ├── README.md                # Panoramica progetto
 └── agents.md                # Questo file

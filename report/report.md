@@ -658,9 +658,9 @@ ci-cervical-lbc/
 │   ├── test_diffpir.py
 │   └── test_unet.py
 ├── report/
-│   ├── teoria.md               # Fondamenti teorici
-│   └── relazione.md            # Questo file
-├── slides/                     # Presentazione PowerPoint/Beamer
+│   ├── theory.md               # Fondamenti teorici
+│   └── report.md               # Questo file
+├── slides/                     # Presentazione LaTeX Beamer
 ├── agents.md                   # Divisione dei compiti
 └── README.md                   # Panoramica progetto
 ```

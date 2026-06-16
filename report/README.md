@@ -11,6 +11,9 @@ Contiene la documentazione teorica e la relazione finale del progetto.
 ## File
 
 | File | Descrizione |
-|---|---|
-| `teoria.md` | Fondamenti teorici: problema inverso, regolarizzazione TV, UNet, modelli diffusivi, metriche |
-| `relazione.md` | Relazione completa: dataset, task, metodi, risultati, confronto, conclusioni (673 righe) |
+|---|---|---|
+| `theory.md` | Fondamenti teorici: problema inverso, regolarizzazione TV, UNet, modelli diffusivi, metriche |
+| `report.md` | Relazione completa: dataset, task, metodi, risultati, confronto, conclusioni (673 righe) |
+| `studio.md` | Manuale di studio completo per l'esame orale |
+| `notebook.md` | Riassunto dei risultati dei notebook |
+| `README.md` | Questo file |
