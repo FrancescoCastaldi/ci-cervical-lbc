@@ -61,6 +61,34 @@
   \par\bigskip
 }
 
+% --- Nuovi ambienti per lo studio ---
+\newenvironment{concetto}{%
+  \smallskip\noindent
+  {\bfseries\color{blue!60!black} Concetto Chiave}\par
+  \vspace{0.1cm}
+  \small\color{blue!60!black}%
+}{%
+  \par\bigskip
+}
+
+\newenvironment{attenzione}{%
+  \smallskip\noindent
+  {\bfseries\color{orange!80!black} Attenzione! — Insidia all'Esame Orale}\par
+  \vspace{0.1cm}
+  \small\color{orange!80!black}%
+}{%
+  \par\bigskip
+}
+
+\newenvironment{riepilogo}{%
+  \smallskip\noindent
+  {\bfseries\color{unired} Riepilogo Rapido}\par
+  \vspace{0.1cm}
+  \normalsize\color{unired!80!black}%
+}{%
+  \par\bigskip
+}
+
 \setlist[itemize]{leftmargin=1.5em,noitemsep,topsep=0.2em}
 \setlist[enumerate]{leftmargin=1.5em,noitemsep,topsep=0.2em}
 
@@ -178,6 +206,19 @@ models.''
 Questa slide è concettualmente la più importante: ogni domanda successiva
 ricollega questi concetti.
 \end{note-esame}
+
+\begin{concetto}
+Il cuore del problema: $y = Hx + n$. Abbiamo $y$ (osservazione) e $H$ (blur), 
+dobbiamo trovare $x$ (originale sconosciuto). Tre strategie diverse:
+\begin{itemize}
+  \item \textbf{Variazionale (TV):} minimizzo $\|Hx - y\|^2 + \lambda \cdot \|\nabla x\|_1$
+  \item \textbf{DL (UNet):} imparo $f_\theta(y) \approx x$ da coppie $(y, x)$
+  \item \textbf{Generativo (DiffPIR):} uso un prior $p(x)$ appreso per guidare
+        la ricostruzione, alternando denoising e data-fidelity
+\end{itemize}
+\textbf{All'orale:} partite da $y = Hx + n$ e spiegate perché serve
+regolarizzare — è il filo logico che unisce tutti i metodi.
+\end{concetto}
 
 % ===========================================================================
 % 3. METODI SCELTI
@@ -443,6 +484,21 @@ il corso di Ottimizzazione: la norma L1 promuove soluzioni sparse (nel gradiente
 mentre la L2 promuove soluzioni dense ma piccole.
 \end{note-esame}
 
+\begin{concetto}
+\textbf{TV = $\|\nabla x\|_1$} — somma dei gradienti in valore assoluto.
+\begin{itemize}
+  \item \textbf{L1} (TV): $|x_{i+1,j} - x_{i,j}|$ — penalizza meno i bordi
+        $\Rightarrow$ \textbf{preserva i bordi}
+  \item \textbf{L2} (Tikhonov): $(x_{i+1,j} - x_{i,j})^2$ — penalizza molto
+        le grandi differenze $\Rightarrow$ \textbf{sfuma i bordi}
+\end{itemize}
+\textbf{Collegamento con Ottimizzazione:} L1 promuove soluzioni \emph{sparse}
+nel gradiente (pochi bordi netti), L2 promuove soluzioni \emph{dense} ma piccole
+(tante piccole variazioni). \\[0.2cm]
+\textbf{All'orale:} se il professore chiede ``Perché L1 e non L2?'', partite
+dal confronto delle derivate e concludete con la sparsity.
+\end{concetto}
+
 % ===========================================================================
 % 8. TV ALGORITMO
 % ===========================================================================
@@ -683,6 +739,22 @@ per ogni sigma; l'UNet generalizza su tutti i livelli e paga un piccolo costo
 in precisione a basso rumore in cambio di robustezza ad alto rumore.
 \end{note-esame}
 
+\begin{attenzione}
+\textbf{PSNR alto $\neq$ qualità visiva.} Non cadete nella trappola di giudicare
+la qualità solo dal PSNR!
+\begin{itemize}
+  \item A $\sigma_n = 0.05$: TV ha PSNR \textbf{30.42\,dB} vs UNet \textbf{29.44\,dB}
+        (TV ``vince''), ma visivamente UNet è migliore e lo SSIM lo conferma
+        (UNet 0.864 vs TV 0.837).
+  \item \textbf{Perché?} Il PSNR misura l'errore pixel-pixel, non la struttura.
+        Lo SSIM cattura similarità di contrasto, luminosità e struttura.
+\end{itemize}
+\textbf{All'orale:} se vi chiedono ``Qual è il metodo migliore?'', non date
+una risposta univoca. Strutturate: ``Dipende dalla metrica e dal regime di
+rumore. A basso rumore TV è migliore in PSNR, ma UNet è più robusto
+complessivamente.''
+\end{attenzione}
+
 \newpage
 
 % ===========================================================================
@@ -897,6 +969,21 @@ variazioni non presenti nell'originale (bias generativo). Ad alto rumore, invece
 l'immagine è talmente degradata che il prior generativo aiuta a ricostruire
 informazione persa, producendo un guadagno netto.
 \end{note-esame}
+
+\begin{concetto}
+\textbf{DiffPIR migliora all'aumentare del rumore — perché?} 
+È un trade-off \emph{bias-varianza}:
+\begin{itemize}
+  \item A $\sigma_n$ \textbf{basso}: l'immagine $y$ è già quasi pulita.
+        Il prior generativo introduce dettagli inesistenti (\emph{allucinazione}),
+        aumentando il \emph{bias}. PSNR basso perché l'output differisce dall'originale.
+  \item A $\sigma_n$ \textbf{alto}: $y$ è molto degradata. Il prior aiuta a
+        ricostruire informazione persa, riducendo la \emph{varianza} netta.
+        Il guadagno supera il bias introdotto.
+\end{itemize}
+\textbf{All'orale:} è un esempio perfetto di bias--variance trade-off applicato
+al restauro di immagini. Menzionatelo esplicitamente — il professore apprezza.
+\end{concetto}
 
 \newpage
 
@@ -1219,6 +1306,37 @@ Si potrebbe anche pensare a un meta-modello che sceglie il metodo in base
 al livello di rumore stimato.
 \end{note-esame}
 
+\begin{concetto}
+\textbf{Nessun metodo domina tutti i regimi.} Questa è la conclusione più
+importante da portare all'orale:
+\begin{itemize}
+  \item \textbf{Basso rumore} ($\sigma_n \leq 0.01$): TV $\succ$ UNet $\succ$ DiffPIR
+  \item \textbf{Medio rumore} ($\sigma_n = 0.05$): UNet $\approx$ TV (dipende dalla metrica)
+  \item \textbf{Alto rumore} ($\sigma_n = 0.1$): UNet $\succ$ DiffPIR $\succ$ TV
+  \item \textbf{Velocità}: UNet ($0.03$s) $\gg$ DiffPIR ($3.7$s) $\approx$ TV ($7$s)
+\end{itemize}
+\textbf{All'orale:} se il professore vi chiede un consiglio per un sistema reale,
+proponete un \textbf{approccio ibrido}: TV per controllo rapido a basso rumore,
+UNet come default robusto, DiffPIR per casi difficili ad alto rumore.
+\end{concetto}
+
+\begin{attenzione}
+\textbf{Domanda-tipo all'orale:} ``Quale metodo consigliereste a un laboratorio
+di screening citologico?''
+\\[0.2cm]
+\textbf{Risposta modello (strutturata in 3 punti):}
+\begin{enumerate}
+  \item \textbf{UNet come default}: robusto su tutto lo spettro, inferenza
+        velocissima ($0.03$s/img), qualità visiva buona.
+  \item \textbf{TV come baseline}: zero costi di training, utile per conferma
+        rapida su immagini a basso rumore.
+  \item \textbf{DiffPIR come opzione avanzata}: solo se il rumore è noto
+        essere molto alto e serve ricostruzione generativa.
+\end{enumerate}
+\textbf{Mai} dire che un metodo è ``il migliore'' in assoluto — mostrate
+consapevolezza dei trade-off.
+\end{attenzione}
+
 % ===========================================================================
 % 26. CONCLUSIONI
 % ===========================================================================
@@ -1283,5 +1401,119 @@ e Zhu et al. per DiffPIR. Il dataset Mendeley è disponibile al link indicato.
 
 Grazie per l'attenzione. Siamo pronti per le domande.''
 \end{copione}
+
+\newpage
+
+% ===========================================================================
+% RIEPILOGO RAPIDO
+% ===========================================================================
+
+\begin{center}
+\vspace{1cm}
+{\huge\bfseries\color{darkblue} Riepilogo Rapido}\\[0.3cm]
+{\large Da portare all'orale come foglio di riferimento}\\[0.5cm]
+\end{center}
+
+% --- Tabella riassuntiva ---
+\subsection*{Metriche Consolidate}
+\renewcommand{\arraystretch}{1.3}
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Metodo} & \makebox[2.5cm]{\centering $\sigma_n=0.005$} & \makebox[2.5cm]{\centering $\sigma_n=0.01$} & \makebox[2.5cm]{\centering $\sigma_n=0.05$} & \makebox[2.5cm]{\centering $\sigma_n=0.1$} \\
+\midrule
+\textbf{TV}       & 32.09\,dB / 0.911 & 32.04\,dB / 0.909 & 30.42\,dB / 0.837 & 26.54\,dB / 0.586 \\
+\textbf{UNet}     & 29.79\,dB / 0.896 & 29.79\,dB / 0.895 & 29.44\,dB / 0.864 & 28.46\,dB / 0.795 \\
+\textbf{DiffPIR}  & 15.78\,dB / 0.329 & 16.45\,dB / 0.374 & 22.64\,dB / 0.677 & 25.46\,dB / 0.766 \\
+\bottomrule
+\multicolumn{5}{l}{\small Formato: PSNR (dB) / SSIM} \\
+\end{tabular}
+\end{center}
+
+\subsection*{Tempi di Inferenza (per immagine 256$\times$256)}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Metodo} & \textbf{Tempo} & \textbf{Note} \\
+\midrule
+UNet    & $\sim$0.03\,s & Inferenza immediata, no training al test \\
+TV      & $\sim$7\,s    & 150 iterazioni Adam, nessun training \\
+DiffPIR & $\sim$3.7\,s  & 15 step DDIM, denoising + FFT \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{concetto}
+\textbf{Regola pratica per l'orale:}
+\begin{itemize}
+  \item $\sigma_n \leq 0.01$: \textbf{TV} domina (PSNR $>$ 32\,dB)
+  \item $\sigma_n = 0.05$: \textbf{UNet $\approx$ TV} (dipende dalla metrica)
+  \item $\sigma_n = 0.1$: \textbf{UNet} nettamente migliore
+  \item DiffPIR: utile solo ad alto rumore, ma attenzione alle allucinazioni
+\end{itemize}
+\end{concetto}
+
+% --- Checklist esame ---
+\subsection*{Checklist per l'Esame Orale}
+\noindent
+Cose da \textbf{menzionare assolutamente} durante l'esposizione:
+
+\begin{enumerate}
+  \item \textbf{Problema inverso:} $y = Hx + n$, mal posto secondo Hadamard
+        $\Rightarrow$ serve regolarizzazione.
+  \item \textbf{Confronto equo:} stessa pipeline di degradazione, stesso split,
+        stesse metriche per tutti i metodi.
+  \item \textbf{TV:} $\min \|Hx - y\|^2 + \lambda\,TV(x)$ — L1 preserva i bordi,
+        L2 (Tikhonov) li sfuma. Staircasing a $\lambda$ alto.
+  \item \textbf{UNet:} architettura encoder-decoder + skip connections,
+        multi-noise augmentation, Loss L1, GroupNorm, 1.9M parametri.
+  \item \textbf{DiffPIR:} DDPM come prior plug-and-play, data-fidelity in
+        Fourier, bias--variance trade-off (migliora col rumore).
+  \item \textbf{Nessun metodo domina:} TV migliore a basso rumore, UNet
+        migliore compromesso generale, DiffPIR interessante ma complementare.
+  \item \textbf{PSNR $\neq$ qualità visiva:} a $\sigma_n=0.05$, TV ha PSNR più
+        alto ma UNet ha SSIM migliore e aspetto visivo superiore.
+\end{enumerate}
+
+\vspace{0.3cm}
+
+\begin{attenzione}
+\textbf{Errori da evitare all'orale:}
+\begin{itemize}
+  \item \textbf{NON} dire che un metodo è ``il migliore'' in assoluto.
+        Dire invece: ``Dipende dal regime di rumore e dalla metrica.''
+  \item \textbf{NON} confondere PSNR con qualità visiva — usate SSIM come
+        metrica strutturale complementare.
+  \item \textbf{NON} dimenticare di menzionare che il confronto è equo
+        (stessa pipeline per tutti).
+  \item \textbf{NON} trascurare il bias--variance trade-off di DiffPIR
+        — è la spiegazione più elegante del suo comportamento.
+  \item \textbf{NON} saltare la motivazione della scelta dei metodi
+        (3 su 4, escluso Weighted TV per composizione del gruppo).
+\end{itemize}
+\end{attenzione}
+
+\vspace{0.5cm}
+
+\begin{riepilogo}
+\textbf{Domande-tipo con risposte modello:}
+\begin{enumerate}
+  \item \textit{``Perché TV usa L1 e non L2?''} $\to$ L1 preserva i bordi
+        (penalizza meno le grandi differenze). L2 li sfuma. Inoltre L1
+        promuove soluzioni sparse nel gradiente.
+  \item \textit{``Perché DiffPIR migliora col rumore?''} $\to$ Bias--variance
+        trade-off: a basso rumore il prior genera allucinazioni (bias alto),
+        ad alto rumore aiuta a ricostruire (varianza ridotta).
+  \item \textit{``Quale metodo per un laboratorio clinico?''} $\to$ UNet
+        come default (robusto e veloce), TV per conferma a basso rumore,
+        DiffPIR solo per casi ad alto rumore.
+  \item \textit{``Cosa sono le skip connections?''} $\to$ Collegamenti tra
+        encoder e decoder che preservano dettagli spaziali fini e mitigano
+        il vanishing gradient.
+  \item \textit{``Cos'è il Plug-and-Play?''} $\to$ Framework che separa
+        il prior (denoiser) dalla fedeltà ai dati. Il denoiser può essere
+        qualsiasi — BM3D, CNN, DDPM — e si alterna con data-fidelity.
+\end{enumerate}
+\end{riepilogo}
 
 \end{document}
