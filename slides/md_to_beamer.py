@@ -99,7 +99,15 @@ raw = re.sub(r"<img\s+[^>]*>", "", raw)
 lines = raw.split("\n")
 
 # ---- Write preamble ----
-PRE = r"""\documentclass[italian,aspectratio=169]{beamer}
+PRE = r"""\documentclass[italian,10pt]{beamer}
+
+\usetheme[secheader]{Madrid}
+\usecolortheme{beaver}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\setbeamersize{text margin left=1.2em, text margin right=1.2em}
+
 \usepackage[italian]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -111,27 +119,26 @@ PRE = r"""\documentclass[italian,aspectratio=169]{beamer}
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{listings}
-% Metropolis theme
-\usepackage{beamerthememetropolis}
-\metroset{
-  progressbar=frametitle,
-  sectionpage=progressbar,
-  numbering=counter,
-  block=fill,
-}
 
 % Color palette
+\definecolor{darkblue}{RGB}{16,55,110}
+\definecolor{unired}{RGB}{200,40,40}
 \definecolor{cb}{RGB}{41,128,185}   % Blue  - Intuizione
 \definecolor{co}{RGB}{231,76,60}    % Red   - All'orale
 \definecolor{cg}{RGB}{39,174,96}    % Green - Spiegazioni
 \definecolor{cp}{RGB}{142,68,173}   % Purple - Termini
 
-\setbeamercolor{background canvas}{bg=white!98}
+\setbeamercolor{title}{fg=unired}
+\setbeamercolor{frametitle}{fg=darkblue}
+\setbeamercolor{structure}{fg=darkblue}
+\setbeamercolor{block title}{bg=darkblue,fg=white}
+\setbeamercolor{block body}{bg=gray!10}
+
 \setbeamercolor{alerted text}{fg=co}
 \setbeamercolor{example text}{fg=cg}
-\setbeamercolor{normal text}{fg=black!90}
 
-% Custom blocks (Metropolis-compatible, with fill)
+% Custom blocks (Intuizione=blue, Orale=red, Spiegazioni=green, Termini=purple)
+% Each keeps Madrid's rounded/shadow but overrides block colors
 \newenvironment{intuizione}{%
   \setbeamercolor{block title}{fg=white,bg=cb}%
   \setbeamercolor{block body}{fg=black,bg=cb!5!white}%
@@ -149,7 +156,7 @@ PRE = r"""\documentclass[italian,aspectratio=169]{beamer}
   \setbeamercolor{block body}{fg=black,bg=cp!5!white}%
   \begin{block}{Termini}}{\end{block}}
 
-% Compact code blocks with shadow
+% Code blocks style
 \lstdefinestyle{pp}{
   language=Python,
   basicstyle=\ttfamily\small,
@@ -165,7 +172,6 @@ PRE = r"""\documentclass[italian,aspectratio=169]{beamer}
 % Slightly smaller text for all frames (better density)
 \apptocmd{\frame}{\small}{}{}
 
-% Section pages (Metropolis built-in handles the rest)
 \title{Computational Imaging}
 \subtitle{Studio per l'Esame Orale}
 \date{}
