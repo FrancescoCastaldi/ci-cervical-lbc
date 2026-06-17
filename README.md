@@ -29,9 +29,9 @@ Inverse problem: recover a high-quality image from a degraded observation (Gauss
 
 | Method | Family | Status |
 |---|---|---|
-| Total Variation (TV) | Variational | ✅ Completato |
-| **UNet** | **End-to-end** | **✅ Completato** |
-| **DiffPIR** | **Generative (Diffusion)** | **✅ Completato** |
+| Total Variation (TV) | Variational | ✅ Complete |
+| **UNet** | **End-to-end** | **✅ Complete** |
+| **DiffPIR** | **Generative (Diffusion)** | **✅ Complete** |
 
 ### Total Variation Results
 
@@ -90,7 +90,7 @@ python scripts/plot_results.py
 python -m pytest tests/ -v
 ```
 
-> **Nota sul dataset:** Il dataset Mendeley LBC Cervical Cancer contiene 962 immagini totali (non 4000 come indicato nella traccia). Abbiamo utilizzato tutte le immagini disponibili. Vedi `report/report.md` per i dettagli.
+> **Note on the dataset:** The Mendeley LBC Cervical Cancer dataset contains 962 images total (not 4000 as indicated in the project brief). We used all available images. See `report/report.md` for details.
 
 ## Project Structure
 
@@ -121,7 +121,6 @@ ci-cervical-lbc/
 │   ├── theory.md               # Theoretical background
 │   └── notebook.md             # Notebook summary
 ├── roadmap.md                  # Completed steps vs exam requirements
-├── agents.md                   # Project status & task division
 └── README.md
 ```
 
