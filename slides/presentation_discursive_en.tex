@@ -106,14 +106,25 @@
 \section{Dataset}
 
 \begin{frame}{Mendeley LBC Cervical Cancer}
-  \begin{columns}
-    \column{0.55\textwidth}
+  \begin{center}
+    \includegraphics[width=0.75\textwidth, height=3.5cm, keepaspectratio]{../data/degraded/examples/example_01.png}
+  \end{center}
+  
+  \vspace{-0.2cm} \hrule \vspace{0.2cm} 
+
+  \begin{columns}[t]
+    \column{0.5\textwidth}
+      \footnotesize
       \begin{itemize}
         \item \textbf{962 images} of cervical cytology
         \item Original $2048\times1536$, \textbf{resized} to $256\times256$
         \item Normalized to $[-1,1]$
       \end{itemize}
-      \begin{block}{Diagnostic Classes}
+    \column{0.5\textwidth}
+      \vspace{-0.25cm} 
+      \begin{block}{\footnotesize Diagnostic Classes}
+        \centering
+        \scriptsize 
         \begin{tabular}{lrc}\toprule
           \textbf{Class} & \textbf{N} & \textbf{\%}\\\midrule
           NILM & 612 & 63.6\%\\
@@ -122,8 +133,6 @@
           SCC  & 74  & 7.7\%\\\bottomrule
         \end{tabular}
       \end{block}
-    \column{0.45\textwidth}
-      \includegraphics[width=\textwidth]{../results/qualitative_slides/noise_0.005_comparison.png}
   \end{columns}
 \end{frame}
 
