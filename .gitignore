@@ -60,7 +60,18 @@ excalidraw.log
 # Slide PDFs (large files, compile locally)
 slides/*.pdf
 
-# LaTeX build artifacts
+# LaTeX build artifacts (root)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.nav
+*.snm
+
+# LaTeX build artifacts (slides)
 slides/*.aux
 slides/*.log
 slides/*.out
@@ -70,6 +81,8 @@ slides/*.fls
 slides/*.fdb_latexmk
 slides/*.bbl
 slides/*.blg
+slides/*.nav
+slides/*.snm
 
 # Agent workspace
 .opencode/

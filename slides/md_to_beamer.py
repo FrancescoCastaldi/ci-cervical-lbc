@@ -6,7 +6,7 @@ Convert Computational_Imaging_Studio.md -> Beamer LaTeX (print-friendly, no imag
 import re, sys, os
 
 MD = "../Computational_Imaging_Studio.md"
-TEX = "comp_imaging_beamer.tex"
+TEX = "slides/comp_imaging_beamer.tex"
 
 # NOTE: { and } are NOT escaped here because we insert \textbf{...} etc.
 # after escaping. Escaping braces would break those commands.
@@ -98,11 +98,11 @@ raw = re.sub(r"!\[.*?\]\(.*?\)", "", raw)
 raw = re.sub(r"<img\s+[^>]*>", "", raw)
 lines = raw.split("\n")
 
-# ── Write preamble ──
-out = []
-out.append(r"""\documentclass[italian,aspectratio=169]{beamer}
+# ---- Write preamble ----
+PRE = r"""\documentclass[italian,aspectratio=169]{beamer}
 \usepackage[italian]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{amsmath,amssymb}
 \usepackage{mathtools}
@@ -111,43 +111,61 @@ out.append(r"""\documentclass[italian,aspectratio=169]{beamer}
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{listings}
-\usepackage{microtype}
-
-\usetheme{Berlin}
-\usecolortheme{seahorse}
-\setbeamertemplate{navigation symbols}{}
-\setbeamertemplate{footline}[frame number]
-
-\definecolor{cb}{RGB}{41,128,185}
-\definecolor{co}{RGB}{231,76,60}
-\definecolor{cg}{RGB}{39,174,96}
-\definecolor{cp}{RGB}{142,68,173}
-
-\newenvironment{intuizione}{%
-  \setbeamercolor{block title}{fg=white,bg=cb!80!black}%
-  \setbeamercolor{block body}{fg=black,bg=cb!10!white}%
-  \begin{block}{Intuizione}}{\end{block}}
-\newenvironment{orale}{%
-  \setbeamercolor{block title}{fg=white,bg=co!80!black}%
-  \setbeamercolor{block body}{fg=black,bg=co!10!white}%
-  \begin{block}{All'orale}}{\end{block}}
-\newenvironment{spiegazione}{%
-  \setbeamercolor{block title}{fg=white,bg=cg!80!black}%
-  \setbeamercolor{block body}{fg=black,bg=cg!10!white}%
-  \begin{block}{Spiegazioni}}{\end{block}}
-\newenvironment{terminiblock}{%
-  \setbeamercolor{block title}{fg=white,bg=cp!80!black}%
-  \setbeamercolor{block body}{fg=black,bg=cp!10!white}%
-  \begin{block}{Termini}}{\end{block}}
-
-\lstdefinestyle{pp}{
-  language=Python,
-  basicstyle=\ttfamily\footnotesize,
-  backgroundcolor=\color{gray!5},
-  frame=single,
-  breaklines=true,
+% Metropolis theme
+\usepackage{beamerthememetropolis}
+\metroset{
+  progressbar=frametitle,
+  sectionpage=progressbar,
+  numbering=counter,
+  block=fill,
 }
 
+% Color palette
+\definecolor{cb}{RGB}{41,128,185}   % Blue  - Intuizione
+\definecolor{co}{RGB}{231,76,60}    % Red   - All'orale
+\definecolor{cg}{RGB}{39,174,96}    % Green - Spiegazioni
+\definecolor{cp}{RGB}{142,68,173}   % Purple - Termini
+
+\setbeamercolor{background canvas}{bg=white!98}
+\setbeamercolor{alerted text}{fg=co}
+\setbeamercolor{example text}{fg=cg}
+\setbeamercolor{normal text}{fg=black!90}
+
+% Custom blocks (Metropolis-compatible, with fill)
+\newenvironment{intuizione}{%
+  \setbeamercolor{block title}{fg=white,bg=cb}%
+  \setbeamercolor{block body}{fg=black,bg=cb!5!white}%
+  \begin{block}{Intuizione}}{\end{block}}
+\newenvironment{orale}{%
+  \setbeamercolor{block title}{fg=white,bg=co}%
+  \setbeamercolor{block body}{fg=black,bg=co!5!white}%
+  \begin{block}{All'orale}}{\end{block}}
+\newenvironment{spiegazione}{%
+  \setbeamercolor{block title}{fg=white,bg=cg}%
+  \setbeamercolor{block body}{fg=black,bg=cg!5!white}%
+  \begin{block}{Spiegazioni}}{\end{block}}
+\newenvironment{terminiblock}{%
+  \setbeamercolor{block title}{fg=white,bg=cp}%
+  \setbeamercolor{block body}{fg=black,bg=cp!5!white}%
+  \begin{block}{Termini}}{\end{block}}
+
+% Compact code blocks with shadow
+\lstdefinestyle{pp}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!3},
+  frame=shadowbox,
+  rulesepcolor=\color{gray!30},
+  breaklines=true,
+  showstringspaces=false,
+  commentstyle=\color{gray},
+  keywordstyle=\color{cb},
+}
+
+% Slightly smaller text for all frames (better density)
+\apptocmd{\frame}{\small}{}{}
+
+% Section pages (Metropolis built-in handles the rest)
 \title{Computational Imaging}
 \subtitle{Studio per l'Esame Orale}
 \date{}
@@ -155,7 +173,9 @@ out.append(r"""\documentclass[italian,aspectratio=169]{beamer}
 \begin{document}
 \frame{\titlepage}
 \frame{\frametitle{Indice}\tableofcontents}
-""")
+"""
+
+out = [PRE]
 
 BLOCK_ENV_MAP = {
     "intuizione": "intuizione",
@@ -199,7 +219,7 @@ def flush_accum():
 
 
 def wrap_items(lines):
-    """Wrap consecutive \item commands in itemize environment."""
+    """Wrap consecutive \\item commands in itemize environment."""
     result = []
     in_list = False
     for line in lines:
@@ -248,7 +268,7 @@ def add_section(title):
     out.append("")
 
 
-# ── Parse lines ──
+# ---- Parse lines ----
 for line in lines:
     s = line.strip()
 
@@ -390,4 +410,4 @@ out.append(r"\end{document}")
 
 with open(TEX, "w", encoding="utf-8") as f:
     f.write("\n".join(out))
-print(f"OK: {TEX} ({len(out)} righe)")
+print("OK: " + TEX + " (" + str(len(out)) + " righe)")
