@@ -138,6 +138,15 @@ Modelli principali:
 
 #### 3.1 Sistemi LSIS (Lineari Shift-Invarianti)
 
+> **💡 Intuizione:** Un sistema LSIS è come un timbro che stampa la stessa forma
+> dappertutto — sposta l'immagine a sinistra? Il risultato si sposta uguale.
+> La risposta impulsiva $h$ è il "timbro": un singolo punto luminoso in input
+> diventa la forma di $h$ in output.
+
+> **🎯 All'orale:** «Cosa significa shift-invariance?» = se sposti l'input, l'output
+> si sposta uguale (stesso effetto su tutto il campo). Domanda tipica: «Un filtro
+> mediano è LSIS?» = NO, non è lineare (non esprimibile come convoluzione).
+
 Un sistema LSIS e completamente caratterizzato dalla sua **risposta impulsiva** $h$. L'uscita e la **convoluzione** dell'ingresso con $h$:
 
 $$y = x * h$$
@@ -150,8 +159,14 @@ Proprieta: commutativa, associativa, distributiva.
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/LSIS4.png" alt="LSIS4" width="400">
 #### 3.2 Convoluzione 1D e 2D
 
-- Il kernel $H$ viene "ribaltato" e fatto scorrere sull'immagine
-- Ai bordi si usa **padding** (zero, replicate, reflect)
+> **💡 Intuizione:** La convoluzione è come un pennello che dipinge mescolando
+> ogni pixel con i suoi vicini. Il kernel è la forma del pennello: più grande è,
+> più "mescola". Il ribaltamento del kernel serve matematicamente per rendere
+> l'operazione commutativa ($x*h = h*x$).
+
+> **🎯 All'orale:** «Convoluzione vs cross-correlazione?» = convoluzione ribalta
+> il kernel, cross-correlazione no. Nelle CNN si usa cross-correlazione (ma
+> la chiamano convoluzione). Padding serve per mantenere la stessa dimensione.
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv1.png" alt="Conv1" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv2.png" alt="Conv2" width="400">
@@ -164,6 +179,16 @@ Proprieta: commutativa, associativa, distributiva.
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv9.png" alt="Conv9" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv10.png" alt="Conv10" width="400">
 #### 3.3 Filtri Lineari
+
+> **💡 Intuizione:** Un filtro gaussiano è come guardare attraverso un vetro
+> smerigliato — tutto si sfuma perché ogni pixel è una media pesata dei vicini.
+> Un filtro separabile è come dipingere prima tutte le righe orizzontali e poi
+> le verticali: stesso risultato con metà fatica ($O(k)$ invece di $O(k^2)$).
+
+> **🎯 All'orale:** «Perché un filtro è separabile?» = se $H = h_1 \cdot h_2^T$
+> (prodotto di due vettori 1D). Gaussiano lo è, mediano no. Domanda subdola:
+> «Convolvere due/tre volte un gaussiano piccolo o usare un gaussiano grande?»
+> = equivalente (la convoluzione di due gaussiani è ancora un gaussiano).
 
 **Box Filter** (media uniforme):
 $$H = \frac{1}{k^2} \begin{bmatrix} 1 & \cdots & 1 \\ \vdots & \ddots & \vdots \\ 1 & \cdots & 1 \end{bmatrix}$$
@@ -187,6 +212,17 @@ $$G(x,y) = \frac{1}{2\pi\sigma^2} e^{-\frac{x^2+y^2}{2\sigma^2}}$$
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt11.png" alt="Direzionali" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt12.png" alt="Bordi confronto" width="400">
 #### 3.4 Filtri Non Lineari
+
+> **💡 Intuizione:** Il filtro mediano è come chiedere l'opinione a tutto il
+> vicinato e prendere quella "di mezzo" — ignorando i voti estremi (rumore
+> impulsivo). Il filtro bilaterale è come colorare dentro le linee: sfuma solo
+> pixel di colore simile, fermandosi ai bordi.
+
+> **🎯 All'orale:** «Filtro che toglie rumore senza sfocare?» = mediano
+> (rumore impulsivo) o bilaterale (rumore gaussiano). Differenza: mediano
+> ordina e sceglie (non lineare), bilaterale pesa per spazio E intensità.
+> Domanda tipica: «Il bilaterale è separabile?» = NO, perché $w_r$ dipende
+> dai pixel dell'immagine, non è una funzione fissa.
 
 **Filtro Mediana**:
 - Sostituisce ogni pixel con la mediana del vicinato
@@ -334,22 +370,33 @@ $$\boldsymbol{y} = A\boldsymbol{x} + \boldsymbol{e}$$
 <img src="https://raw.githubusercontent.com/devangelista2/computational-imaging/main/years/2025-26/imgs/GoPro.jpg" alt="Deblurring esempio" width="400">
 #### 5.2 Problemi Ill-Posed (Mal Posti)
 
-Un problema e **ben posto** (Hadamard) se soddisfa:
-1. **Esistenza**: la soluzione esiste
-2. **Unicita**: la soluzione e unica
-3. **Stabilita**: la soluzione dipende con continuita dai dati
+> **💡 Intuizione:** Un problema mal posto è come cercare di ricostruire un
+> pupazzo di neve dalla pozzanghera che lascia sciogliendosi — infinite
+> configurazioni di neve possono dare la stessa pozzanghera (non unicità),
+> e un minimo cambiamento (un sasso nella pozzanghera) cambia totalmente
+> la ricostruzione (non stabilità).
 
-I problemi inversi in imaging sono tipicamente **ill-posed**.
+> **🎯 All'orale:** «Quali sono le 3 condizioni di Hadamard?» = esistenza,
+> unicità, stabilità. Domanda subdola: «Se manca solo la stabilità?» = è
+> comunque ill-posed. Esempio classico: TAC con poche angolazioni = sistema
+> sottodeterminato ($m < n$).
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim7.png" alt="Ill-posed" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim8.png" alt="Hadamard" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim9.png" alt="Esempio ill-posed" width="400">
 #### 5.3 SVD (Singular Value Decomposition)
 
-$$A = U \Sigma V^T$$
+> **💡 Intuizione:** La SVD è come scomporre un'immagine in "strati" di
+> dettaglio dal più importante ($\sigma_1$ grande = struttura globale) al
+> meno importante ($\sigma_r$ piccolo = rumore). I vettori $v_i$ sono i
+> "mattoncini" dell'immagine, gli $u_i$ sono le "impronte" che lasciano
+> sui dati.
 
-- $U, V$: matrici ortogonali (basi ortonormali)
-- $\Sigma = \text{diag}(\sigma_1, \sigma_2, \ldots, \sigma_r)$: valori singolari, $\sigma_1 \geq \sigma_2 \geq \cdots \geq \sigma_r > 0$
+> **🎯 All'orale:** «Cosa rappresentano $\sigma_i$ piccoli?» = componenti
+> mal condizionate — $1/\sigma_i$ amplifica il rumore. «Condizionamento?»
+> = $\sigma_{max}/\sigma_{min}$. Più alto = più amplifichi rumore.
+> Domanda: «Come si vede dall'SVD che un problema è mal posto?» = $\sigma_i$
+> decadono gradualmente a zero.
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim10.png" alt="SVD" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim11.png" alt="SVD valori" width="400">
@@ -357,15 +404,15 @@ $$A = U \Sigma V^T$$
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim13.png" alt="Condizionamento" width="400">
 #### 5.4 Soluzione Naive e Amplificazione del Rumore
 
-La soluzione naive (inversa diretta):
+> **💡 Intuizione:** La soluzione naive è come alzare il volume al massimo
+> per sentire un sussurro in una stanza rumorosa — sentirai il sussurro, ma
+> anche ogni minimo fruscio amplificato. $1/\sigma_i$ è il "volume": per
+> $\sigma_i$ piccoli il rumore esplode.
 
-$$\boldsymbol{x}_{naive} = A^{-1}\boldsymbol{y} = A^{-1}(A\boldsymbol{x} + \boldsymbol{e}) = \boldsymbol{x} + A^{-1}\boldsymbol{e}$$
-
-In termini SVD:
-
-$$\boldsymbol{x}_{naive} = \sum_{i=1}^{n} \frac{\boldsymbol{u}_i^T \boldsymbol{y}}{\sigma_i} \boldsymbol{v}_i$$
-
-**Il problema**: quando $\sigma_i$ e piccolo, $1/\sigma_i$ amplifica enormemente il rumore.
+> **🎯 All'orale:** «Perché non possiamo semplicemente invertire $A$?» =
+> perché $A$ è mal condizionata: $\sigma_i$ piccoli fanno esplodere il rumore.
+$A^{-1}e$ amplifica il rumore. «Soluzione?» = troncare i $\sigma_i$ più
+> piccoli (truncated SVD) o aggiungere regolarizzazione.
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim14.png" alt="Naive problem" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim15.png" alt="Naive solution" width="500">
@@ -389,13 +436,30 @@ $$\hat{\boldsymbol{x}} = \arg\min_{\boldsymbol{x}} \underbrace{\|A\boldsymbol{x}
 
 #### 6.2 Scelta di $\lambda$
 
-- $\lambda \to 0$: overfitting (soluzione rumorosa)
-- $\lambda \to \infty$: underfitting (soluzione troppo liscia)
-- $\lambda$ ottimale: bilancia fedelta e plausibilita
+> **💡 Intuizione:** $\lambda$ è come il dosaggio del sale: poco ($\lambda \to 0$)
+> e senti solo rumore (la soluzione insegue i dati, rumorosissima). Troppo
+> ($\lambda \to \infty$) e tutto diventa insipido e liscio (soluzione troppo
+> regolarizzata, perdi i dettagli). Il $\lambda$ giusto è dove smetti di sentire
+> il rumore ma i bordi sono ancora nitidi.
+
+> **🎯 All'orale:** «Come scegli $\lambda$?» = L-curve (grafico log-log di
+> $\|Ax-y\|$ vs $\|R(x)\|$ — il gomito è il punto ottimale). In pratica:
+> cross-validazione o euristica. Domanda: «Cosa succede se $\lambda$ è
+> troppo piccolo?» = overfitting, soluzione rumorosa (segue il rumore).
 
 #### 6.3 Tipi di Regolarizzazione
 
-| Regolarizzatore | Formula | Effetto |
+> **💡 Intuizione:** L2 (Tikhonov) è come tirare tutto verso zero con elastici:
+> le punte si appiattiscono, tutto diventa liscio come una palla da bowling.
+> TV (L1 sul gradiente) è come piegare un foglio di carta ORIGAMI: pieghe
+> nette (bordi) ma ogni faccia è liscia. L1 è come volere il minor numero
+> possibile di ingredienti: preferisce coefficienti nulli (sparsità).
+
+> **🎯 All'orale:** Differenza cruciale: L2 penalizza i valori grandi (li
+> comprime verso zero), TV penalizza le differenze tra pixel vicini (gradienti
+> L1). Domanda tipica: «TV preserva i bordi perché usa L1 sul gradiente?
+> Perché L1 permette salti netti (penalizza $|x|$, non $x^2$ — per $|x|$ piccolo
+> la penalità è costante, per $x^2$ è quadratica -> tende a zero).
 |-----------------|---------|---------|
 | **Tikhonov** ($L_2$) | $R(x) = \|x\|_2^2$ | Soluzione liscia, penalizza grandi valori |
 | **TV** (Total Variation) | $R(x) = \|\nabla x\|_1$ | Preserva bordi, piecewise constant |
@@ -599,30 +663,30 @@ Un modello lineare $f(x) = Wx + b$ puo rappresentare solo relazioni lineari.
 
 #### 10.1 Convoluzione 2D nelle CNN
 
-$$y[i,j] = \sum_{m}\sum_{n} x[i+m, j+n] \cdot w[m,n] + b$$
+> **💡 Intuizione:** La convoluzione nelle CNN è come una lente di ingrandimento
+> che scorre sull'immagine cercando pattern specifici (bordi, texture, colori).
+> Ogni filtro impara un "occhio" diverso. Il padding serve per non perdere i
+> bordi dell'immagine — senza padding, l'immagine si restringe ogni volta.
 
-Nota: nelle CNN si usa la **cross-correlazione** (senza ribaltamento del kernel), non la convoluzione matematica.
-
-**Padding**: aggiunta di pixel ai bordi per controllare la dimensione dell'output.
-- `padding = (k-1)/2` (con stride=1) -> output stessa dimensione dell'input
+> **🎯 All'orale:** «Convoluzione vs cross-correlazione nelle CNN?» = nelle CNN
+> si usa cross-correlazione (nessun ribaltamento del kernel), ma si chiama
+> convoluzione per abitudine. Nelle CNN non fa differenza perché i pesi sono
+> imparati, non progettati. Domanda: «Perché padding?» = per mantenere la
+> dimensione e non perdere informazione ai bordi.
 
 <img src="immagini_locali/padded-convolution.png" alt="Convoluzione con padding" width="400">
 #### 10.2 Architettura CNN
 
-```python
-class SimpleCNN(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Conv2d(1, 32, 3, padding=1),  # 1?32 canali
-            nn.ReLU(),
-            nn.Conv2d(32, 64, 3, padding=1), # 32?64 canali
-            nn.ReLU(),
-            nn.Conv2d(64, 1, 3, padding=1),  # 64?1 canale (output)
-        )
-    def forward(self, x):
-        return self.net(x)
-```
+> **💡 Intuizione:** Una CNN è come una catena di montaggio: primo strato
+> trova bordi semplici (linee verticali/orizzontali), strati intermedi
+> combinano bordi in texture (angoli, curve), strati profondi combinano
+> texture in parti (occhi, ruote). In ricostruzione, la CNN impara a
+> togliere rumore e sfocatura direttamente dai dati, senza formule esplicite.
+
+> **🎯 All'orale:** «Perché più layer = più astrazione?» = il receptive field
+> cresce con la profondità. «ReLU perché?» = non-linearità necessaria, altrimenti
+> la CNN sarebbe solo una grande convoluzione lineare. «Pooling?» = riduce
+> risoluzione e aumenta receptive field, ma in ricostruzione si evita.
 
 **Pooling (opzionale, non nella SimpleCNN)**:
 - **Max Pooling**: seleziona il valore massimo in una finestra $2 \times 2$ ? dimezza risoluzione, mantiene le feature piu attive
@@ -670,6 +734,10 @@ $$x_{pred} = y^\delta + f_\Theta(y^\delta)$$
 
 **Skip connection**: $x_{pred} = y^\delta + f_\Theta(y^\delta)$ e essa stessa una skip connection globale.
 
+> **💡 Intuizione:** Imparare il residuo e come correggere un compito gia scritto invece di riscriverlo da zero. $y^\delta$ e gia una bozza decente (l'immagine degradata), la rete impara solo la differenza da aggiungere per renderla pulita. Funziona perche $x \approx y^\delta$ quando la degradazione non e estrema — il residuo e piccolo, strutturato, e piu facile da imparare della mappa completa.
+
+> **🎯 All'orale:** La domanda classica e: "Perche ResNet funziona meglio di una CNN profonda normale?" Risposta: 1) Il residuo e piu facile da imparare (bias induttivo — identity mapping e gia una buona soluzione). 2) Le skip connections permettono gradienti di fluire direttamente ai layer iniziali (vanishing gradient risolto). Nel nostro caso specifico (deblur): $x_{pred} = y^\delta + f_\Theta(y^\delta)$ e una skip connection GLOBALE — l'input degradato arriva direttamente all'output, la rete impara solo il residuo. Se chiedono "svantaggio?" — se il rumore e forte ($\sigma_n$ alto), $y^\delta$ non e una buona approssimazione, e il residuo diventa grande e difficile da imparare.
+
 <img src="immagini_locali/ResCNN.png" alt="ResCNN" width="400">
 #### 11.2 Receptive Field
 
@@ -683,6 +751,10 @@ dove $k_L$ e la dimensione del kernel e $s_i$ lo stride al layer $i$.
 
 <img src="immagini_locali/receptive_field.png" alt="Receptive Field" width="400">
 **Problema**: CNN poco profonde hanno receptive field piccolo -> non catturano contesto globale. Soluzione nell'UNet: downsampling + bottleneck permette ai layer profondi di avere receptive field molto grande (tutta l'immagine dopo vari stride 2).
+
+> **💡 Intuizione:** Il receptive field e come il campo visivo: guardando da vicino vedi dettagli ma non l'insieme; allontanandoti vedi tutto ma perdi dettagli. In una CNN, ogni strato convoluzionale aumenta il receptive field — dopo $L$ layer, un neurone "vede" una regione di $(k_L-1)\prod s_i$ pixel in piu rispetto al layer precedente. Il downsampling (stride 2) amplifica quest'effetto: un layer dopo 4 stride 2 vede $2^4 = 16\times$ l'area.
+
+> **🎯 All'orale:** Il receptive field si calcola ricorsivamente: $r_L = r_{L-1} + (k_L-1)\prod_{i=1}^{L-1}s_i$. Domanda tipica: "Perche l'UNet risolve il problema del receptive field?" Perche il downsampling progressivo (encoder) riduce la risoluzione spaziale, quindi layer profondi con stride cumulativo grande vedono TUTTA l'immagine — il bottleneck ha un receptive field globale. Poi l'upsampling (decoder) ricostruisce i dettagli locali usando le skip connections. "Quindi una CNN semplice con stride 2 non basta?" No, perche senza decoder e skip connections perdi la risoluzione spaziale — hai contesto ma non dettagli.
 
 #### 11.3 UNet
 
@@ -706,6 +778,10 @@ Encoder (downsampling):       Decoder (upsampling):
 - **Residual UNet**: blocchi residui al posto delle conv semplici
 - **Attention UNet**: attention gates sulle skip connections
 - **UNet++**: skip connections nidificate e dense
+
+> **💡 Intuizione:** L'UNet e come un artista che prima fa uno schizzo a matita dell'intera scena (encoder — cattura la composizione globale) e poi aggiunge i dettagli (decoder — ricostruisce texture e bordi). Le skip connections sono come i promemoria: l'artista guarda il modello originale mentre disegna i dettagli, senza doverli ricordare a memoria. Senza skip connections, il decoder dovrebbe ricostruire tutto dal solo bottleneck — come ridipingere un quadro guardando solo un mini-appunto.
+
+> **🎯 All'orale:** Domanda frequente: "Differenza tra skip connection ResNet (somma) e UNet (concatenazione)?" — ResNet usa somma: $x_{out} = x + f(x)$ (riduce il carico, impara residuo). UNet usa concatenazione: concatena l'encoder al decoder lungo il canale (preserva informazioni spaziali, utile per segmentazione/restauro). Altra domanda: "Perche l'UNet funziona bene per il deblur?" — 1) Struttura multi-scala cattura blur a diverse scale (un kernel gaussiano grande richiede contesto globale). 2) Skip connections preservano bordi e dettagli fini. 3) Il bottleneck forza una rappresentazione compatta che aiuta a rimuovere rumore incoerente. Nel nostro progetto, l'UNet ha dato PSNR stabili (~29 dB) su tutti i livelli di rumore — ottima robustezza.
 
 ---
 
@@ -845,6 +921,10 @@ $$\boldsymbol{z} \sim p(\boldsymbol{z}), \quad \boldsymbol{x} \sim p_\Theta(\bol
 <img src="immagini_locali/DLVM.png" alt="DLVM" width="300">
 **Latent vector**: descrizione compressa dell'immagine. Non memorizza ogni pixel, ma codifica i fattori principali (anatomia, struttura, texture).
 
+> **💡 Intuizione:** Un modello discriminativo e come un esaminatore che guarda una foto e dice "e un gatto" (mappa input → etichetta). Un modello generativo e come un artista che, avendo visto tanti gatti, puo disegnarne uno nuovo mai visto prima (impara la distribuzione $p(x)$). Il DLVM funziona come: lo spazio latente $z$ e un "codice genetico" compresso — data una sequenza di DNA ($z$), il decoder produce l'immagine completa. $z$ non memorizza pixel ma concetti ad alto livello: "c'e un nucleo", "la texture e granulare", "il bordo e netto".
+
+> **🎯 All'orale:** Domanda: "Differenza tra modello generativo e discriminativo?" — Discriminativo impara il confine di decisione ($p(y|x)$). Generativo impara la distribuzione dei dati ($p(x)$), quindi puo campionare nuovi esempi. "A cosa serve un generativo in imaging?" — 1) Prior per problemi inversi (DiffPIR). 2) Data augmentation. 3) Deblinding / super-resolution (genera dettaglio plausibile dove manca). "Svantaggio?" — I generativi sono piu instabili da addestrare e richiedono piu dati.
+
 #### 14.2 VAE (Variational Autoencoder)
 
 Un VAE e un AutoEncoder probabilistico:
@@ -867,6 +947,10 @@ Rende il sampling differenziabile -> backprop possibile.
 **Training in 2 stadi** (nel corso):
 1. **Pretraining AE**: training deterministico (senza KL) -> buona ricostruzione
 2. **Fine-tuning VAE**: attivazione KL con capacity annealing -> spazio latente regolare
+
+> **💡 Intuizione:** Il VAE e come un appassionato di musica che impara a riassumere canzoni: l'encoder trasforma una canzone ($x$) in una descrizione compatta ($z$) come "ritmo lento, tono minore, strumenti acustici", e il decoder ricostruisce la canzone da questa descrizione. Il **reparameterization trick** e come aggiungere un po' di improvvisazione casuale ($\varepsilon$) alla descrizione — questo rende il modello robusto e lo spazio latente continuo (canzoni simili hanno descrizioni simili). Il termine KL forza la descrizione a essere "standard" (vicina a $\mathcal{N}(0,1)$) — cosi quando campioni un $z$ a caso, il decoder produce comunque una canzone plausibile.
+
+> **🎯 All'orale:** Domanda frequente: "Qual e il problema del VAE?" — Produce immagini **sfocate**. Perche? Perche l'ELBO minimizza MSE ($\|x-\hat{x}\|^2$) e la ricostruzione che minimizza MSE e la **media** delle possibili interpretazioni — e la media di tante immagini e sfocata (come una foto lunga esposizione di una folla). Seconda domanda: "Reparameterization trick a cosa serve?" — Permette di fare backpropagation attraverso il sampling stocastico separando $\mu,\sigma$ (parametri imparabili) da $\varepsilon$ (rumore casuale). Senza, non potremmo addestrare con SGD perche il sampling non e differenziabile. "VAE vs GAN?" — VAE stabile ma sfocato (minimizza MSE = media), GAN nitido ma instabile (mode collapse).
 
 #### 14.3 GAN (Generative Adversarial Network)
 
@@ -891,6 +975,10 @@ $$\min_\Theta -\mathbb{E}_{\boldsymbol{z}}[\log D_\Psi(G_\Theta(\boldsymbol{z}))
 
 **Varianti importanti**: DCGAN, Conditional GAN, Pix2Pix, CycleGAN, WGAN, WGAN-GP, LSGAN.
 
+> **💡 Intuizione:** La GAN e come un falsario (Generator) e un esperto d'arte (Discriminator): il falsario impara a creare quadri sempre piu realistici, l'esperto migliora a smascherare i falsi. All'equilibrio, il falsario produce quadri indistinguibili dagli originali. Il **mode collapse** e quando il falsario impara a dipingere solo nature morte perche e l'unico stile che inganna sempre l'esperto — il Generator "si accontenta" di un'unica strategia vincente invece di esplorare tutto lo spazio delle immagini.
+
+> **🎯 All'orale:** Domanda classica: "Problema principale delle GAN?" — Mode collapse: il Generator produce sempre la stessa immagine (o poche varianti) perche scopre un "punto debole" del Discriminator e lo sfrutta. Secondo problema: training instabile — il minimax e difficile da bilanciare (se D e troppo forte, G non impara; se D e troppo debole, G collassa). "Soluzioni?" — WGAN (Wasserstein distance, piu stabile), spectral normalization (limita la norma dei layer), label smoothing. "GAN vs VAE per problemi inversi?" — GAN produce immagini piu nitide ma soffre di mode collapse; VAE e piu stabile ma sfoca. Per DiffPIR si usa un approccio diverso (diffusion).
+
 #### 14.4 Deep Generative Prior (DGP) per Problemi Inversi
 
 Un generatore pre-addestrato $G$ definisce un **prior** sulle immagini:
@@ -910,6 +998,11 @@ $$\hat{\boldsymbol{x}} = G(\hat{\boldsymbol{z}})$$
 - VAE prior: spazio piu regolare, ma immagini piu sfocate
 
 <img src="immagini_locali/DGP.png" alt="DGP" width="400">
+
+> **💡 Intuizione:** Il DGP e come cercare una persona scomparsa sapendo che si trova in un determinato quartiere (lo spazio $\mathcal{M}$ del generatore). Non puo essere fuori dal quartiere, quindi riduci il problema dal mondo intero a una zona ristretta. Il generatore $G$ definisce quali immagini sono "plausibili" — se $x_{true}$ non e rappresentabile dal generatore (non sta nel quartiere), non la troverai mai (representation error). E come cercare una persona che vive in un'altra citta.
+
+> **🎯 All'orale:** Domanda: "Qual e il limite del DGP?" — Il **representation error**: se l'immagine vera non e generabile dal modello ($x_{true} \notin \mathcal{M}$), non puoi recuperarla per quanto ottimizzi $z$. "E con VAE vs GAN?" — GAN ha uno spazio latente irregolare (mode collapse, buchi nello spazio latente), VAE ha spazio piu regolare (KL force) ma immagini piu sfocate. "Alternativa migliore?" — I metodi basati su diffusion (DiffPIR) non hanno questo problema perche lo spazio delle soluzioni e piu ricco.
+
 ---
 
 ### 15. Diffusion Models `[p.26-28]`
@@ -945,6 +1038,10 @@ dove $\alpha_t = \prod_{s=1}^{t}(1-\beta_s)$.
 - $t$ grande: $\alpha_t \approx 0$, $\sqrt{1-\alpha_t} \approx 1$ ? quasi puro rumore gaussiano
 - Per $t = T$ (tipicamente $T=1000$): $\alpha_T \approx 0$, $\boldsymbol{x}_T \sim \mathcal{N}(0,I)$
 
+> **💡 Intuizione:** Il forward process e come sciogliere un iceberg in acqua: parte da un iceberg ben definito ($x_0$) e aggiunge gradualmente turbolenza ($\beta_t$) fino a ottenere acqua di mare uniforme ($x_T \sim \mathcal{N}(0,I)$). La **formula chiusa** $x_t = \sqrt{\alpha_t}x_0 + \sqrt{1-\alpha_t}\varepsilon$ e la magia: invece di simulare $t$ passaggi uno per uno, puoi saltare direttamente a qualsiasi passo $t$. $\alpha_t$ misura quanto "iceberg originale" rimane: per $t$ piccolo ($\alpha\approx 1$), e quasi tutto ghiaccio; per $t$ grande ($\alpha\approx 0$), e quasi tutta acqua.
+
+> **🎯 All'orale:** Domanda: "Formula chiusa del forward process?" — $x_t = \sqrt{\alpha_t}x_0 + \sqrt{1-\alpha_t}\varepsilon$ dove $\alpha_t = \prod_{s=1}^t(1-\beta_s)$. Permette di campionare $x_t$ a qualsiasi $t$ senza iterare, accelerando drasticamente il training. "Perche si chiama 'diffusion'?" — Perche il processo di aggiungere rumore e analogo all'equazione di diffusione in fisica (secondo law of thermodynamics: l'entropia aumenta, l'informazione si perde gradualmente).
+
 #### 15.3 Training (Noise Prediction)
 
 Una singola rete $\boldsymbol{\varepsilon}_\Theta(\boldsymbol{x}_t, t)$ impara a predire il rumore:
@@ -953,6 +1050,10 @@ $$\min_\Theta \; \mathbb{E}_{\boldsymbol{x}_0, \boldsymbol{\varepsilon}_t, t}\le
 
 **Stima dell'immagine pulita**:
 $$\hat{\boldsymbol{x}}_0(\boldsymbol{x}_t, t) = \frac{\boldsymbol{x}_t - \sqrt{1-\alpha_t}\,\boldsymbol{\varepsilon}_\Theta(\boldsymbol{x}_t, t)}{\sqrt{\alpha_t}}$$
+
+> **💡 Intuizione:** Il training e come insegnare a qualcuno a riconoscere quanto una foto e stata rovinata. Mostri una foto rovinata ($x_t$) e il livello di rovina ($t$), e la persona deve indovinare esattamente qual e il "rumore" ($\varepsilon$) che abbiamo aggiunto. Non deve ricostruire l'immagine originale — solo isolare il rumore. Poi, sapendo il rumore, puoi calcolare l'immagine pulita ($\hat{x}_0$) come $x_t$ meno il rumore scalato. E piu facile predire il rumore (che ha struttura uniforme) che l'immagine (che e complessa).
+
+> **🎯 All'orale:** Domanda: "Perche il diffusion model predice il rumore e non l'immagine?" — Perche predire il rumore $\varepsilon$ e piu facile: ha distribuzione fissa $\mathcal{N}(0,I)$, mentre l'immagine $x_0$ ha distribuzione complessa e sconosciuta. Inoltre, il rumore e la stessa quantita che viene aggiunta a ogni step — e naturale imparare a rimuoverla. "Obiettivo di training?" — $\min \|\varepsilon - \varepsilon_\Theta(x_t, t)\|^2$, MSE sul rumore. "E se predicesi direttamente $x_0$?" — Funzionerebbe ma sarebbe piu difficile (stessa logica del residual learning in ResNet).
 
 #### 15.4 Architettura del Denoiser
 
@@ -967,6 +1068,10 @@ Il time embedding viene proiettato e **aggiunto** dentro i residual blocks -> og
 
 **EMA** (Exponential Moving Average): si mantiene una copia "mediata" dei pesi per sampling piu stabile.
 
+> **💡 Intuizione:** La DiffusionUNet e come un team di esperti di restauro: ogni esperto ($\varepsilon_\Theta$) sa lavorare a un diverso livello di "danneggiamento" dell'immagine ($t$). Il **time embedding** e come dire all'esperto "questa foto e molto rovinata" (t alto) o "e quasi a posto" (t basso) — cosi lo stesso esperto puo adattare la sua strategia. Il **sinusoidal embedding** trasforma $t$ in un vettore che codifica il livello di rumore in modo continuo e strutturato (come una frequenza radio che cambia).
+
+> **🎯 All'orale:** Domanda: "Perche serve il time embedding?" — Perche la stessa rete deve denoizzare a TUTTI i livelli di rumore. Senza sapere $t$, non saprebbe quanto rumore rimuovere. Il sinusoidal embedding e analogo al positional encoding dei Transformer: mappa uno scalare ($t$) in un vettore ricco di informazioni. "Architettura tipica?" — UNet con residual blocks, GroupNorm, SiLU, self-attention a risoluzioni medie, time embedding iniettato in ogni blocco.
+
 #### 15.5 DDPM Sampling (Reverse Process)
 
 Partendo da rumore puro $\boldsymbol{x}_T \sim \mathcal{N}(0,I)$, si applicano $T$ step di denoising:
@@ -977,6 +1082,10 @@ dove $\boldsymbol{z} \sim \mathcal{N}(0,I)$ e $\sigma_t$ e la varianza del passo
 
 **Lento**: richiede $T$ valutazioni della rete (tipicamente $T = 400-1000$). Ogni valutazione e una forward pass della DiffusionUNet.
 
+> **💡 Intuizione:** Il reverse process e come ricostruire l'iceberg dall'acqua di mare — un passo alla volta, togliendo un po' di turbolenza per volta. Ad ogni passo, il modello guarda lo stato corrente $x_t$, usa la sua conoscenza della struttura delle immagini ($\varepsilon_\Theta$) per stimare la direzione di "pulizia", e fa un piccolo passo verso l'immagine originale. E come scolpire: parti da un blocco informe ($x_T \sim \mathcal{N}$) e a ogni colpo di scalpello riveli piu dettaglio.
+
+> **🎯 All'orale:** "Velocita del sampling DDPM?" — Lento: servono $T$ passi (tipicamente 400-1000) e ogni passo richiede una forward pass della DiffusionUNet (rete grande). Confronto con GAN: una GAN genera in un colpo solo (una forward pass), un diffusion model richiede centinaia/migliaia di passi. Ecco perche DDIM e importante: riduce i passi a 20-50 mantenendo buona qualita. "Cosa rende DDPM stocastico?" — L'aggiunta di rumore $\sigma_t z$ a ogni passo: lo stesso punto di partenza $x_T$ puo generare immagini diverse.
+
 #### 15.6 DDIM Sampling (Deterministico e Veloce)
 
 **DDIM** (Denoising Diffusion Implicit Models) modifica il sampling:
@@ -986,6 +1095,10 @@ $$\boldsymbol{x}_{s} = \sqrt{\alpha_s}\,\hat{\boldsymbol{x}}_0 + \sqrt{1-\alpha_
 - **Deterministico**: stesso $\boldsymbol{x}_T$ ? stessa immagine generata
 - **Accelerato**: si possono saltare timestep (es. 40 step invece di 400)
 - **Stesso modello**: non serve ri-addestrare
+
+> **💡 Intuizione:** DDIM e come prendere una scorciatoia: invece di fare 1000 piccoli passi per scendere una montagna, fai 40 passi piu lunghi. Il percorso e meno preciso ma arrivi comunque a valle. Inoltre, DDIM e **deterministico** — se parti dallo stesso $x_T$, arrivi sempre alla stessa immagine (a differenza di DDPM che aggiunge rumore casuale a ogni passo). Questo permette interpolazioni e inversioni.
+
+> **🎯 All'orale:** "DDPM vs DDIM?" — DDPM: stocastico, 400-1000 passi, genera varieta. DDIM: deterministico, 20-50 passi, riproducibile. "Come fa DDIM a essere piu veloce?" — Salta timestep: usa una sotto-sequenza $S \ll T$ (es. ogni 10 passi invece di tutti). La formula $x_s = \sqrt{\alpha_s}\hat{x}_0 + \sqrt{1-\alpha_s}\varepsilon_\Theta(x_t,t)$ e derivabile dalla stessa equazione DDPM ma con varianza zero per il termine stocastico. "Perche e utile per problemi inversi?" — Perche e deterministico: puoi fare "inversion" (trovare $x_T$ che genera una data immagine) e guidare il sampling con gradienti della likelihood.
 
 ---
 
@@ -1010,6 +1123,10 @@ $$p(\boldsymbol{x}|\boldsymbol{y}^\delta) \propto \underbrace{p(\boldsymbol{y}^\
 
 Il diffusion model non da una densita $p(\boldsymbol{x})$ in forma chiusa, ma fornisce **informazione di score** $\nabla_{\boldsymbol{x}_t} \log p_t(\boldsymbol{x}_t)$ che guida la ricostruzione iterativa.
 
+> **💡 Intuizione:** Il punto di vista bayesiano e come un detective che indaga su un crimine: la **likelihood** $p(y|x)$ e la prova fisica (le macchie di fango sulla scena del crimine), il **prior** $p(x)$ e cio che il detective sa per esperienza ("di solito l'assassino fugge dalla finestra, non dalla porta"). La soluzione migliore combina entrambi. Nel nostro caso, la likelihood dice "l'immagine deve essere coerente con le misure $y$", il prior dice "l'immagine deve sembrare una vera foto LBC", e il diffusion model e l'esperto che fornisce il prior a tutti i livelli di dettaglio.
+
+> **🎯 All'orale:** "Perche il diffusion model e un buon prior?" — Perche fornisce lo score $\nabla \log p(x)$ a TUTTI i livelli di rumore, non solo a uno. Questo e cruciale: durante il reverse process, il modello sa quanto rumore c'e ($t$) e fornisce la giusta correzione. "Differenza col prior GAN?" — Il prior GAN e limitato a una varieta $\mathcal{M} = \{G(z): z \in \mathbb{R}^d\}$ a bassa dimensione — se l'immagine vera non sta li, non la recuperi (representation error). Il prior diffusion copre tutto lo spazio delle immagini — nessun representation error.
+
 #### 16.2 DPS (Diffusion Posterior Sampling)
 
 **Idea**: modificare la traiettoria del reverse diffusion con un gradiente di likelihood.
@@ -1030,6 +1147,10 @@ dove $R_\Theta$ e lo step DDIM e $\eta$ e la guidance strength.
 **Pro**: prior diffusionale sempre nel loop, riusabile per diversi operatori $K$ senza riaddestrare.
 **Contro**: computazionalmente pesante (gradiente ad ogni step), $\eta$ da tuningare, gradiente approssimato.
 
+> **💡 Intuizione:** DPS e come correggere la rotta di una nave in mezzo alla nebbia: hai una mappa ($\nabla \log p(x_t)$, il prior) che ti dice la direzione generale verso terraferma, ma ogni tanto controlli il GPS ($\nabla \|K\hat{x}_0 - y\|^2$, la likelihood) per assicurarti di non aver deviato verso il mare aperto. Il gradiente di likelihood corregge la traiettoria a ogni passo, guidando il campionamento verso immagini consistenti con le misure.
+
+> **🎯 All'orale:** "Come funziona DPS in pratica?" — A ogni step di denoising, calcoli $\hat{x}_0$ (stima dell'immagine pulita), poi calcoli il gradiente $\nabla_{x_t}\|K\hat{x}_0 - y\|^2$ e sottrai un po' di questo gradiente dalla traiettoria DDIM. "Problema principale?" — Il gradiente e approssimato (usa $\hat{x}_0$, non $x_t$ vero), quindi non e un campionatore esatto. Inoltre, calcolare il gradiente via autograd a ogni step e costoso. "Perche si usa $\hat{x}_0$ invece di $x_t$?" — Perche $x_t$ e rumorosa; la likelihood $p(y|x_t)$ non e ben definita. $\hat{x}_0$ e una stima dell'immagine pulita, quindi la likelihood $p(y|\hat{x}_0)$ e piu sensata.
+
 #### 16.3 DiffPIR (Diffusion Plug-and-Play Image Restoration)
 
 **Filosofia plug-and-play**: alternare denoising (prior) e data consistency (misure).
@@ -1046,6 +1167,10 @@ dove $\tau > 0$ e uno step size.
 **Pro**: modulare, interpretabile, connesso a metodi di ottimizzazione classici (proximal algorithms).
 **Contro**: non e un campionatore posterio esatto, bilanciamento denoising/correction delicato.
 
+> **💡 Intuizione:** DiffPIR e come un pittore che alterna due fasi: prima dipinge liberamente seguendo la sua ispirazione (prior step — DDIM), poi controlla la foto reale e corregge i dettagli che non corrispondono (data consistency: $x - \tau K^T(Kx - y)$). E simile ai metodi **proximal** classici (HQS, ADMM) dove si alterna un passo di denoising e uno di "proiezione" verso i dati. Plug-and-play perche puoi sostituire il denoiser senza cambiare l'algoritmo.
+
+> **🎯 All'orale:** "Differenza DPS vs DiffPIR?" — DPS modifica la traiettoria del diffusion con un gradiente (approccio "steering"), DiffPIR alterna denoising e data consistency (approccio "splitting"). DiffPIR e piu semplice: non serve autograd per il gradiente, solo forward di $K$ e $K^T$. "Perche DiffPIR e plug-and-play?" — Perche separa il prior (denoiser) dalla data consistency — puoi usare qualsiasi denoiser (TV, UNet, diffusion) senza cambiare l'algoritmo. Nel nostro progetto, DiffPIR ha dato risultati migliori a rumore alto ($\sigma_n=0.1$, PSNR=25.46 dB) perche il prior generative aiuta quando i dati sono molto corrotti. "Svantaggio?" — Non e un vero campionatore bayesiano: la sequenza denoising → correction non garantisce di campionare dalla vera posterior $p(x|y)$.
+
 #### 16.4 Confronto DPS vs DiffPIR
 
 | | DPS | DiffPIR |
@@ -1055,6 +1180,10 @@ dove $\tau > 0$ e uno step size.
 | **Interpretabilita** | Meno trasparente | Piu trasparente (proximal) |
 | **Stabilita** | Sensibile a $\eta$ | Piu stabile con $\tau$ |
 | **Costo** | Gradiente via autograd | Solo forward di $K$ e $K^T$ |
+
+> **💡 Intuizione:** La scelta tra DPS e DiffPIR e come scegliere tra due chef: DPS e uno chef che ass assaggia e corregge continuamente (ogni passo aggiusta la rotta con un gradiente), DiffPIR e uno chef che prepara e assaggia a fasi alterne (prima cucina, poi aggiusta il sale). DPS e piu preciso ma costoso; DiffPIR e piu veloce e interpretabile.
+
+> **🎯 All'orale:** "Quale scegliere?" — Dipende: DPS e piu fedele alla teoria bayesiana (campiona dalla posterior approssimata) ma e costoso (gradiente a ogni passo). DiffPIR e piu pratico (solo forward di $K$) e si connette alla letteratura PnP. Per il nostro progetto (deblur LBC), DiffPIR si e comportato meglio, specialmente a rumore alto. Se dovessi dare un consiglio all'orale: "DiffPIR per problemi dove l'operatore $K$ e semplice (deblur, super-res), DPS per problemi dove serve maggiore fedelta (CT, MRI)."
 
 #### 16.5 Limitazioni Generali
 
