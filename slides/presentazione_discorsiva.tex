@@ -79,7 +79,6 @@
         \textbf{Total Variation}
         \begin{itemize}\small
           \item $\lambda=0.005$, Adam 150 iter
-          \item \emph{Paolo}
         \end{itemize}
       \end{block}
     \column{0.33\textwidth}
@@ -88,7 +87,6 @@
         \textbf{UNet}
         \begin{itemize}\small
           \item Encoder-Decoder, MSE+Adam
-          \item \emph{Paolo}
         \end{itemize}
       \end{block}
     \column{0.33\textwidth}
@@ -97,7 +95,6 @@
         \textbf{DiffPIR}
         \begin{itemize}\small
           \item DDPM+LightUNet, FFT fidelity
-          \item \emph{Francesco}
         \end{itemize}
       \end{block}
   \end{columns}
@@ -617,18 +614,18 @@
   \end{center}
 \end{frame}
 
-\begin{frame}{Confronto Visivo -- $\sigma_n = 0.1$}
+\begin{frame}[shrink]{Confronto Visivo -- $\sigma_n = 0.1$}
   \begin{center}
-    \includegraphics[width=0.85\textwidth]{../results/qualitative_slides/methods_noise_0.1.png}
-    \vspace{0.1cm}
-    \includegraphics[width=0.65\textwidth]{../results/qualitative_slides/crop_diff_comparison.png}
+    \includegraphics[width=0.80\textwidth]{../results/qualitative_slides/methods_noise_0.1.png}
+    \vspace{0.05cm}
+    \includegraphics[width=0.55\textwidth]{../results/qualitative_slides/crop_diff_comparison.png}
   \end{center}
-  \vspace{0.1cm}
+  \vspace{0.05cm}
   \begin{center}
-    \textbf{Mappe di differenza} ($|\hat{x} - x_{\text{GT}}|$, normalizzate)
+    \small\textbf{Mappe di differenza} ($|\hat{x} - x_{\text{GT}}|$, normalizzate)
   \end{center}
   \begin{center}
-    \includegraphics[width=0.75\textwidth]{../results/diff/all_diffs_0.1.png}
+    \includegraphics[width=0.65\textwidth]{../results/diff/all_diffs_0.1.png}
   \end{center}
 \end{frame}
 

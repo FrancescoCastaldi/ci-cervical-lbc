@@ -1,1519 +1,805 @@
-% ===========================================================================
-% COPIONE — Presentazione Computational Imaging: Deblur & Denoise LBC
-% Accompagna ogni slide di presentazione.tex con testo esplicativo,
-% collegamenti teorici e note per l'esposizione orale.
-% ===========================================================================
+﻿% =============================================================================
+% COPIONE — Computational Imaging: Deblur & Denoise LBC
+% Guida allo studio per l'esposizione orale
+% Stile: minimal tech
+% =============================================================================
 \documentclass[italian,11pt,a4paper]{article}
 
-% --- Pacchetti ---
+% --- Minimal tech preamble ---
 \usepackage[italian]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{amsmath,amssymb}
 \usepackage{geometry}
-\geometry{margin=2.2cm,top=2cm,bottom=2cm}
+\geometry{margin=2cm,top=1.8cm,bottom=1.8cm}
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{xcolor}
 \usepackage{hyperref}
-\usepackage{enumitem}
+\usepackage{microtype}
 \usepackage{framed}
 \usepackage{titlesec}
-\usepackage{microtype}
+\usepackage{enumitem}
 
-% --- Colori ---
-\definecolor{darkblue}{RGB}{16,55,110}
-\definecolor{unired}{RGB}{200,40,40}
-\definecolor{slidebg}{RGB}{240,245,255}
-\definecolor{theorybg}{RGB}{255,250,230}
-\definecolor{scriptbg}{RGB}{245,255,245}
+% --- Palette (tech-minimal) ---
+\definecolor{fg}{HTML}{1a1a2e}     % text
+\definecolor{accent}{HTML}{00509e}  % deep blue accent
+\definecolor{muted}{HTML}{6c757d}   % secondary text
+\definecolor{border}{HTML}{dee2e6}  % light borders
+\definecolor{codebg}{HTML}{f8f9fa}  % code background
 
-% --- Comandi ---
-\newcommand{\slidetitle}[1]{%
-  \subsection*{\textcolor{darkblue}{Slide: #1}}%
-  \vspace{-0.2cm}%
-  \hrule\vspace{0.3cm}%
-}
-\newenvironment{teoria}{%
-  \smallskip\noindent
-  {\bfseries\color{darkblue} Collegamenti Teorici}\par
-  \vspace{0.1cm}
-  \color{darkblue!80!black}%
-  \small
-}{%
-  \par\medskip
-}
-\newenvironment{copione}{%
-  \smallskip\noindent
-  {\bfseries\color{unired} Copione}\par
-  \vspace{0.1cm}
+% --- Title style ---
+\titleformat{\section}{\Large\bfseries\color{accent}}{}{0em}{}[\vspace{-0.3cm}\rule{\textwidth}{0.5pt}]
+\titleformat{\subsection}{\large\bfseries\color{fg}}{}{0em}{}
+\titleformat{\subsubsection}{\small\bfseries\color{accent}}{}{0em}{}
+
+\setlist[itemize]{leftmargin=1.2em,noitemsep,topsep=0.15em,label=\textcolor{accent}{\tiny\textbullet}}
+\setlist[enumerate]{leftmargin=1.5em,noitemsep,topsep=0.15em}
+
+% --- Custom environments ---
+\newenvironment{script}{%
+  \smallskip
+  \noindent{\small\bfseries\color{accent}$\blacktriangleright$ Da dire}\par
+  \vspace{0.05cm}
   \normalsize
-}{%
-  \par\bigskip
-}
-\newenvironment{note-esame}{%
-  \smallskip\noindent
-  {\bfseries\color{teal!70!black} Note per l'esame}\par
-  \vspace{0.1cm}
-  \small\color{teal!70!black}%
-}{%
-  \par\bigskip
-}
+}{\par\medskip}
 
-% --- Nuovi ambienti per lo studio ---
-\newenvironment{concetto}{%
-  \smallskip\noindent
-  {\bfseries\color{blue!60!black} Concetto Chiave}\par
-  \vspace{0.1cm}
-  \small\color{blue!60!black}%
-}{%
-  \par\bigskip
-}
+\newenvironment{study}{%
+  \smallskip
+  \noindent{\small\bfseries\color{muted}$\blacktriangleright$ Da studiare}\par
+  \vspace{0.05cm}
+  \small\color{fg}
+}{\par\medskip}
 
-\newenvironment{attenzione}{%
-  \smallskip\noindent
-  {\bfseries\color{orange!80!black} Attenzione! — Insidia all'Esame Orale}\par
-  \vspace{0.1cm}
-  \small\color{orange!80!black}%
-}{%
-  \par\bigskip
-}
+\newenvironment{qa}{%
+  \smallskip
+  \noindent{\small\bfseries\color{accent}$\blacktriangleright$ Domande tipiche}\par
+  \vspace{0.05cm}
+  \small
+}{\par\medskip}
 
-\newenvironment{riepilogo}{%
-  \smallskip\noindent
-  {\bfseries\color{unired} Riepilogo Rapido}\par
-  \vspace{0.1cm}
-  \normalsize\color{unired!80!black}%
-}{%
-  \par\bigskip
-}
-
-\setlist[itemize]{leftmargin=1.5em,noitemsep,topsep=0.2em}
-\setlist[enumerate]{leftmargin=1.5em,noitemsep,topsep=0.2em}
-
-\title{\textbf{Computational Imaging}\\DeBlur \& Denoise di Immagini di Citologia Cervicale LBC\\\large Copione per l'Esposizione Orale}
-\author{Gruppo R -- Francesco Castaldi, Paolo Fusco}
+% --- Title ---
+\title{\vspace{-1cm}\textcolor{accent}{\textbf{Computational Imaging}} \\[0.1cm]
+       Deblur \& Denoise di Immagini di Citologia Cervicale LBC \\[0.2cm]
+       \large\textcolor{muted}{Guida allo studio per l'esposizione orale}}
+\author{Gruppo R}
 \date{A.A. 2025/2026}
 
 \begin{document}
 \maketitle
 \thispagestyle{empty}
-\vfill
+\vspace{0.3cm}
 \begin{center}
-\small
-Questo documento accompagna \texttt{slides/presentazione.tex} e contiene il\\
-copione dettagliato per ogni slide, con collegamenti alla teoria del corso.\\[0.2cm]
-\textit{Da stampare e portare all'orale come traccia di esposizione.}
+\small\textcolor{muted}{Accompagna \texttt{slides/presentazione.tex} -- 27 slide, 3 metodi}\\[0.1cm]
+\textcolor{muted}{Stampa e usa come traccia durante l'esposizione.}
 \end{center}
-\newpage
 
+\newpage
 \tableofcontents
 \newpage
 
-% ===========================================================================
-% 1. TITLE PAGE
-% ===========================================================================
-\section{Slide 1 — Title Page}
+% =============================================================================
+% SLIDE 1
+% =============================================================================
+\section{Slide 1 -- Title Page}\label{s:01}
 
-\slidetitle{``Computational Imaging — Deblur e Denoise di Immagini di Citologia Cervicale LBC''}
+\subsection{Contenuto}
+Slide iniziale con titolo, autori, affiliazione e link GitHub.
 
-\begin{teoria}
-\textbf{Riferimenti:} Problema Inverso (\texttt{theory.md §1}), Dataset (\texttt{theory.md §2}),
-Definizione del task (\texttt{report.md §3.1}).
-\end{teoria}
+\begin{script}
+Buongiorno, siamo il Gruppo R. Presentiamo il nostro progetto di Computational
+Imaging: deblur e denoise di immagini di citologia cervicale LBC.
 
-\begin{copione}
-``Buongiorno, siamo il Gruppo R, composto da Francesco Castaldi e Paolo Fusco.
-Presentiamo il nostro progetto di Computational Imaging: deblur e denoise di immagini
-di citologia cervicale provenienti dal dataset Mendeley LBC Cervical Cancer.
+Il progetto confronta tre famiglie metodologiche: Total Variation (variazionale),
+UNet (deep learning), DiffPIR (generativo). L'obiettivo e confrontare criticamente
+i tre approcci nelle stesse condizioni sperimentali.
 
-Il progetto confronta tre diverse famiglie metodologiche: un approccio variazionale
-(Total Variation), uno di deep learning end-to-end (UNet), e uno generativo (DiffPIR).
-L'obiettivo è duplice: risolvere il problema di restauro e, soprattutto, confrontare
-criticamente i tre approcci nelle stesse condizioni sperimentali.
+Il codice e su GitHub all'indirizzo mostrato in slide.
+\end{script}
 
-Il codice sorgente è disponibile su GitHub all'indirizzo mostrato in slide.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Potenziali domande:}
+\begin{study}
 \begin{itemize}
-  \item ``Perché avete scelto questi tre metodi e non Weighted TV?''
-  \item ``Qual è il contributo principale del progetto?''
+\item Tre metodi $\to$ tre famiglie (variazionale, DL, generativo)
+\item Confronto equo: stessa pipeline, stesso dataset, stesse metriche
+\item Riproducibilita: seed 42, codice open-source
 \end{itemize}
-\textbf{Risposte suggerite:}
+\end{study}
+
+\begin{qa}
+\textbf{D:} Perche Weighted TV e escluso? \\
+\textbf{R:} Siamo in 2, 3 metodi su 4 coprono le famiglie principali. Weighted TV e ibrido.
+\end{qa}
+
+% =============================================================================
+% SLIDE 2
+% =============================================================================
+\section{Slide 2 -- Problema Inverso}\label{s:02}
+
+\subsection{Contenuto}
+Modello di degradazione $y = Hx + n$, ill-posedness, necessita di regolarizzazione.
+
+\begin{script}
+Partiamo dal modello: data un'immagine $x$ (Ground Truth), applichiamo blur
+gaussiano $H$ ($\sigma=2$, kernel $9\times9$) e rumore AWGN $n$ a 4 livelli
+($\sigma_n = 0.005$--$0.1$). Otteniamo $y$, l'osservazione.
+
+Il problema inverso -- stimare $x$ da $y$ -- e \emph{mal posto} secondo Hadamard:
+esistono infinite $x$ compatibili con la stessa $y$, perche il blur cancella le
+alte frequenze. Invertire direttamente il blur amplificherebbe il rumore.
+
+Servono \textbf{regolarizzazioni}: la TV usa un prior analitico di
+piecewise-smoothness; UNet apprende un prior dai dati; DiffPIR usa un prior
+generativo (DDPM).
+\end{script}
+
+\begin{study}
 \begin{itemize}
-  \item Il regolamento richiedeva un metodo per studente; essendo in 2, abbiamo scelto
-        3 metodi su 4, escludendo Weighted TV perché ibrido e meno distintivo.
-  \item Il contributo principale è il confronto equo e sistematico tra tre famiglie,
-        non la performance assoluta.
+\item \textbf{Formula base:} $y = Hx + n$ -- memorizzarla e spiegare ogni termine
+\item \textbf{Perche ill-posed:} $H$ cancella info in alta frequenza $\Rightarrow$ soluzione non unica
+\item \textbf{Collegamento:} questa slide e il fondamento logico di tutto il progetto
 \end{itemize}
-\end{note-esame}
+\end{study}
 
-% ===========================================================================
-% 2. PROBLEMA INVERSO
-% ===========================================================================
-\section{Slide 2 — Problema Inverso}
+\begin{qa}
+\textbf{D:} Cosa significa ``mal posto''? \\
+\textbf{R:} Hadamard: esiste soluzione? Unica? Dipende con continuita dai dati? Nessuna delle tre e garantita.
 
-\slidetitle{``Problema Inverso''}
+\textbf{D:} Perche non possiamo invertire $H$? \\
+\textbf{R:} $H$ e mal condizionato: $H^{-1}$ amplifica il rumore in modo catastrofico.
+\end{qa}
 
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{theory.md §1} (intero), \texttt{report.md §3.1}.
+% =============================================================================
+% SLIDE 3
+% =============================================================================
+\section{Slide 3 -- Metodi Scelti}\label{s:03}
 
-\textbf{Concetti chiave:}
+\subsection{Contenuto}
+Panoramica dei tre metodi con classificazione per famiglia.
+
+\begin{script}
+Tre metodi, tre filosofie diverse.
+
+\textbf{Total Variation} -- metodo variazionale classico. Minimizza
+$\|Hx-y\|^2 + \lambda\|\nabla x\|_1$. Non richiede training, e interpretabile,
+ma qualita limitata ad alto rumore.
+
+\textbf{UNet} -- deep learning end-to-end. Impara $f_\theta(y) \approx x$ da
+coppie (degradata, GT). Inferenza velocissima ($\sim$0.03 s/img), ma richiede
+training supervisionato.
+
+\textbf{DiffPIR} -- generativo plug-and-play. Usa un DDPM come prior, alterna
+denoising (DDPM) e data-fidelity (risolta in FFT). Produce texture realistiche
+ma e lento ($\sim$3 s/img) e allucina a basso rumore.
+\end{script}
+
+\begin{study}
 \begin{itemize}
-  \item Problema diretto vs. inverso: dato $x$ calcolare $y$ (diretto, ben posto)
-        vs. dato $y$ stimare $x$ (inverso, mal posto).
-  \item Modello di degradazione: $y = \mathcal{H}(x) + n$ con operatore di blur
-        $\mathcal{H}$ e rumore AWGN $n$.
-  \item Hadamard (1902): un problema è ben posto se soluzione esiste, è unica e
-        dipende continuamente dai dati. Qui nessuna delle tre condizioni è garantita.
-  \item Ill-posedness: soluzione non unica perché blur cancella informazioni ad
-        alta frequenza. La regolarizzazione (TV, prior appresi) restringe lo spazio
-        delle soluzioni.
+\item Saper classificare ogni metodo nella sua famiglia
+\item Memorizzare un pro e un contro per ciascuno
+\item Tre famiglie diverse $\to$ confronto metodologico
 \end{itemize}
-\end{teoria}
+\end{study}
 
-\begin{copione}
-``Partiamo dal problema inverso. Data un'immagine di citologia cervicale $x$, che
-rappresenta la ground truth sconosciuta, applichiamo un operatore di blur gaussiano
-$\mathcal{H}$, con sigma 2 e kernel 9 per 9, e aggiungiamo rumore AWGN a diversi
-livelli. Il risultato è l'osservazione $y$.
+% =============================================================================
+% SLIDE 4
+% =============================================================================
+\section{Slide 4 -- Mendeley LBC Cervical Cancer}\label{s:04}
 
-Il problema è stimare l'immagine originale $x$ a partire dalla sola $y$.
+\subsection{Contenuto}
+Dataset: 962 immagini, 4 classi diagnostiche, resize $2048\to256$.
 
-Questo è un classico problema inverso mal posto secondo la definizione di Hadamard:
-esistono infinite immagini $x$ compatibili con la stessa $y$, perché il blur ha
-cancellato le informazioni ad alta frequenza — i dettagli fini delle cellule — e
-il rumore aggiunge ambiguità. Non possiamo quindi limitarci a invertire l'operatore
-di blur perché amplificheremmo il rumore.
+\begin{script}
+Il dataset Mendeley LBC Cervical Cancer ha 962 immagini di citologia cervicale
+in fase liquida, classificate in 4 categorie: NILM (normali, 64\%), HSIL, LSIL e
+SCC. Originali a 2048$\times$1536, ridimensionate a 256$\times$256.
 
-Servono regolarizzazioni o prior che vincolino la soluzione verso immagini
-realistiche. E qui si inseriscono i tre metodi: la TV usa un prior analitico
-di regolarizzazione delle variazioni locali; UNet impara il prior dai dati in
-modo supervisionato; DiffPIR usa un prior generativo appreso tramite diffusion
-models.''
-\end{copione}
+Lo sbilanciamento delle classi non e un problema per il restauro: non
+classifichiamo, e la varieta morfologica e presente in tutte le classi.
+\end{script}
 
-\begin{note-esame}
-\textbf{Potenziali domande:}
+\begin{study}
 \begin{itemize}
-  \item ``Cosa significa esattamente 'mal posto'?''
-  \item ``Perché il blur rende il problema mal posto?''
-  \item ``Qual è la differenza tra regolarizzazione e prior appreso?''
+\item Dataset pubblico, 962 immagini, 4 classi
+\item Resize 256: compromesso costo/qualita
+\item Per il restauro, lo sbilanciamento NON e un problema
 \end{itemize}
-Questa slide è concettualmente la più importante: ogni domanda successiva
-ricollega questi concetti.
-\end{note-esame}
+\end{study}
 
-\begin{concetto}
-Il cuore del problema: $y = Hx + n$. Abbiamo $y$ (osservazione) e $H$ (blur), 
-dobbiamo trovare $x$ (originale sconosciuto). Tre strategie diverse:
+% =============================================================================
+% SLIDE 5
+% =============================================================================
+\section{Slide 5 -- Preprocessing e Split}\label{s:05}
+
+\subsection{Contenuto}
+Pipeline: resize $\to$ toTensor $\to$ normalize $[-1,1]$ $\to$ split 70/15/15.
+
+\begin{script}
+Pipeline condivisa: resize bilineare a 256, conversione in float $[0,1]$,
+normalizzazione in $[-1,1]$ (range richiesto dal DDPM, coerente con MSE loss),
+split stratificato 70\% train / 15\% val / 15\% test con seed 42.
+
+Tutti i metodi usano lo stesso test set: 145 immagini.
+\end{script}
+
+\begin{study}
 \begin{itemize}
-  \item \textbf{Variazionale (TV):} minimizzo $\|Hx - y\|^2 + \lambda \cdot \|\nabla x\|_1$
-  \item \textbf{DL (UNet):} imparo $f_\theta(y) \approx x$ da coppie $(y, x)$
-  \item \textbf{Generativo (DiffPIR):} uso un prior $p(x)$ appreso per guidare
-        la ricostruzione, alternando denoising e data-fidelity
+\item Perche $[-1,1]$? DDPM addestrato con rumore gaussiano centrato
+\item Split stratificato: mantiene le proporzioni delle classi
+\item Seed 42: riproducibilita
 \end{itemize}
-\textbf{All'orale:} partite da $y = Hx + n$ e spiegate perché serve
-regolarizzare — è il filo logico che unisce tutti i metodi.
-\end{concetto}
+\end{study}
 
-% ===========================================================================
-% 3. METODI SCELTI
-% ===========================================================================
-\section{Slide 3 — Metodi Scelti}
+% =============================================================================
+% SLIDE 6
+% =============================================================================
+\section{Slide 6 -- Degradazione}\label{s:06}
 
-\slidetitle{``Metodi Scelti''}
+\subsection{Contenuto}
+Pipeline di degradazione: blur gaussiano + AWGN a 4 livelli.
 
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{report.md §1} (descrizione generale),
-\texttt{src/methods/README.md}, \texttt{theory.md §3}.
+\begin{script}
+Degradazione identica per tutti i metodi: blur gaussiano $\sigma=2$ kernel
+$9\times9$, poi AWGN a 4 livelli: $\sigma_n = 0.005,\;0.01,\;0.05,\;0.1$.
 
-Classificazione metodologica:
+I 4 livelli coprono regimi qualitativamente distinti: da rumore trascurabile
+a rumore pesante. Questo permette di studiare la transizione.
+\end{script}
+
+\begin{study}
 \begin{itemize}
-  \item \textbf{Variazionale (TV):} minimizza un funzionale composto da data-fidelity
-        $+\ \lambda \cdot$ regolarizzazione. Non richiede training.
-  \item \textbf{Deep Learning (UNet):} apprende una mappatura end-to-end da coppie
-        (degradata, GT). Richiede training supervisionato.
-  \item \textbf{Generativo (DiffPIR):} usa un modello di diffusione come prior
-        plug-and-play, alternando denoising e data-fidelity via FFT.
+\item Pipeline \emph{identica} per tutti -- confronto equo
+\item I 4 livelli non sono arbitrari: ognuno rappresenta un regime
 \end{itemize}
-\end{teoria}
+\end{study}
 
-\begin{copione}
-``Il progetto copre tre famiglie metodologiche.
+% =============================================================================
+% SLIDE 7
+% =============================================================================
+\section{Slide 7 -- Total Variation: Teoria}\label{s:07}
 
-La Total Variation è un metodo variazionale classico: minimizza una funzione
-obiettivo che bilancia fedeltà ai dati e regolarizzazione. È interpretabile,
-non richiede training, ma la qualità è limitata.
+\subsection{Contenuto}
+Formulazione TV: $\hat{x} = \arg\min\|Hx-y\|^2 + \lambda\cdot TV(x)$. $TV(x) = \|\nabla x\|_1$.
 
-L'UNet è un metodo end-to-end di deep learning. Impara direttamente dai dati
-la mappatura da immagine degradata a immagine restaurata. L'inferenza è
-velocissima, ma richiede training supervisionato.
+\begin{script}
+La TV minimizza un funzionale a due termini: data-fidelity ($\|Hx-y\|^2$) e
+regolarizzazione ($\lambda\cdot\|\nabla x\|_1$).
 
-DiffPIR è un metodo generativo basato su modelli di diffusione. Integra un
-DDPM in un framework plug-and-play, alternando passi di denoising e di
-fedeltà ai dati risolta in frequenza. Produce buoni risultati ad alto rumore
-ma è computazionalmente più costoso.
+La TV e la norma L1 del gradiente. Usare L1 e la scelta fondamentale: preserva
+i bordi. Se usassimo L2 (Tikhonov), i bordi verrebbero sfumati.
 
-Paolo ha implementato TV e UNet, Francesco DiffPIR.''
-\end{copione}
+$\lambda$ controlla il bilanciamento. Il problema e convesso -- soluzione
+globalmente ottima.
+\end{script}
 
-\begin{note-esame}
-\textbf{Domanda probabile:} ``Perché non avete fatto Weighted TV?''
-\textbf{Risposta:} Weighted TV è un metodo ibrido tra variazionale e deep learning.
-Per un gruppo di 2 studenti, 3 metodi su 4 sono già rappresentativi delle diverse
-famiglie.
-\end{note-esame}
-
-% ===========================================================================
-% 4. DATASET
-% ===========================================================================
-\section{Slide 4 — Mendeley LBC Cervical Cancer}
-
-\slidetitle{``Mendeley LBC Cervical Cancer''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{theory.md §2} (dataset), \texttt{report.md §2} (dataset completo).
-
-\textbf{Dettaglio classi:}
+\begin{study}
 \begin{itemize}
-  \item NILM (Negative for Intraepithelial Malignancy): 63.6\% — cellule normali
-  \item HSIL (High-grade SIL): 16.9\% — lesione di alto grado
-  \item LSIL (Low-grade SIL): 11.7\% — lesione di basso grado
-  \item SCC (Squamous Cell Carcinoma): 7.7\% — carcinoma
+\item \textbf{L1 $\to$ preserva bordi; L2 $\to$ sfuma bordi}
+\item Staircasing: artefatti a gradino se $\lambda$ troppo alto
+\item Convessita: minimo globale garantito
 \end{itemize}
-Il dataset è sbilanciato ma per il task di restauro questo non è un problema,
-poiché la varietà morfologica è rappresentata in tutte le classi.
-\end{teoria}
+\end{study}
 
-\begin{copione}
-``Il dataset utilizzato è Mendeley LBC Cervical Cancer, composto da 962 immagini
-di citologia cervicale in fase liquida. Le immagini originali sono 2048 per 1536
-pixel, che ridimensioniamo a 256 per 256 per ragioni computazionali.
+\begin{qa}
+\textbf{D:} Perche L1 e non L2? \\
+\textbf{R:} L1 promuove sparsity nel gradiente (pochi bordi netti), L2 produce
+soluzioni dense (tante piccole variazioni, bordi sfumati).
+\end{qa}
 
-Le immagini sono classificate in 4 categorie diagnostiche: NILM, che sono cellule
-normali e rappresentano la maggioranza; HSIL e LSIL, che sono lesioni
-intraepiteliali di alto e basso grado; e SCC, carcinoma squamoso.
+% =============================================================================
+% SLIDE 8
+% =============================================================================
+\section{Slide 8 -- Total Variation: Algoritmo}\label{s:08}
 
-La distribuzione è sbilanciata — NILM supera il 63\% — ma per il task di restauro
-delle immagini questo non costituisce un problema: non stiamo facendo classificazione,
-e la varietà morfologica è comunque presente in tutte le classi.
+\subsection{Contenuto}
+Ottimizzazione con Adam, 150 iter, $\lambda=0.005$, clamping $[-1,1]$.
 
-A destra vediamo un esempio di confronto tra ground truth, immagine degradata e
-restauro con i tre metodi.''
-\end{copione}
+\begin{script}
+Implementazione pratica: inizializziamo $x=y$, usiamo Adam (lr 0.001), 150
+iterazioni, $\lambda=0.005$. Ad ogni passo: blur, loss, backprop, update,
+clamping in $[-1,1]$.
 
-\begin{note-esame}
-\textbf{Domande possibili:}
+Perche Adam? I gradienti TV hanno magnitudo variabile (grandi sui bordi, piccoli
+nelle zone uniformi). Adam adatta il learning rate.
+
+150 iter bastano per convergenza empirica. $\lambda=0.005$ e il miglior
+compromesso.
+\end{script}
+
+\begin{study}
 \begin{itemize}
-  \item ``Perché 962 immagini e non 4000 come menzionato?''
-  \item ``Perché il resize a 256?''
+\item Adam: learning rate adattivo, meglio di GD classico
+\item 150 iter + clamping: trade-off velocita/qualita
+\item $\lambda=0.005$: bilanciamento ottimale
 \end{itemize}
-\textbf{Risposte:} Il dataset Mendeley ha 962 immagini totali; abbiamo usato tutto
-il dataset. Il resize a 256 è un compromesso tra costo computazionale e
-preservazione dei dettagli cellulari (nuclei, cromatina).
-\end{note-esame}
+\end{study}
 
-% ===========================================================================
-% 5. PREPROCESSING E SPLIT
-% ===========================================================================
-\section{Slide 5 — Preprocessing e Split}
+% =============================================================================
+% SLIDE 9
+% =============================================================================
+\section{Slide 9 -- Total Variation: Risultati}\label{s:09}
 
-\slidetitle{``Preprocessing e Split''}
+\subsection{Contenuto}
+PSNR 32.09 dB ($\sigma_n=0.005$) $\to$ 26.54 dB ($\sigma_n=0.1$). SSIM 0.911 $\to$ 0.586.
 
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{report.md §2.2}, \texttt{theory.md §6}.
+\begin{script}
+TV eccelle a basso rumore: PSNR $>$ 32 dB, SSIM $>$ 0.9 a $\sigma_n \leq 0.01$,
+senza training. Ad alto rumore, degrada: staircasing diventa dominante, PSNR
+scende a 26.54 dB, SSIM a 0.586.
 
-Pipeline:
-\begin{enumerate}
-  \item Resize bilineare $2048 \to 256$: riduzione carico computazionale.
-  \item ToTensor $[0,255] \to [0,1]$: conversione in float per PyTorch.
-  \item Normalizzazione $(x-0.5)/0.5 \to [-1,1]$: range richiesto dal DDPM
-        (coerente con MSE loss per immagini in questo range).
-  \item Split stratificato 70/15/15 con seed 42.
-\end{enumerate}
-\end{teoria}
+La TV funziona bene quando l'assunzione piecewise-smooth e valida -- cioe a
+basso rumore.
+\end{script}
 
-\begin{copione}
-``La pipeline di preprocessing è unica per tutti i metodi.
+\begin{study}
+\begin{itemize}
+\item Eccellente a basso rumore (PSNR $>$ 32 dB)
+\item Degrada ad alto rumore (staircasing)
+\item Vantaggio: zero training richiesto
+\end{itemize}
+\end{study}
 
-Primo passo: resize bilineare da 2048 per 1536 a 256 per 256. Perdiamo risoluzione
-ma il carico computazionale diventa gestibile, e i dettagli cellulari principali
-— nuclei e cromatina — rimangono visibili.
+% =============================================================================
+% SLIDE 10
+% =============================================================================
+\section{Slide 10 -- UNet: Architettura}\label{s:10}
 
-Secondo passo: convertiamo i pixel da interi 0--255 a float 0--1 per compatibilità
-con PyTorch.
+\subsection{Contenuto}
+Encoder-decoder con skip connections, GroupNorm, input 4 canali, $\sim$1.9M params.
 
-Terzo passo: normalizziamo nell'intervallo [-1, 1] dividendo per 0.5 e sottraendo 1.
-Questo range è necessario per il modello DDPM e coerente con la loss L1 e MSE
-che lavorano meglio su segnali centrati.
+\begin{script}
+UNet: encoder comprime (16$\to$256 canali), decoder ricostruisce. Skip
+connections preservano dettagli spaziali. Ogni blocco: DoubleConv (Conv3x3 +
+GroupNorm + ReLU $\times$2).
 
-Infine, dividiamo il dataset in training 70\%, validation 15\% e test 15\%, con
-split stratificato per classe per mantenere le proporzioni e seed fisso 42 per
-riproducibilità.
+GroupNorm: piu stabile di BatchNorm con batch size piccolo (16). Input: 4 canali
+(RGB + noise map). Output: RGB + tanh. $\sim$1.9M parametri -- snello, gira su CPU.
+\end{script}
 
-Tutti i metodi usano lo stesso identico test set di 145 immagini.''
-\end{copione}
+\begin{study}
+\begin{itemize}
+\item Skip connections: preservano informazione spaziale
+\item GroupNorm $>$ BatchNorm per batch piccoli
+\item 4 canali input: condizionamento sul rumore
+\end{itemize}
+\end{study}
 
-\begin{note-esame}
-\textbf{Domanda:} ``Perché normalizzate in [-1,1] e non [0,1]?''
-\textbf{Risposta:} Il modello DDPM è addestrato per generare dati con rumore
-gaussiano centrato; il range [-1,1] è simmetrico e si sposa meglio con la
-predizione del rumore MSE. Inoltre, l'output con tanh dell'UNet produce
-naturalmente valori in [-1,1].
-\end{note-esame}
+% =============================================================================
+% SLIDE 11
+% =============================================================================
+\section{Slide 11 -- UNet: Training}\label{s:11}
 
+\subsection{Contenuto}
+Loss L1, Adam, batch 16, 50 epoche, multi-noise augmentation.
+
+\begin{script}
+Loss L1 (piu robusta della MSE agli outlier -- i dettagli fini). Adam lr
+$10^{-4}$, batch 16, 50 epoche su 673 immagini.
+
+Multi-noise augmentation: ad ogni batch, $\sigma_n$ scelto uniformemente tra i 4
+livelli. Il modello impara a gestire tutto lo spettro di rumore.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item L1 $>$ MSE: preserva dettagli fini
+\item Multi-noise: chiave della robustezza
+\item Training su CPU: 50 epoche, poche ore
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 12
+% =============================================================================
+\section{Slide 12 -- UNet: Risultati}\label{s:12}
+
+\subsection{Contenuto}
+PSNR 28.46--29.79 dB (escursione $\sim$1 dB). Inferenza 0.03 s/img.
+
+\begin{script}
+Due risultati notevoli: degradazione trascurabile col rumore ($\sim$1 dB di
+escursione su tutto lo spettro), e inferenza velocissima (0.03 s/img -- 200$\times$
+piu veloce di TV, 100$\times$ di DiffPIR).
+
+A $\sigma_n=0.1$, UNet supera TV di quasi 2 dB. A basso rumore, TV e ancora
+leggermente superiore: UNet generalizza ma paga un piccolo costo.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item Minima degradazione PSNR ($\sim$1 dB su tutto lo spettro)
+\item Inferenza 0.03 s/img: 200$\times$ piu veloce di TV
+\item Supera TV a $\sigma_n=0.1$
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 13
+% =============================================================================
+\section{Slide 13 -- DiffPIR: Panoramica}\label{s:13}
+
+\subsection{Contenuto}
+DiffPIR (CVPR 2023) = DDPM + Plug-and-Play. LightUNet custom (1.26M params).
+
+\begin{script}
+DiffPIR integra un DDPM in un framework Plug-and-Play: alterna denoising
+(DDPM) e data-fidelity (Wiener in FFT).
+
+La novita: invece di usare un modello pre-addestrato su ImageNet (500M params,
+2 GB), abbiamo addestrato una LightUNet custom da zero su 673 immagini LBC.
+1.26M parametri, $\sim$5 MB, gira su CPU.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item Plug-and-Play: denoising e data-fidelity separati
+\item Fidelity risolta in FFT: soluzione analitica
+\item LightUNet custom: specifica per citologia
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 14
+% =============================================================================
+\section{Slide 14 -- DDPM e LightUNet}\label{s:14}
+
+\subsection{Contenuto}
+DDPM: forward $q(x_t|x_{t-1})$, reverse $p_\theta(x_{t-1}|x_t)$, MSE su $\varepsilon$.
+
+\begin{script}
+DDPM: forward aggiunge rumore in 1000 step (scheduler lineare
+$\beta_1=10^{-4}$, $\beta_T=0.02$). Reverse: il modello predice il rumore
+$\varepsilon$ aggiunto, non l'immagine.
+
+LightUNet: canali base 32, encoder 32$\to$64$\to$128, time embedding sinusoidale
++ MLP per il timestep, GroupNorm + SiLU. Addestrata 30 epoche su 673 immagini.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item Il modello predice $\varepsilon$, non $x_0$
+\item Time embedding: codifica il timestep corrente
+\item 1000 step forward, ma sampling con 15 step DDIM
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 15
+% =============================================================================
+\section{Slide 15 -- Algoritmo DiffPIR}\label{s:15}
+
+\subsection{Contenuto}
+Passi: denoising $\to$ data-fidelity (FFT) $\to$ DDIM step. $\rho_t$ dinamico.
+
+\begin{script}
+Ad ogni iterazione: (1) denoising -- DDPM stima $\hat{x}_0$ da $x_t$;
+(2) data-fidelity -- soluzione di Wiener in FFT: bilancia $\hat{x}_0$ con
+l'osservazione $y$; (3) DDIM step -- sample $x_{t-1}$ da $\tilde{x}_0$.
+
+$\rho_t$ e dinamico: alto a $t$ grande (prior pesa di piu), basso a $t$ piccolo
+(pesano i dati). Usiamo 15 step DDIM anziche 1000 per accelerare.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item Tre passi: denoise, fidelity, sample
+\item Fidelity in FFT: convoluzione $\to$ moltiplicazione (efficiente)
+\item $\rho_t$ dinamico: bilanciamento adattivo
+\item 15 step DDIM: sampling sub-campionato
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 16
+% =============================================================================
+\section{Slide 16 -- DiffPIR: Risultati}\label{s:16}
+
+\subsection{Contenuto}
+PSNR 15.78 dB ($\sigma_n=0.005$) $\to$ 25.46 dB ($\sigma_n=0.1$).
+
+\begin{script}
+DiffPIR ha comportamento inverso: PSNR \emph{cresce} col rumore. Da 15.78 dB a
+$\sigma_n=0.005$ (peggiore di tutti) a 25.46 dB a $\sigma_n=0.1$ (miglioramento).
+
+A basso rumore: il modello \emph{allucina} dettagli -- il prior generativo
+sovrascrive quelli reali. Ad alto rumore: il prior aiuta a ricostruire cio che
+manca.
+
+Questo e un esempio perfetto di \textbf{bias-variance trade-off}: a $\sigma_n$
+basso il bias domina, a $\sigma_n$ alto la varianza e ridotta dal prior.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item \textbf{Trend inverso:} PSNR migliora col rumore
+\item Allucinazione a basso $\sigma_n$: prior sovrascrive dettagli
+\item Bias-variance trade-off: menzionarlo all'esame!
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 17
+% =============================================================================
+\section{Slide 17 -- Implementazione}\label{s:17}
+
+\subsection{Contenuto}
+Struttura repository: moduli separati, pipeline condivisa, 34 test.
+
+\begin{script}
+Repo modulare: ogni metodo in \texttt{src/methods/} con script indipendenti.
+Pipeline condivisa: degradazione, metriche, plotting. 34 test unitari. Seed 42
+per riproducibilita.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item Modularita: ogni metodo e indipendente
+\item Pipeline condivisa: confronto equo
+\item 34 test: copertura di degradazione, metriche, metodi
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 18
+% =============================================================================
+\section{Slide 18 -- Confronto PSNR / SSIM}\label{s:18}
+
+\subsection{Contenuto}
+Tabella riassuntiva dei risultati quantitativi.
+
+\begin{script}
+Tabella centrale del confronto. TV domina a $\sigma_n \leq 0.01$ (PSNR $>$ 32 dB,
+SSIM $>$ 0.9). A $\sigma_n=0.05$: TV ha PSNR piu alto, UNet ha SSIM migliore
+(0.864 vs 0.837). A $\sigma_n=0.1$: UNet nettamente superiore (PSNR 28.46 vs 26.54,
+SSIM 0.795 vs 0.586). DiffPIR migliora col rumore ma resta sotto.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item TV: eccellente a basso rumore
+\item UNet: robusto su tutto lo spettro, migliore ad alto
+\item DiffPIR: complementare, migliora col rumore
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 19
+% =============================================================================
+\section{Slide 19 -- Grafico Comparativo}\label{s:19}
+
+\subsection{Contenuto}
+Grafico PSNR e SSIM vs $\sigma_n$ per i tre metodi.
+
+\begin{script}
+Il grafico visualizza le metriche. Linee TV e UNet quasi piatte in PSNR,
+divergenti in SSIM -- perche il PSNR e meno sensibile alla struttura. TV crolla
+in SSIM dopo $\sigma_n=0.05$ (staircasing). DiffPIR ha pendenza crescente.
+
+L'incrocio TV/UNet a $\sigma_n\approx0.05$ segna il punto in cui il metodo
+classico cede al deep learning.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item PSNR piatto, SSIM divergente: perche? Struttura vs pixel
+\item Incrocio TV/UNet a $\sigma_n\approx0.05$
+\item DiffPIR: trend crescente in entrambe le metriche
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 20
+% =============================================================================
+\section{Slide 20 -- Griglia Completa}\label{s:20}
+
+\subsection{Contenuto}
+Griglia visiva: metodi $\times$ livelli di rumore.
+
+\begin{script}
+Griglia che confronta visivamente i metodi per ogni livello di rumore.
+TV: pulita a sinistra, degrada a destra. UNet: uniforme su tutta la griglia.
+DiffPIR: migliora da sinistra a destra. Conferma visiva delle metriche.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item Correlazione visiva-metriche: la griglia conferma la tabella
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 21
+% =============================================================================
+\section{Slide 21 -- Confronto Visivo $\sigma_n=0.01$}\label{s:21}
+
+\subsection{Contenuto}
+Confronto visivo a basso rumore.
+
+\begin{script}
+A $\sigma_n=0.01$, TV e UNet sono eccellenti, quasi indistinguibili dalla GT.
+DiffPIR mostra gia artefatti generativi: allucina dettagli inesistenti.
+Il crop ingrandito evidenzia le differenze nei nuclei cellulari.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item A basso rumore: TV e UNet funzionano, DiffPIR no
+\item Crop: dettaglio sui nuclei
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 22
+% =============================================================================
+\section{Slide 22 -- Confronto Visivo $\sigma_n=0.05$}\label{s:22}
+
+\subsection{Contenuto}
+Confronto visivo a medio rumore.
+
+\begin{script}
+A $\sigma_n=0.05$, primo cambio di regime. TV mostra staircasing: l'immagine
+e squadrata. UNet mantiene buona qualita -- inizia il vantaggio del DL. DiffPIR
+migliora rispetto a $\sigma_n=0.01$: texture piu plausibili.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item TV: staircasing visibile
+\item UNet: inizia a superare TV (visivamente)
+\item DiffPIR: texture piu realistiche
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 23
+% =============================================================================
+\section{Slide 23 -- Confronto Visivo $\sigma_n=0.1$}\label{s:23}
+
+\subsection{Contenuto}
+Confronto visivo ad alto rumore + mappe di differenza.
+
+\begin{script}
+A $\sigma_n=0.1$, le differenze sono massime. TV: staircasing dominante, PSNR
+26.54 dB, SSIM 0.586. UNet: il migliore, PSNR 28.46 dB, pulito e riconoscibile.
+DiffPIR: texture realistiche ma PSNR 25.46 dB.
+
+Le mappe di differenza ($|\hat{x} - x_{\text{GT}}|$) sono rivelatrici: TV ha
+errori strutturati a blocchi, UNet ha errori minimi e isotropi, DiffPIR ha
+errori concentrati dove ha allucinato.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item $\sigma_n=0.1$: massima divergenza tra i metodi
+\item Mappe di differenza: errore strutturato (TV) vs isotropo (UNet)
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 24
+% =============================================================================
+\section{Slide 24 -- Confronto tra le Famiglie}\label{s:24}
+
+\subsection{Contenuto}
+Pro e contro di ogni famiglia metodologica.
+
+\begin{script}
+Riassunto: TV -- no training, interpretabile, eccellente a basso rumore ma
+staircasing. UNet -- velocissimo ($0.03$ s/img), robusto, ma richiede dati
+supervisionati. DiffPIR -- texture realistiche, migliora col rumore, ma lento
+($3$ s/img) e allucina a basso rumore.
+
+Nessuno domina tutti i regimi. La scelta dipende dal contesto.
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item Tre trade-off diversi: velocita, qualita, generalizzazione
+\item Nessun metodo universalmente migliore
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 25
+% =============================================================================
+\section{Slide 25 -- Regimi di Funzionamento}\label{s:25}
+
+\subsection{Contenuto}
+Tabella scenario $\times$ metodo: chi scegliere in ogni regime.
+
+\begin{script}
+Tabella riassuntiva: basso rumore $\to$ TV (eccellente); medio rumore $\to$
+UNet (molto buono); alto rumore $\to$ UNet (migliore), DiffPIR (buono).
+Velocita: UNet ($0.03$ s) $>$ DiffPIR ($3$ s) $>$ TV ($7$ s).
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item Basso $\sigma_n$: TV
+\item Medio-alto $\sigma_n$: UNet
+\item Alto $\sigma_n$: considerare DiffPIR se texture importanti
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 26
+% =============================================================================
+\section{Slide 26 -- Conclusioni}\label{s:26}
+
+\subsection{Contenuto}
+Conclusioni e takeaway del progetto.
+
+\begin{script}
+Tre risultati principali:
+(1) UNet e il miglior compromesso: robusto su tutto lo spettro, velocissimo.
+(2) Il confronto equo e il vero contributo: stessa pipeline, stesse metriche.
+(3) Nessun metodo domina tutti i regimi: la scelta e contesto-dipendente.
+
+Grazie per l'attenzione!
+\end{script}
+
+\begin{study}
+\begin{itemize}
+\item Tre takeaway chiari
+\item Enfatizzare il confronto equo come contributo
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% SLIDE 27
+% =============================================================================
+\section{Slide 27 -- Riferimenti}\label{s:27}
+
+\subsection{Contenuto}
+Bibliografia: DiffPIR (CVPR 2023), DDPM (NeurIPS 2020), DDIM (ICLR 2021), etc.
+
+\begin{study}
+\begin{itemize}
+\item Conoscere i paper principali (almeno titolo e conferenza)
+\item DiffPIR: Zhu et al., CVPR 2023
+\item DDPM: Ho et al., NeurIPS 2020
+\item DDIM: Song et al., ICLR 2021
+\end{itemize}
+\end{study}
+
+% =============================================================================
+% Appendice: strategia di esposizione
+% =============================================================================
 \newpage
+\section*{Strategia di Esposizione}
+\addcontentsline{toc}{section}{Strategia di Esposizione}
 
-% ===========================================================================
-% 6. DEGRADAZIONE
-% ===========================================================================
-\section{Slide 6 — Degradazione}
-
-\slidetitle{``Degradazione''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{theory.md §1}, \texttt{report.md §3.2},
-\texttt{src/degradation/README.md}.
-
-Parametri identici per tutti i metodi:
-\begin{itemize}
-  \item Blur gaussiano: kernel $9\times9$, $\sigma_{\text{blur}} = 2$.
-        La scelta di $\sigma=2$ produce uno sfocamento moderato che cancella
-        dettagli fini (membrane cellulari, bordi nucleari) senza rendere
-        l'immagine irriconoscibile.
-  \item AWGN: $\sigma_n \in \{0.005, 0.01, 0.05, 0.1\}$.
-        4 livelli permettono di studiare la transizione tra regimi.
-\end{itemize}
-\end{teoria}
-
-\begin{copione}
-``Questa slide mostra la pipeline di degradazione, che è identica per tutti i
-metodi. È il punto fondamentale per garantire un confronto equo: le differenze
-nei risultati sono dovute solo ai metodi, non alla degradazione.
-
-Applichiamo prima un blur gaussiano con sigma 2 e kernel 9 per 9. Abbiamo scelto
-sigma 2 perché produce una sfocatura visibile ma non estrema, cancellando dettagli
-come membrane cellulari e bordi dei nuclei senza rendere l'immagine irriconoscibile.
-
-Poi aggiungiamo rumore AWGN a quattro livelli di deviazione standard: 0.005,
-0.01, 0.05 e 0.1. Questi quattro livelli ci permettono di studiare come si
-comportano i metodi in regimi diversi: da rumore trascurabile a rumore significativo.
-
-La pipeline è implementata in un unico file \texttt{src/degradation/degradation.py},
-usato da tutti i metodi. Il seed 42 garantisce riproducibilità.
-
-A destra vediamo una striscia di immagini che mostra l'effetto dei diversi livelli
-di rumore su un crop.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Perché proprio questi quattro livelli di rumore?''
-\textbf{Risposta:} I quattro livelli coprono regimi qualitativamente diversi:
-0.005 è rumore trascurabile (PSNR teoricamente alto), 0.01 è rumore leggero,
-0.05 è rumore moderato, 0.1 è rumore pesante. Questo permette di vedere la
-transizione completa del comportamento dei metodi.
-\end{note-esame}
-
-% ===========================================================================
-% 7. TV TEORIA
-% ===========================================================================
-\section{Slide 7 — Total Variation: Teoria}
-
-\slidetitle{``Total Variation — Teoria''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{theory.md §3.1}, \texttt{report.md §4.1}.
-
-\textbf{Formulazione matematica:}
-\[
-\hat{x} = \arg\min_x \underbrace{\|H*x - y\|_2^2}_{\text{data fidelity}} + \lambda \cdot \underbrace{TV(x)}_{\text{regolarizzazione}}
-\]
-
-\textbf{Total Variation:}
-\[
-TV(x) = \sum_{i,j} |x_{i+1,j} - x_{i,j}| + |x_{i,j+1} - x_{i,j}|
-\]
-
-\textbf{Proprietà:}
-\begin{itemize}
-  \item La norma L1 del gradiente preserva i bordi (a differenza della
-        regolarizzazione Tikhonov che usa norma L2 e sfuma i bordi).
-  \item Effetto staircasing: a $\lambda$ troppo alto, l'immagine sviluppa
-        artefatti a gradino nelle regioni a gradiente dolce.
-  \item Convexità: il problema è convesso, quindi la soluzione è globalmente
-        ottima indipendentemente dall'inizializzazione.
-\end{itemize}
-\end{teoria}
-
-\begin{copione}
-``Cominciamo con il primo metodo: la Total Variation.
-
-L'idea è semplice: cerchiamo l'immagine $x$ che minimizza un funzionale composto
-da due termini. Il primo termine è la fedeltà ai dati: l'immagine $x$ deve essere
-coerente con l'osservazione $y$ dopo aver applicato il blur $H$. Il secondo
-termine è la regolarizzazione TV, che penalizza le variazioni locali.
-
-La TV è la somma, su tutti i pixel, delle differenze in valore assoluto tra
-pixel adiacenti, sia in orizzontale che in verticale. È essenzialmente la norma
-L1 del gradiente dell'immagine. Usare la norma L1, invece della L2, è una scelta
-fondamentale: permette di preservare i bordi netti. Se usassimo L2 — che è la
-regolarizzazione di Tikhonov — i bordi verrebbero sfumati, perché la norma L2
-penalizza molto di più le grandi differenze.
-
-Il parametro lambda controlla il bilanciamento. Con lambda troppo basso, il
-rumore residuo è visibile. Con lambda troppo alto, appare l'effetto staircasing:
-le regioni a gradiente dolce sviluppano artefatti a gradino.
-
-Un vantaggio importante: il problema è convesso, quindi la soluzione è globalmente
-ottima.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domande chiave:}
-\begin{itemize}
-  \item ``Perché TV usa L1 e non L2?''
-  \item ``Cos'è lo staircasing?''
-  \item ``Perché il problema è convesso?''
-\end{itemize}
-\textbf{Approfondimento:} Il professore potrebbe chiedere il collegamento con
-il corso di Ottimizzazione: la norma L1 promuove soluzioni sparse (nel gradiente),
-mentre la L2 promuove soluzioni dense ma piccole.
-\end{note-esame}
-
-\begin{concetto}
-\textbf{TV = $\|\nabla x\|_1$} — somma dei gradienti in valore assoluto.
-\begin{itemize}
-  \item \textbf{L1} (TV): $|x_{i+1,j} - x_{i,j}|$ — penalizza meno i bordi
-        $\Rightarrow$ \textbf{preserva i bordi}
-  \item \textbf{L2} (Tikhonov): $(x_{i+1,j} - x_{i,j})^2$ — penalizza molto
-        le grandi differenze $\Rightarrow$ \textbf{sfuma i bordi}
-\end{itemize}
-\textbf{Collegamento con Ottimizzazione:} L1 promuove soluzioni \emph{sparse}
-nel gradiente (pochi bordi netti), L2 promuove soluzioni \emph{dense} ma piccole
-(tante piccole variazioni). \\[0.2cm]
-\textbf{All'orale:} se il professore chiede ``Perché L1 e non L2?'', partite
-dal confronto delle derivate e concludete con la sparsity.
-\end{concetto}
-
-% ===========================================================================
-% 8. TV ALGORITMO
-% ===========================================================================
-\section{Slide 8 — Total Variation: Algoritmo}
-
-\slidetitle{``Total Variation — Algoritmo''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{src/methods/tv/tv.py}.
-
-\textbf{ADAM come ottimizzatore:}
-\begin{itemize}
-  \item Learning rate adattivo per canale: utile quando i gradienti TV hanno
-        magnitudo variabile.
-  \item 150 iterazioni: sufficienti per convergenza empirica.
-  \item Clamping in [-1,1] dopo ogni step: vincolo di box sul dominio.
-\end{itemize}
-\end{teoria}
-
-\begin{copione}
-``Vediamo l'algoritmo nel dettaglio.
-
-Inizializziamo $x$ con l'immagine degradata $y$ e settiamo lambda a 0.005.
-Usiamo l'ottimizzatore Adam con learning rate 0.001.
-
-Ad ogni iterazione: applichiamo il blur a $x$, calcoliamo la loss come somma
-della fedeltà ai dati e della TV, facciamo backpropagation per ottenere il
-gradiente, aggiorniamo $x$ con Adam, e infine clampiamo in [-1, 1] per
-rispettare il dominio dell'immagine.
-
-Perché Adam? Perché i gradienti della TV possono avere magnitudo variabile
-attraverso l'immagine — vicino ai bordi sono grandi, nelle zone uniformi sono
-piccoli — e Adam adatta il learning rate per canale.
-
-Perché 150 iterazioni? Abbiamo verificato empiricamente che la loss si
-stabilizza entro 150 iterazioni per i nostri parametri.
-
-Perché lambda 0.005? L'abbiamo scelto come bilanciamento ottimale dopo test:
-a 0.001 resta troppo rumore, a 0.1 lo staircasing è evidente, a 0.005
-otteniamo il miglior compromesso.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Perché non usate un metodo classico come il gradient descent
-invece di Adam?''
-\textbf{Risposta:} Adam converge più velocemente e in modo più stabile grazie
-ai learning rate adattivi, specialmente con funzioni obiettivo non lisce come
-la TV (la norma L1 non è differenziabile in zero; usiamo il subgradiente).
-\end{note-esame}
-
-% ===========================================================================
-% 9. TV RISULTATI
-% ===========================================================================
-\section{Slide 9 — Total Variation: Risultati}
-
-\slidetitle{``Total Variation — Risultati''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{src/methods/tv/README.md}, \texttt{report.md §4.4}.
-
-\textbf{Risultati quantitativi:}
-\begin{itemize}
-  \item $\sigma_n = 0.005$: PSNR 32.09 dB, SSIM 0.911 — eccellente.
-  \item $\sigma_n = 0.1$: PSNR 26.54 dB, SSIM 0.586 — degrado significativo.
-  \item La TV eccelle a basso rumore perché il prior TV cattura bene le
-        caratteristiche delle immagini naturali (piecewise smooth).
-  \item Ad alto rumore, la TV non riesce a discriminare rumore da dettagli fini.
-\end{itemize}
-\end{teoria}
-
-\begin{copione}
-``I risultati della TV sono chiari: a basso rumore, sigma 0.005 e 0.01, la TV
-ottiene PSNR superiori a 32 dB e SSIM sopra 0.9. È un risultato eccellente per
-un metodo che non richiede alcun training.
-
-Tuttavia, la qualità degrada progressivamente con il rumore. A sigma 0.1, il
-PSNR scende a 26.54 dB e lo SSIM a 0.586: lo staircasing diventa evidente e
-la TV non riesce più a distinguere il rumore dai dettagli fini delle cellule.
-
-Nell'immagine a destra si vede qualitativamente: a sigma 0.005 il restauro è
-quasi perfetto, ma a sigma 0.1 l'immagine appare eccessivamente squadrata
-e perde dettagli.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Perché TV funziona meglio proprio a basso rumore?''
-\textbf{Risposta:} La TV assume che le immagini siano piecewise smooth, il che
-è vero per le immagini naturali. A basso rumore, questa assunzione è sufficiente
-per separare segnale da rumore. Ad alto rumore, i dettagli fini si confondono
-con il rumore e vengono rimossi insieme.
-\end{note-esame}
-
-% ===========================================================================
-% 10. UNET ARCHITETTURA
-% ===========================================================================
-\section{Slide 10 — UNet: Architettura}
-
-\slidetitle{``UNet — Architettura''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{report.md §4.2, 4.3}, \texttt{src/methods/unet/unet.py}.
-
-\textbf{Architettura:}
-\begin{itemize}
-  \item Encoder: 16 $\to$ 32 $\to$ 64 $\to$ 128 $\to$ 256 canali.
-  \item Decoder: simmetrico con skip connections.
-  \item Blocco DoubleConv: Conv3x3 + GroupNorm + ReLU (2 volte).
-  \item Input: 4 canali (RGB + noise map condizionamento).
-  \item Output: 3 canali RGB + tanh.
-  \item ~1.9 milioni di parametri.
-\end{itemize}
-
-\textbf{Perché GroupNorm invece di BatchNorm?} BatchNorm si comporta male con
-batch size piccoli; GroupNorm è più stabile e non dipende dalla dimensione del batch.
-\end{teoria}
-
-\begin{copione}
-``Passiamo all'UNet, il metodo di deep learning end-to-end.
-
-L'architettura è un encoder-decoder con skip connections. L'encoder comprime
-l'immagine in rappresentazioni astratte raddoppiando i canali ad ogni livello:
-da 16 fino a 256. Il decoder fa il percorso inverso, ricostruendo l'immagine.
-
-Le skip connections collegano ogni livello dell'encoder al corrispondente livello
-del decoder: questo permette di preservare i dettagli spaziali fini, come i
-nuclei cellulari, che altrimenti si perderebbero nel collo di bottiglia.
-
-Ogni blocco è una DoubleConv, cioè due convoluzioni 3 per 3 seguite da GroupNorm
-e ReLU. Usiamo GroupNorm invece di BatchNorm perché è più stabile con batch
-size piccoli — e noi usiamo batch 16.
-
-L'input ha 4 canali: RGB più una mappa del rumore per condizionare il modello
-sul livello di rumore. L'output è RGB con attivazione tanh per il range [-1, 1].
-
-La rete ha circa 1.9 milioni di parametri, un modello snello e gestibile su CPU.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domande:}
-\begin{itemize}
-  \item ``Perché GroupNorm?''
-  \item ``Perché 4 canali in input?''
-  \item ``Perché le skip connections sono importanti?''
-\end{itemize}
-\textbf{Approfondimento:} Le skip connections risolvono il problema del
-\emph{vanishing gradient} e preservano informazioni spaziali che altrimenti
-sarebbero perse nel bottleneck.
-\end{note-esame}
-
-% ===========================================================================
-% 11. UNET TRAINING
-% ===========================================================================
-\section{Slide 11 — UNet: Training}
-
-\slidetitle{``UNet — Training''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{report.md §4.3.3}, \texttt{src/methods/unet/unet.py}.
-
-\textbf{Configurazione training:}
-\begin{itemize}
-  \item Loss L1 (MAE): più robusta agli outlier rispetto a MSE; preserva meglio
-        i dettagli fini.
-  \item Adam, lr $10^{-4}$: learning rate conservativo per convergenza stabile.
-  \item Batch size 16: compromesso tra stima del gradiente e memoria CPU.
-  \item 50 epoche: sufficienti per convergenza su 673 immagini.
-  \item Multi-noise augmentation: $\sigma_n$ uniforme per batch.
-\end{itemize}
-\end{teoria}
-
-\begin{copione}
-``Il training usa la loss L1, che abbiamo preferito alla MSE perché è più robusta
-agli outlier — e nel restauro di immagini, gli outlier corrispondono a dettagli
-fini importanti che vogliamo preservare. L'ottimizzatore è Adam con learning rate
-conservativo $10^{-4}$.
-
-Usiamo batch size 16 e 50 epoche, sufficienti per convergere sui 673 esempi
-di training.
-
-L'aspetto chiave è la multi-noise augmentation: ad ogni batch, il livello di rumore
-viene scelto uniformemente tra i quattro disponibili. Questo rende il modello
-robusto su tutto lo spettro di rumore e previene l'overfitting su un singolo
-livello.
-
-Ad ogni epoca validiamo sul validation set e salviamo il modello con il miglior
-PSNR. Il training è stato eseguito su CPU, circa 50 epoche in alcune ore.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Perché L1 invece di MSE?''
-\textbf{Risposta:} La MSE è una loss L2, che penalizza quadraticamente gli errori
-grandi. Questo tende a produrre immagini più lisce perché il modello evita errori
-grandi sui bordi, sfumandoli. La L1 è più tollerante ai bordi netti e preserva
-meglio i dettagli.
-\end{note-esame}
-
-% ===========================================================================
-% 12. UNET RISULTATI
-% ===========================================================================
-\section{Slide 12 — UNet: Risultati}
-
-\slidetitle{``UNet — Risultati''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{src/methods/unet/README.md}, \texttt{report.md §4.4}.
-
-\textbf{Risultati:}
-\begin{itemize}
-  \item PSNR: 28.46--29.79 dB — escursione minima di circa 1 dB.
-  \item SSIM: 0.795--0.896.
-  \item Tempo inferenza: 0.026--0.030 s/img.
-  \item Supera TV a $\sigma_n = 0.1$ (28.46 vs 26.54 dB).
-\end{itemize}
-\end{teoria}
-
-\begin{copione}
-``I risultati dell'UNet sono notevoli per due aspetti. Primo: la degradazione
-tra il livello di rumore più basso e quello più alto è minima, circa 1 dB.
-Questo significa che UNet è robusto su tutto lo spettro di rumore, grazie
-proprio alla multi-noise augmentation.
-
-Secondo: l'inferenza è velocissima — circa 0.03 secondi per immagine, oltre
-200 volte più veloce della TV e 100 volte più veloce di DiffPIR.
-
-Qualitativamente, l'UNet produce immagini visivamente buone a tutti i livelli.
-A sigma 0.1, supera la TV con un margine di quasi 2 dB di PSNR.
-
-Tuttavia, è interessante notare che a basso rumore sigma 0.005 e 0.01, l'UNet
-non raggiunge la TV in PSNR. Questo perché il prior appreso generalizza ma
-non è specifico per ogni livello di rumore, mentre la TV con lambda ottimale
-è più precisa a basso rumore.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Perché la TV supera UNet a basso rumore?''
-\textbf{Risposta:} La TV è un modello deterministico con parametri ottimizzati
-per ogni sigma; l'UNet generalizza su tutti i livelli e paga un piccolo costo
-in precisione a basso rumore in cambio di robustezza ad alto rumore.
-\end{note-esame}
-
-\begin{attenzione}
-\textbf{PSNR alto $\neq$ qualità visiva.} Non cadete nella trappola di giudicare
-la qualità solo dal PSNR!
-\begin{itemize}
-  \item A $\sigma_n = 0.05$: TV ha PSNR \textbf{30.42\,dB} vs UNet \textbf{29.44\,dB}
-        (TV ``vince''), ma visivamente UNet è migliore e lo SSIM lo conferma
-        (UNet 0.864 vs TV 0.837).
-  \item \textbf{Perché?} Il PSNR misura l'errore pixel-pixel, non la struttura.
-        Lo SSIM cattura similarità di contrasto, luminosità e struttura.
-\end{itemize}
-\textbf{All'orale:} se vi chiedono ``Qual è il metodo migliore?'', non date
-una risposta univoca. Strutturate: ``Dipende dalla metrica e dal regime di
-rumore. A basso rumore TV è migliore in PSNR, ma UNet è più robusto
-complessivamente.''
-\end{attenzione}
-
-\newpage
-
-% ===========================================================================
-% 13. DIFFPIR PANORAMICA
-% ===========================================================================
-\section{Slide 13 — DiffPIR: Panoramica}
-
-\slidetitle{``DiffPIR — Panoramica''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{report.md §5.1}, \texttt{theory.md §3.3}.
-
-\textbf{Concept:}
-\begin{itemize}
-  \item DiffPIR (Y. Zhu et al., CVPR 2023) integra un modello DDPM in un
-        framework Plug-and-Play (P\&P).
-  \item P\&P: separa il prior (denoising) dalla fedeltà ai dati, alternando
-        i due step.
-  \item Il prior nel nostro caso è un DDPM addestrato sulle nostre immagini LBC.
-  \item La fedeltà ai dati è risolta analiticamente nel dominio di Fourier.
-\end{itemize}
-\end{teoria}
-
-\begin{copione}
-``Passiamo a DiffPIR, il metodo generativo implementato da Francesco.
-
-DiffPIR è un algoritmo proposto da Zhu et al. al CVPR 2023. L'idea è integrare
-un modello di diffusione — un DDPM — dentro un framework Plug-and-Play.
-Plug-and-Play significa che separiamo il prior dalla fedeltà ai dati: il prior
-è dato dal modello di diffusione che denoisa l'immagine, mentre la fedeltà
-ai dati è risolta analiticamente nel dominio della frequenza.
-
-La novità principale del nostro progetto rispetto all'articolo originale è che
-noi non usiamo un modello pre-addestrato su ImageNet, che ha 500 milioni di
-parametri e pesa 2 GB. Abbiamo invece addestrato una LightUNet custom da zero
-sulle nostre 673 immagini LBC. Questo modello ha solo 1.26 milioni di parametri
-e pesa circa 5 MB.
-
-È specifico per il dominio citologico e giriamo sia training che inferenza su CPU.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Cosa significa Plug-and-Play?''
-\textbf{Risposta:} In P\&P, il problema inverso viene risolto con un algoritmo
-di splitting (es. ADMM o HQS) dove il termine di regolarizzazione viene sostituito
-da un denoiser esterno. Il denoiser può essere qualsiasi — BM3D, CNN, o un DDPM —
-e si alterna con un passo di data-fidelity.
-\end{note-esame}
-
-% ===========================================================================
-% 14. DDPM E LIGHTUNET
-% ===========================================================================
-\section{Slide 14 — DDPM e LightUNet}
-
-\slidetitle{``DDPM e LightUNet''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{theory.md §3.3}, \texttt{src/methods/diffpir/model.py}.
-
-\textbf{DDPM (Ho et al., NeurIPS 2020):}
-\begin{itemize}
-  \item Forward: $q(x_t|x_{t-1}) = \mathcal{N}(\sqrt{1-\beta_t}x_{t-1}, \beta_t I)$
-  \item Reverse: $p_\theta(x_{t-1}|x_t) = \mathcal{N}(\mu_\theta(x_t,t), \Sigma_\theta)$
-  \item Training: MSE su $\varepsilon_\theta(x_t, t)$
-  \item Scheduler lineare: $\beta_1=10^{-4}$, $\beta_T=0.02$, 1000 timestep
-\end{itemize}
-
-\textbf{LightUNet:}
-\begin{itemize}
-  \item Canali base: 32 $\to$ encoder 32/64/128
-  \item Time embedding sinusoidale (dim=128) + MLP
-  \item GroupNorm (8 gruppi) + SiLU
-  \item Training: 30 epoche, 673 immagini LBC
-\end{itemize}
-\end{teoria}
-
-\begin{copione}
-``Approfondiamo il modello di diffusione.
-
-Il DDPM definisce un processo forward in cui aggiungiamo gradualmente rumore
-gaussiano all'immagine per 1000 timestep, secondo uno scheduler lineare che
-parte da $\beta_1=10^{-4}$ e arriva a $\beta_T=0.02$. Il modello impara a invertire questo
-processo: dato $x_t$ rumoroso, predice il rumore $\varepsilon$ che è stato
-aggiunto.
-
-La nostra LightUNet ha una struttura più snella della UNet usata per il restauro:
-canali base 32, tre livelli encoder da 32 a 64 a 128, skip connections, time
-embedding sinusoidale con MLP per codificare il timestep, GroupNorm e SiLU
-come attivazione.
-
-L'abbiamo addestrata per 30 epoche sulle 673 immagini LBC con la loss MSE
-standard del DDPM: il modello riceve $x_t$ e il timestep $t$, e deve predire
-il rumore $\varepsilon$ che è stato aggiunto.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domande possibili:}
-\begin{itemize}
-  \item ``Come funziona il forward process?''
-  \item ``Cosa predice esattamente il modello?''
-  \item ``Cos'è il sinusoidal time embedding?''
-\end{itemize}
-\textbf{Approfondimento:} Il modello NON predice l'immagine $x_0$ ma il rumore
-$\varepsilon$. La formula per ottenere $x_0$ da $\varepsilon$ è:
-$\hat{x}_0 = (x_t - \sqrt{1-\bar{\alpha}_t} \varepsilon) / \sqrt{\bar{\alpha}_t}$.
-\end{note-esame}
-
-% ===========================================================================
-% 15. ALGORITMO DIFFPIR
-% ===========================================================================
-\section{Slide 15 — Algoritmo DiffPIR}
-
-\slidetitle{``Algoritmo DiffPIR''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{theory.md §3.3}, \texttt{report.md §5.2},
-\texttt{src/methods/diffpir/diffpir.py}.
-
-\textbf{Passi dell'algoritmo:}
+\subsection*{Prima dell'esame}
 \begin{enumerate}
-  \item Denoising step: $\hat{x}_0^{(t)} = \frac{x_t - \sqrt{1-\bar{\alpha}_t}\,\varepsilon_\theta(x_t,t)}{\sqrt{\bar{\alpha}_t}}$
-  \item Data-fidelity step (FFT):
-        \[
-        \tilde{x}_0 = \mathcal{F}^{-1}\!\left(\frac{\mathcal{F}(y)\overline{\mathcal{F}(k)} + \rho_t\mathcal{F}(\hat{x}_0)}{|\mathcal{F}(k)|^2 + \rho_t}\right)
-        \]
-  \item DDIM step: $x_{t-1} \gets$ sampling da $\tilde{x}_0$
+\item Leggi il copione slide per slide
+\item Per ogni slide, spiega il contenuto \textbf{a voce alta} senza leggere
+\item Verifica di saper rispondere alle domande tipiche
+\item Esercitati con un timer: 15--20 minuti totali
 \end{enumerate}
 
-\textbf{Peso dinamico:}
-$\rho_t = \lambda \cdot \frac{\sigma^2 \cdot \bar{\alpha}_t}{1 - \bar{\alpha}_t}$
-
-Il data-fidelity step è la soluzione del problema di Wiener nel dominio
-della frequenza. A $t$ grande ($\bar{\alpha}_t$ piccolo), $\rho_t$ è grande
-e il passo privilegia il prior; a $t$ piccolo, $\rho_t$ è piccolo e si
-privilegia la fedeltà ai dati.
-\end{teoria}
-
-\begin{copione}
-``L'algoritmo DiffPIR alterna due passi ad ogni iterazione.
-
-Partiamo dall'immagine degradata $y$. Calcoliamo una volta la trasformata di
-Fourier del kernel di blur — la OTF, Optical Transfer Function.
-
-Poi, per ogni timestep $t$ da $t_{\text{start}}$ a 1, facciamo:
-primo, il denoising step: il DDPM predice il rumore $\varepsilon$, e da questo
-ricaviamo una stima $\hat{x}_0$ dell'immagine pulita.
-
-Secondo, il data-fidelity step: vogliamo che l'immagine sia coerente con
-l'osservazione $y$ dato il blur. Questo è un problema di Wiener che si risolve
-analiticamente nel dominio di Fourier. L'equazione mostra la soluzione in forma
-chiusa.
-
-Il parametro $\rho_t$ controlla il bilanciamento tra prior e fedeltà ai dati.
-È dinamico: a timestep alti, quando l'immagine è molto rumorosa, $\rho_t$ è
-grande e diamo più peso al prior. Scendendo, il peso si riduce e prevale
-la fedeltà ai dati.
-
-Usiamo 15 step DDIM invece dei 1000 del DDPM completo: è un sampling
-sub-campionato che accelera notevolmente l'inferenza.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Perché la soluzione nel dominio di Fourier?''
-\textbf{Risposta:} Perché la convoluzione nel dominio spaziale diventa una
-moltiplicazione puntuale nel dominio di Fourier. Il problema di minimizzazione
-si riduce a un'equazione algebrica risolta punto per punto. È molto più
-efficiente che risolvere il problema nello spazio originale.
-\end{note-esame}
-
-% ===========================================================================
-% 16. DIFFPIR RISULTATI
-% ===========================================================================
-\section{Slide 16 — DiffPIR: Risultati}
-
-\slidetitle{``DiffPIR — Parametri e Risultati''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{report.md §5.3}, \texttt{src/methods/diffpir/README.md}.
-
-\textbf{Risultati:}
+\subsection*{Durante l'esposizione}
 \begin{itemize}
-  \item $\sigma_n = 0.005$: PSNR 15.78 dB, SSIM 0.329 — il più basso.
-  \item $\sigma_n = 0.1$: PSNR 25.46 dB, SSIM 0.766 — il più alto.
-  \item Comportamento inverso rispetto agli altri metodi: PSNR cresce col rumore.
+\item \textbf{Slide 2} (Problema Inverso): parti da $y = Hx + n$ -- e il fondamento
+\item \textbf{Slide 7} (TV): enfatizza L1 vs L2 e staircasing
+\item \textbf{Slide 18} (Confronto): usa la tabella come punto di riferimento
+\item \textbf{Slide 23} (Mappe differenza): mostra visivamente le differenze
+\item \textbf{Conclusione}: UNet miglior compromesso, ma non universalmente
 \end{itemize}
-\end{teoria}
 
-\begin{copione}
-``I risultati di DiffPIR mostrano un comportamento sorprendente ma coerente
-con la teoria dei modelli generativi.
-
-A basso rumore, sigma 0.005, DiffPIR ottiene solo 15.78 dB di PSNR: il modello
-generativo \emph{inventa} dettagli che non esistono — l'effetto allucinazione —
-perché il suo prior generativo sovrascrive i dettagli fini già presenti.
-
-Man mano che il rumore aumenta, però, il PSNR migliora progressivamente, fino
-a 25.46 dB a sigma 0.1. Questo perché ad alto rumore, l'informazione è già
-degradata e il prior generativo aiuta a ricostruire ciò che manca.
-
-Il punto chiave è: DiffPIR non compete con TV e UNet a basso rumore, ma
-mostra il potenziale dei metodi generativi proprio dove gli altri falliscono —
-ad alto rumore. Inoltre, la qualità visiva può essere migliore di quanto
-suggerisca il PSNR: le immagini appaiono più naturali perché il modello
-genera texture realistiche.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda importante:} ``Perché il PSNR di DiffPIR cresce col rumore?''
-\textbf{Risposta:} Perché a basso rumore l'immagine è già quasi pulita e un
-modello generativo tende a \emph{distruggere} i dettagli fini introducendo
-variazioni non presenti nell'originale (bias generativo). Ad alto rumore, invece,
-l'immagine è talmente degradata che il prior generativo aiuta a ricostruire
-informazione persa, producendo un guadagno netto.
-\end{note-esame}
-
-\begin{concetto}
-\textbf{DiffPIR migliora all'aumentare del rumore — perché?} 
-È un trade-off \emph{bias-varianza}:
+\subsection*{Collegamenti da sottolineare}
 \begin{itemize}
-  \item A $\sigma_n$ \textbf{basso}: l'immagine $y$ è già quasi pulita.
-        Il prior generativo introduce dettagli inesistenti (\emph{allucinazione}),
-        aumentando il \emph{bias}. PSNR basso perché l'output differisce dall'originale.
-  \item A $\sigma_n$ \textbf{alto}: $y$ è molto degradata. Il prior aiuta a
-        ricostruire informazione persa, riducendo la \emph{varianza} netta.
-        Il guadagno supera il bias introdotto.
+\item \textbf{Ottimizzazione:} norma L1 $\to$ sparsity; Adam vs GD
+\item \textbf{Probabilita:} DDPM forward/reverse; bias-variance trade-off
+\item \textbf{Elaborazione segnali:} convoluzione $\to$ FFT; Wiener filter
 \end{itemize}
-\textbf{All'orale:} è un esempio perfetto di bias--variance trade-off applicato
-al restauro di immagini. Menzionatelo esplicitamente — il professore apprezza.
-\end{concetto}
 
-\newpage
-
-% ===========================================================================
-% 17. IMPLEMENTAZIONE
-% ===========================================================================
-\section{Slide 17 — Implementazione}
-
-\slidetitle{``Implementazione -- Struttura del Repository''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{README.md}, \texttt{report.md §6}.
-
-\textbf{Struttura modulare:}
-\begin{itemize}
-  \item \texttt{src/data/} -- dataset e preprocessing
-  \item \texttt{src/degradation/} -- pipeline degradazione
-  \item \texttt{src/methods/tv/, unet/, diffpir/} -- metodi
-  \item \texttt{src/eval/} -- metriche (PSNR, SSIM)
-  \item \texttt{src/plots/} -- visualizzazione
-  \item \texttt{scripts/} -- script di esecuzione
-  \item \texttt{tests/} -- 34 unit test
-\end{itemize}
-\end{teoria}
-
-\begin{copione}
-``La struttura del repository riflette la modularità del progetto.
-
-Ogni metodo è un modulo indipendente in \texttt{src/methods/}. La pipeline
-di degradazione è condivisa in \texttt{src/degradation/}, così come le metriche
-in \texttt{src/eval/} e la visualizzazione in \texttt{src/plots/}.
-
-L'esecuzione segue una pipeline sequenziale: preprocessing, poi ogni metodo
-con il proprio script, infine la generazione dei grafici comparativi.
-
-Abbiamo anche 34 test unitari che coprono degradazione, metriche e tutti e
-tre i metodi.
-
-La riproducibilità è garantita dal seed 42, dalla pipeline unica di
-degradazione e dai test.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Come avete garantito la riproducibilità?''
-\textbf{Risposta:} Seed fisso 42 in tutti i componenti stocastici; pipeline
-unica di degradazione condivisa; split del dataset salvato su file; 34 test
-unitari di verifica.
-\end{note-esame}
-
-% ===========================================================================
-% 18. CONFRONTO PSNR/SSIM
-% ===========================================================================
-\section{Slide 18 — Confronto PSNR/SSIM}
-
-\slidetitle{``Confronto PSNR / SSIM''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{report.md §7}, \texttt{theory.md §4}.
-
-\textbf{Risultati consolidati:}
-\begin{itemize}
-  \item \textbf{Basso rumore} ($\sigma_n \leq 0.01$): TV domina (PSNR $>$ 32 dB,
-        SSIM $>$ 0.9).
-  \item \textbf{Medio rumore} ($\sigma_n = 0.05$): UNet leggermente superiore
-        in SSIM (0.864 vs 0.837), TV migliore in PSNR (30.42 vs 29.44).
-  \item \textbf{Alto rumore} ($\sigma_n = 0.1$): UNet nettamente migliore
-        (28.46 dB, 0.795 SSIM).
-  \item DiffPIR ha comportamento complementare: migliora col rumore.
-\end{itemize}
-\end{teoria}
-
-\begin{copione}
-``Questa è la slide centrale del confronto. Mettiamo tutte le metriche fianco
-a fianco in un'unica tabella.
-
-La TV domina a basso rumore, sigma 0.005 e 0.01, con PSNR oltre 32 dB e SSIM
-superiore a 0.9. È la scelta migliore se il rumore è trascurabile.
-
-A medio rumore, sigma 0.05, le posizioni iniziano a cambiare: la TV mantiene
-un PSNR più alto, ma l'UNet ha già un SSIM migliore — segno che la qualità
-percettiva dell'UNet è superiore anche se il PSNR è leggermente inferiore.
-
-Ad alto rumore, sigma 0.1, l'UNet supera nettamente la TV: 28.46 contro
-26.54 dB di PSNR, e 0.795 contro 0.586 di SSIM. Il distacco è significativo.
-
-DiffPIR ha un comportamento complementare: parte male a basso rumore ma
-migliora progressivamente. A sigma 0.1 raggiunge 25.46 dB, pur rimanendo
-sotto UNet e TV.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Cosa ci dice la differenza tra PSNR e SSIM?''
-\textbf{Risposta:} Il PSNR misura l'errore quadratico medio pixel per pixel;
-lo SSIM misura la similarità strutturale. Un PSNR simile ma SSIM diverso indica
-che la qualità percettiva è diversa anche se l'errore puntuale è simile.
-L'UNet a sigma 0.05 ha PSNR leggermente inferiore a TV ma SSIM migliore:
-significa che produce immagini visivamente più fedeli.
-\end{note-esame}
-
-% ===========================================================================
-% 19. GRAFICO COMPARATIVO
-% ===========================================================================
-\section{Slide 19 — Grafico Comparativo}
-
-\slidetitle{``Grafico Comparativo''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{src/plots/visualize.py}, \texttt{results/comparison.png}.
-\end{teoria}
-
-\begin{copione}
-``Il grafico riassume visivamente quanto detto. Si vede chiaramente:
-
-A sinistra, il PSNR: le linee di TV e UNet sono quasi piatte, mentre DiffPIR
-ha una pendenza crescente — l'unico metodo che migliora col rumore.
-
-A destra, lo SSIM: TV crolla dopo sigma 0.05 perché lo staircasing distrugge
-la similarità strutturale, mentre UNet mantiene uno SSIM elevato su tutto lo
-spettro.
-
-Notate l'incrocio tra TV e UNet intorno a sigma 0.05 sia in PSNR che in SSIM:
-è il punto in cui il metodo classico cede il passo al deep learning.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Perché le linee di TV e UNet sono quasi piatte in PSNR
-ma divergono in SSIM?''
-\textbf{Risposta:} Il PSNR è poco sensibile alla struttura dell'immagine; anche
-immagini con artefatti visibili possono avere PSNR decenti. Lo SSIM cattura
-invece la degradazione strutturale (staircasing, blur) e quindi mostra un
-divario maggiore tra i metodi.
-\end{note-esame}
-
-\newpage
-
-% ===========================================================================
-% 20. GRIGLIA COMPLETA
-% ===========================================================================
-\section{Slide 20 — Griglia Completa}
-
-\slidetitle{``Griglia Completa''}
-
-\begin{copione}
-``Questa slide mostra una griglia che confronta visivamente i tre metodi per
-diversi livelli di rumore. Ogni riga è un metodo, ogni colonna un livello
-di rumore.
-
-Si vede a colpo d'occhio: la TV è pulita a sinistra ma degrada verso destra;
-l'UNet è uniforme su tutta la griglia; DiffPIR è rumoroso a sinistra ma
-migliora verso destra.
-
-La griglia conferma visivamente quanto visto nelle metriche quantitative.''
-\end{copione}
-
-% ===========================================================================
-% 21-23. CONFRONTO VISIVO
-% ===========================================================================
-\section{Slide 21 — Confronto Visivo $\sigma_n = 0.01$}
-
-\slidetitle{``Confronto Visivo — $\sigma_n = 0.01$''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{results/tv/qualitative/}, \texttt{results/unet/qualitative/},
-\texttt{results/diffpir/qualitative/}, \texttt{src/plots/visualize.py}.
-\end{teoria}
-
-\begin{copione}
-``A sigma 0.01, il rumore è molto basso. TV e UNet producono risultati
-visivamente eccellenti, quasi indistinguibili dalla ground truth sia a occhio
-nudo che nei dettagli.
-
-DiffPIR mostra già artefatti generativi — l'immagine appare alterata,
-come se il modello stesse \emph{ridisegnando} texture che invece nell'originale
-erano già presenti. È il sintomo dell'allucinazione a basso rumore.
-
-In basso, un crop ingrandito mette in evidenza le differenze nei dettagli
-fini dei nuclei cellulari: TV e UNet preservano i bordi netti, DiffPIR
-li sfuma o li altera.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Nota:} A $\sigma_n = 0.01$, il rumore è appena percettibile. Questa
-slide serve a dimostrare che un metodo generativo \textbf{non va usato} quando
-il rumore è trascurabile.
-\end{note-esame}
-
-\section{Slide 22 — Confronto Visivo $\sigma_n = 0.05$}
-
-\slidetitle{``Confronto Visivo — $\sigma_n = 0.05$''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{results/tv/qualitative/}, \texttt{results/unet/qualitative/},
-\texttt{results/diffpir/qualitative/}.
-\end{teoria}
-
-\begin{copione}
-``A sigma 0.05, il rumore è moderato e qui si vede il primo cambio di regime.
-
-La TV inizia a mostrare staircasing evidente nelle zone uniformi dello
-sfondo — l'immagine appare \emph{squadrata}. I dettagli fini delle cellule
-sono ancora riconoscibili ma con bordi artefatti.
-
-L'UNet mantiene una buona qualità: il rumore è rimosso efficacemente e la
-struttura cellulare è preservata. È il punto in cui il deep learning inizia
-a mostrare il suo vantaggio rispetto al metodo classico.
-
-DiffPIR migliora visibilmente rispetto a sigma 0.01: le texture generate
-sono più plausibili e la struttura globale è coerente.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``A sigma 0.05, TV ha ancora PSNR più alto di UNet nella
-tabella. Come si spiega?''
-\textbf{Risposta:} Il PSNR misura l'errore puntuale, non la qualità percettiva.
-La TV preserva meglio i pixel individuali ma produce artefatti strutturali
-(lo staircasing) che lo SSIM cattura (0.837 vs 0.864 per UNet).
-\end{note-esame}
-
-\section{Slide 23 — Confronto Visivo $\sigma_n = 0.1$}
-
-\slidetitle{``Confronto Visivo — $\sigma_n = 0.1$''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{results/diff/all\_diffs\_0.1.png} (mappe di differenza).
-\end{teoria}
-
-\begin{copione}
-``A sigma 0.1, il rumore è alto e le differenze tra i metodi sono massime.
-
-La TV produce immagini squadrate con staircasing molto evidente: le zone
-uniformi sono segmentate in blocchi, i nuclei perdono i contorni naturali.
-Il PSNR scende a 26.54 dB e lo SSIM crolla a 0.586.
-
-L'UNet resta pulito e riconoscibile nonostante l'alto rumore: è il miglior
-risultato sia quantitativamente (28.46 dB) che qualitativamente.
-
-DiffPIR, pur con PSNR più basso (25.46 dB), produce texture realistiche
-che visivamente possono essere preferibili alla TV: l'immagine appare
-\emph{naturale} anche se non identica pixel-per-pixel all'originale.
-
-Le mappe di differenza in basso sono rivelatrici: la TV ha errori diffusi
-e strutturati (pattern a blocchi); l'UNet ha errori minimi e isotropi;
-DiffPIR ha errori concentrati dove il modello ha \emph{allucinato} dettagli.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Quale metodo produce l'immagine più \emph{naturale} a sigma 0.1?''
-\textbf{Risposta:} Soggettivo. L'UNet è oggettivamente più fedele (PSNR/SSIM).
-DiffPIR può sembrare più naturale perché genera texture coerenti, ma può
-introdurre pattern inesistenti (allucinazioni). La TV è artificiale a causa
-dello staircasing.
-\end{note-esame}
-
-% ===========================================================================
-% 24. CONFRONTO TRA LE FAMIGLIE
-% ===========================================================================
-\section{Slide 24 — Confronto tra le Famiglie}
-
-\slidetitle{``Confronto tra le Famiglie''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{report.md §7.3}, \texttt{report/report.md} discussione.
-\end{teoria}
-
-\begin{copione}
-``Questa slide riassume pro e contro di ogni famiglia.
-
-TV: non richiede dati, è interpretabile, robusto a basso rumore. Ma soffre
-di staircasing e degrada rapidamente.
-
-UNet: inferenza velocissima, robusto su tutto lo spettro. Ma richiede training
-supervisionato e generalizza solo sul dominio di training.
-
-DiffPIR: ricostruisce dettagli persi, migliora col rumore. Ma è lento e
-produce allucinazioni a basso rumore.
-
-Le metriche chiave a destra mostrano il PSNR a sigma 0.005, dove TV guida.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Se doveste consigliare un metodo per un'applicazione reale?''
-\textbf{Risposta:} Dipende dal contesto. In uno screening clinico dove il costo
-dell'errore è alto, UNet offre la migliore robustezza generalizzata. TV come
-baseline gratuita per conferma. DiffPIR solo se il rumore è notoriamente alto
-e serve ricostruzione generativa.
-\end{note-esame}
-
-% ===========================================================================
-% 25. REGIMI DI FUNZIONAMENTO
-% ===========================================================================
-\section{Slide 25 — Regimi di Funzionamento}
-
-\slidetitle{``Regimi di Funzionamento''}
-
-\begin{teoria}
-\textbf{Riferimenti:} \texttt{report.md §7.4} (analisi comparativa per regime).
-\end{teoria}
-
-\begin{copione}
-``La tabella riassume i regimi di funzionamento.
-
-A basso rumore, TV è eccellente, UNet buono, DiffPIR scarso.
-A medio rumore, TV è buono, UNet molto buono, DiffPIR adeguato.
-Ad alto rumore, TV è mediocre, UNet è il migliore, DiffPIR è buono.
-
-In termini di velocità: UNet domina con 0.035 secondi per immagine,
-DiffPIR impiega circa 3 secondi, TV circa 7 secondi.
-
-Il messaggio chiave: nessun metodo domina tutti i regimi. La scelta dipende
-dal contesto applicativo. L'UNet è il miglior compromesso complessivo.
-DiffPIR è utile solo ad alto rumore.
-TV è una scelta pragmatica quando il rumore è basso e non si hanno dati.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Cosa consigliate per un sistema reale?''
-\textbf{Risposta:} Un sistema ibrido: TV come filtro rapido per immagini a
-basso rumore, UNet come default, DiffPIR come opzione per casi difficili.
-Si potrebbe anche pensare a un meta-modello che sceglie il metodo in base
-al livello di rumore stimato.
-\end{note-esame}
-
-\begin{concetto}
-\textbf{Nessun metodo domina tutti i regimi.} Questa è la conclusione più
-importante da portare all'orale:
-\begin{itemize}
-  \item \textbf{Basso rumore} ($\sigma_n \leq 0.01$): TV $\succ$ UNet $\succ$ DiffPIR
-  \item \textbf{Medio rumore} ($\sigma_n = 0.05$): UNet $\approx$ TV (dipende dalla metrica)
-  \item \textbf{Alto rumore} ($\sigma_n = 0.1$): UNet $\succ$ DiffPIR $\succ$ TV
-  \item \textbf{Velocità}: UNet ($0.03$s) $\gg$ DiffPIR ($3.7$s) $\approx$ TV ($7$s)
-\end{itemize}
-\textbf{All'orale:} se il professore vi chiede un consiglio per un sistema reale,
-proponete un \textbf{approccio ibrido}: TV per controllo rapido a basso rumore,
-UNet come default robusto, DiffPIR per casi difficili ad alto rumore.
-\end{concetto}
-
-\begin{attenzione}
-\textbf{Domanda-tipo all'orale:} ``Quale metodo consigliereste a un laboratorio
-di screening citologico?''
-\\[0.2cm]
-\textbf{Risposta modello (strutturata in 3 punti):}
+\subsection*{Domande frequenti}
 \begin{enumerate}
-  \item \textbf{UNet come default}: robusto su tutto lo spettro, inferenza
-        velocissima ($0.03$s/img), qualità visiva buona.
-  \item \textbf{TV come baseline}: zero costi di training, utile per conferma
-        rapida su immagini a basso rumore.
-  \item \textbf{DiffPIR come opzione avanzata}: solo se il rumore è noto
-        essere molto alto e serve ricostruzione generativa.
+\item ``Qual e il metodo migliore?'' $\to$ Dipende dal regime e dalla metrica
+\item ``Perche non avete usato Weighted TV?'' $\to$ 3 su 4 per 2 studenti
+\item ``Perche L1 e non L2 in TV?'' $\to$ Preserva bordi, sparsity
+\item ``Perche DiffPIR migliora col rumore?'' $\to$ Bias-variance trade-off
+\item ``Come garantite riproducibilita?'' $\to$ Seed 42, pipeline unica, test
 \end{enumerate}
-\textbf{Mai} dire che un metodo è ``il migliore'' in assoluto — mostrate
-consapevolezza dei trade-off.
-\end{attenzione}
-
-% ===========================================================================
-% 26. CONCLUSIONI
-% ===========================================================================
-\section{Slide 26 — Conclusioni}
-
-\slidetitle{``Conclusioni''}
-
-\begin{copione}
-``Concludiamo riassumendo i risultati principali.
-
-Abbiamo confrontato equamente tre famiglie metodologiche — variazionale, deep
-learning, generativo — sulla stessa pipeline, con le stesse metriche e lo
-stesso test set. Abbiamo 34 test unitari a garanzia della correttezza.
-
-Lezioni apprese: un problema ill-posed non significa irrisolvibile; ci sono
-compromessi diversi tra qualità, velocità e generalizzazione. I metodi
-generativi vanno usati con cautela a basso rumore perché possono allucinare
-dettagli. La CPU ha limitato la scala degli esperimenti — con GPU si potrebbero
-esplorare modelli più grandi.
-
-Direzioni future: tuning adattivo di lambda per TV in funzione di sigma,
-training GPU per modelli più grandi, validazione su immagini cliniche reali
-per testare la generalizzazione.''
-\end{copione}
-
-\begin{note-esame}
-\textbf{Domanda:} ``Cosa cambiereste se poteste ricominciare?''
-\textbf{Risposta:} Useremmo GPU per training più lunghi e modelli più grandi
-per UNet e DiffPIR, e introdurremmo un metodo adattivo per la scelta automatica
-del metodo basata sul rumore stimato.
-\end{note-esame}
-
-% ===========================================================================
-% 27. BIBLIOGRAFIA
-% ===========================================================================
-\section{Slide 27 — Riferimenti}
-
-\slidetitle{``Riferimenti''}
-
-\begin{teoria}
-\textbf{Bibliografia principale:}
-\begin{enumerate}
-  \item Y. Zhu et al., ``Denoising Diffusion Models for Plug-and-Play Image
-        Restoration'', CVPR 2023. \emph{(DiffPIR)}
-  \item J. Ho et al., ``Denoising Diffusion Probabilistic Models'', NeurIPS 2020.
-        \emph{(DDPM)}
-  \item J. Song et al., ``Denoising Diffusion Implicit Models'', ICLR 2021.
-        \emph{(DDIM)}
-  \item L. Rudin, S. Osher, E. Fatemi, ``Nonlinear total variation based noise
-        removal algorithms'', Physica D 1992.
-  \item O. Ronneberger et al., ``U-Net: Convolutional Networks for Biomedical
-        Image Segmentation'', MICCAI 2015.
-  \item Mendeley LBC Cervical Cancer dataset,
-        \url{https://data.mendeley.com/datasets/zddtpgzv63/2}.
-\end{enumerate}
-\end{teoria}
-
-\begin{copione}
-Qui sono elencati i riferimenti principali. I più importanti per il progetto
-sono l'articolo di Rudin--Osher--Fatemi per la TV, Ronneberger per l'UNet,
-e Zhu et al. per DiffPIR. Il dataset Mendeley è disponibile al link indicato.
-
-Grazie per l'attenzione. Siamo pronti per le domande.''
-\end{copione}
-
-\newpage
-
-% ===========================================================================
-% RIEPILOGO RAPIDO
-% ===========================================================================
-
-\begin{center}
-\vspace{1cm}
-{\huge\bfseries\color{darkblue} Riepilogo Rapido}\\[0.3cm]
-{\large Da portare all'orale come foglio di riferimento}\\[0.5cm]
-\end{center}
-
-% --- Tabella riassuntiva ---
-\subsection*{Metriche Consolidate}
-\renewcommand{\arraystretch}{1.3}
-\begin{center}
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Metodo} & \makebox[2.5cm]{\centering $\sigma_n=0.005$} & \makebox[2.5cm]{\centering $\sigma_n=0.01$} & \makebox[2.5cm]{\centering $\sigma_n=0.05$} & \makebox[2.5cm]{\centering $\sigma_n=0.1$} \\
-\midrule
-\textbf{TV}       & 32.09\,dB / 0.911 & 32.04\,dB / 0.909 & 30.42\,dB / 0.837 & 26.54\,dB / 0.586 \\
-\textbf{UNet}     & 29.79\,dB / 0.896 & 29.79\,dB / 0.895 & 29.44\,dB / 0.864 & 28.46\,dB / 0.795 \\
-\textbf{DiffPIR}  & 15.78\,dB / 0.329 & 16.45\,dB / 0.374 & 22.64\,dB / 0.677 & 25.46\,dB / 0.766 \\
-\bottomrule
-\multicolumn{5}{l}{\small Formato: PSNR (dB) / SSIM} \\
-\end{tabular}
-\end{center}
-
-\subsection*{Tempi di Inferenza (per immagine 256$\times$256)}
-\begin{center}
-\begin{tabular}{lcc}
-\toprule
-\textbf{Metodo} & \textbf{Tempo} & \textbf{Note} \\
-\midrule
-UNet    & $\sim$0.03\,s & Inferenza immediata, no training al test \\
-TV      & $\sim$7\,s    & 150 iterazioni Adam, nessun training \\
-DiffPIR & $\sim$3.7\,s  & 15 step DDIM, denoising + FFT \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\begin{concetto}
-\textbf{Regola pratica per l'orale:}
-\begin{itemize}
-  \item $\sigma_n \leq 0.01$: \textbf{TV} domina (PSNR $>$ 32\,dB)
-  \item $\sigma_n = 0.05$: \textbf{UNet $\approx$ TV} (dipende dalla metrica)
-  \item $\sigma_n = 0.1$: \textbf{UNet} nettamente migliore
-  \item DiffPIR: utile solo ad alto rumore, ma attenzione alle allucinazioni
-\end{itemize}
-\end{concetto}
-
-% --- Checklist esame ---
-\subsection*{Checklist per l'Esame Orale}
-\noindent
-Cose da \textbf{menzionare assolutamente} durante l'esposizione:
-
-\begin{enumerate}
-  \item \textbf{Problema inverso:} $y = Hx + n$, mal posto secondo Hadamard
-        $\Rightarrow$ serve regolarizzazione.
-  \item \textbf{Confronto equo:} stessa pipeline di degradazione, stesso split,
-        stesse metriche per tutti i metodi.
-  \item \textbf{TV:} $\min \|Hx - y\|^2 + \lambda\,TV(x)$ — L1 preserva i bordi,
-        L2 (Tikhonov) li sfuma. Staircasing a $\lambda$ alto.
-  \item \textbf{UNet:} architettura encoder-decoder + skip connections,
-        multi-noise augmentation, Loss L1, GroupNorm, 1.9M parametri.
-  \item \textbf{DiffPIR:} DDPM come prior plug-and-play, data-fidelity in
-        Fourier, bias--variance trade-off (migliora col rumore).
-  \item \textbf{Nessun metodo domina:} TV migliore a basso rumore, UNet
-        migliore compromesso generale, DiffPIR interessante ma complementare.
-  \item \textbf{PSNR $\neq$ qualità visiva:} a $\sigma_n=0.05$, TV ha PSNR più
-        alto ma UNet ha SSIM migliore e aspetto visivo superiore.
-\end{enumerate}
-
-\vspace{0.3cm}
-
-\begin{attenzione}
-\textbf{Errori da evitare all'orale:}
-\begin{itemize}
-  \item \textbf{NON} dire che un metodo è ``il migliore'' in assoluto.
-        Dire invece: ``Dipende dal regime di rumore e dalla metrica.''
-  \item \textbf{NON} confondere PSNR con qualità visiva — usate SSIM come
-        metrica strutturale complementare.
-  \item \textbf{NON} dimenticare di menzionare che il confronto è equo
-        (stessa pipeline per tutti).
-  \item \textbf{NON} trascurare il bias--variance trade-off di DiffPIR
-        — è la spiegazione più elegante del suo comportamento.
-  \item \textbf{NON} saltare la motivazione della scelta dei metodi
-        (3 su 4, escluso Weighted TV per composizione del gruppo).
-\end{itemize}
-\end{attenzione}
-
-\vspace{0.5cm}
-
-\begin{riepilogo}
-\textbf{Domande-tipo con risposte modello:}
-\begin{enumerate}
-  \item \textit{``Perché TV usa L1 e non L2?''} $\to$ L1 preserva i bordi
-        (penalizza meno le grandi differenze). L2 li sfuma. Inoltre L1
-        promuove soluzioni sparse nel gradiente.
-  \item \textit{``Perché DiffPIR migliora col rumore?''} $\to$ Bias--variance
-        trade-off: a basso rumore il prior genera allucinazioni (bias alto),
-        ad alto rumore aiuta a ricostruire (varianza ridotta).
-  \item \textit{``Quale metodo per un laboratorio clinico?''} $\to$ UNet
-        come default (robusto e veloce), TV per conferma a basso rumore,
-        DiffPIR solo per casi ad alto rumore.
-  \item \textit{``Cosa sono le skip connections?''} $\to$ Collegamenti tra
-        encoder e decoder che preservano dettagli spaziali fini e mitigano
-        il vanishing gradient.
-  \item \textit{``Cos'è il Plug-and-Play?''} $\to$ Framework che separa
-        il prior (denoiser) dalla fedeltà ai dati. Il denoiser può essere
-        qualsiasi — BM3D, CNN, DDPM — e si alterna con data-fidelity.
-\end{enumerate}
-\end{riepilogo}
 
 \end{document}
