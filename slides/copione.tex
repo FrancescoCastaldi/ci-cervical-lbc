@@ -59,6 +59,13 @@
   \small
 }{\par\medskip}
 
+\newenvironment{hint}{%
+  \smallskip
+  \noindent{\small\bfseries\color{teal!70!black}$\blacktriangleright$ Hint + Esempio}\par
+  \vspace{0.05cm}
+  \small\itshape
+}{\par\medskip}
+
 % --- Title ---
 \title{\vspace{-1cm}\textcolor{accent}{\textbf{Computational Imaging}} \\[0.1cm]
        Deblur \& Denoise di Immagini di Citologia Cervicale LBC \\[0.2cm]
@@ -148,6 +155,18 @@ generativo (DDPM).
 \textbf{D:} Perche non possiamo invertire $H$? \\
 \textbf{R:} $H$ e mal condizionato: $H^{-1}$ amplifica il rumore in modo catastrofico.
 \end{qa}
+
+\begin{hint}
+\textbf{Hint:} La convoluzione $Hx$ diventa una moltiplicazione nel dominio di
+Fourier. Ecco perche possiamo risolvere il data-fidelity step in FFT con
+un semplice prodotto. Invertire nel dominio spaziale richiederebbe una costosa
+deconvoluzione.
+
+\textbf{Esempio:} Immagina di guardare attraverso un vetro smerigliato. Il
+vetro e il blur $H$: vedi le forme ma non i dettagli. Non puoi ``levare il
+vetro'' (invertire $H$) senza amplificare ogni granello di polvere (rumore $n$).
+La regolarizzazione e come pulire il vetro senza graffiarlo.
+\end{hint}
 
 % =============================================================================
 % SLIDE 3
@@ -286,6 +305,19 @@ globalmente ottima.
 soluzioni dense (tante piccole variazioni, bordi sfumati).
 \end{qa}
 
+\begin{hint}
+\textbf{Hint:} L1 e L2 penalizzano diversamente. L1 somma i valori assoluti,
+L2 somma i quadrati. Un gradiente grande (bordo) pesa tanto in L1, ma
+\emph{moltissimo} in L2. Un gradiente piccolo (sfumatura) pesa poco in L2.
+Risultato: L2 preferisce tante piccole variazioni (sfumatura), L1 preferisce
+pochi grandi salti (bordi netti).
+
+\textbf{Esempio:} Un gradino alto 1 su 1 pixel: L1 = 1, L2 = 1. Lo stesso
+gradino sfumato su 10 pixel (0.1 ciascuno): L1 = $10 \times 0.1 = 1$ (uguale),
+L2 = $10 \times 0.01 = 0.1$ (10 volte meno!). L2 ``pensa'' che la versione
+sfumata sia migliore, perche penalizza meno -- ma noi vogliamo il bordo netto!
+\end{hint}
+
 % =============================================================================
 % SLIDE 8
 % =============================================================================
@@ -313,6 +345,18 @@ compromesso.
 \item $\lambda=0.005$: bilanciamento ottimale
 \end{itemize}
 \end{study}
+
+\begin{hint}
+\textbf{Hint:} Adam combina momentum (accelerazione nelle direzioni
+consistenti) con adaptive learning rate (passi piccoli dove il gradiente e
+variabile). Per la TV, il gradiente e grande ai bordi (discontinuita) e
+piccolo nelle zone uniformi -- Adam si adatta automaticamente. SGD classico
+dovrebbe usare un learning rate unico per tutti i pixel.
+
+\textbf{Esempio:} E come un taxi in citta: in autostrada (zona uniforme,
+gradiente piccolo) accelera, nel traffico (bordo, gradiente grande) frena.
+SGD invece va sempre a 50 km/h, ovunque.
+\end{hint}
 
 % =============================================================================
 % SLIDE 9
@@ -363,6 +407,21 @@ GroupNorm: piu stabile di BatchNorm con batch size piccolo (16). Input: 4 canali
 \item 4 canali input: condizionamento sul rumore
 \end{itemize}
 \end{study}
+
+\begin{hint}
+\textbf{Hint:} Le skip connections collegano l'encoder (dove l'immagine e
+grande e dettagliata) al decoder (dove l'immagine viene ricostruita). Senza,
+il collo di bottiglia (bottleneck) perderebbe la posizione dei dettagli --
+sapresti \emph{cosa} c'e ma non \emph{dove} si trova.
+
+GroupNorm: divide i canali in gruppi e normalizza ogni gruppo. BatchNorm
+normalizza su tutto il batch -- se il batch e piccolo, la stima e rumorosa.
+GroupNorm funziona bene anche con batch = 1.
+
+\textbf{Esempio:} Le skip connections sono come un pittore che tiene la foto
+originale a fianco mentre dipinge: guarda il soggetto (encoder), poi dipinge
+(decoder), ma ogni tanto torna a controllare i dettagli originali (skip).
+\end{hint}
 
 % =============================================================================
 % SLIDE 11
@@ -463,6 +522,24 @@ LightUNet: canali base 32, encoder 32$\to$64$\to$128, time embedding sinusoidale
 \end{itemize}
 \end{study}
 
+\begin{hint}
+\textbf{Hint:} Perche il DDPM predice $\varepsilon$ (rumore) e non $x_0$
+(immagine pulita)? Perche $\varepsilon$ ha una distribuzione semplice e nota
+(gaussiana standard), mentre $x_0$ ha una distribuzione complicatissima
+(immagini reali). E piu facile imparare a ``togliere lo sporco'' che a
+``disegnare da zero''.
+
+Time embedding: il modello riceve il timestep $t$ codificato con seni/coseni
+(come le coordinate in NeRF/Transformer). Cosi sa se deve fare un passo
+piccolo ($t$ piccolo, immagine quasi pulita) o grande ($t$ grande, molto
+rumore).
+
+\textbf{Esempio:} E come insegnare a qualcuno a pulire una vecchia foto:
+invece di ridisegnarla, impara a riconoscere e rimuovere graffi e macchie
+($\varepsilon$). Il time embedding e come dirgli ``questa foto e molto sporca
+(fai un passo grosso)'' o ``e quasi pulita (sfuma solo l'ultimo graffio)''.
+\end{hint}
+
 % =============================================================================
 % SLIDE 15
 % =============================================================================
@@ -488,6 +565,21 @@ $\rho_t$ e dinamico: alto a $t$ grande (prior pesa di piu), basso a $t$ piccolo
 \item 15 step DDIM: sampling sub-campionato
 \end{itemize}
 \end{study}
+
+\begin{hint}
+\textbf{Hint:} $\rho_t$ e un parametro che bilancia prior e dati. All'inizio
+($t$ grande, tanto rumore) $\rho_t$ e alto -- ci fidiamo del prior perche
+l'osservazione e troppo rumorosa. Alla fine ($t$ piccolo, poco rumore) $\rho_t$
+e basso -- ci fidiamo dei dati perche sono piu affidabili del prior.
+
+La soluzione di Wiener in FFT e una formula chiusa: $\hat{x}_0 = \frac{\dots}$,
+calcolabile con una FFT forward e una inverse. Senza FFT, dovremmo risolvere
+un sistema lineare $O(N^3)$; in FFT e $O(N \log N)$.
+
+\textbf{Esempio:} $\rho_t$ e come un arbitro di calcio: all'inizio della partita
+($t$ grande, caos) lascia giocare (prior), alla fine ($t$ piccolo) fischia di
+piu (dati). Il passaggio graduale evita strappi.
+\end{hint}
 
 % =============================================================================
 % SLIDE 16
@@ -516,6 +608,25 @@ basso il bias domina, a $\sigma_n$ alto la varianza e ridotta dal prior.
 \item Bias-variance trade-off: menzionarlo all'esame!
 \end{itemize}
 \end{study}
+
+\begin{hint}
+\textbf{Hint:} Bias-variance trade-off e il cuore del machine learning. Un
+modello con \textbf{alto bias} fa assunzioni forti (es. ``l'immagine e
+piecewise-smooth'' come TV) -- sbaglia sistematicamente ma e prevedibile.
+Un modello con \textbf{alta varianza} e molto flessibile (es. una rete
+profonda) -- azzecca quando ha dati buoni, ma e instabile con dati poveri.
+
+DiffPIR ha forte prior generativo (alto bias). A $\sigma_n$ basso questo bias
+e dannoso: il modello ``crede'' che l'immagine debba assomigliare a quelle
+viste in training e sovrascrive i dettagli reali. A $\sigma_n$ alto il rumore
+rende i dati inaffidabili, e avere un prior forte \emph{aiuta} a stabilizzare.
+
+\textbf{Esempio:} Due fotografi a un concerto. Il primo (alto bias) sa suonare
+solo rock -- se il concerto e rock, foto perfette; se e jazz, sbaglia tutto.
+Il secondo (alta varianza) fotografa qualsiasi genere -- ma se c'e poca luce
+(molto rumore), le foto vengono mosse. DiffPIR e il primo fotografo: ottimo
+se conosce gia il genere, male se e sorpreso.
+\end{hint}
 
 % =============================================================================
 % SLIDE 17
@@ -561,6 +672,19 @@ SSIM 0.795 vs 0.586). DiffPIR migliora col rumore ma resta sotto.
 \item DiffPIR: complementare, migliora col rumore
 \end{itemize}
 \end{study}
+
+\begin{hint}
+\textbf{Hint:} PSNR e SSIM misurano cose diverse. PSNR = errore quadratico
+medio in dB: confronta pixel per pixel. SSIM = similarita strutturale: guarda
+luminanza, contrasto e struttura in finestre locali. Per questo TV ha PSNR
+decente ma SSIM basso ad alto rumore: lo staircasing sposta i pixel di poco
+(PSNR regge) ma distrugge la struttura locale (SSIM crolla).
+
+\textbf{Esempio:} PSNR e come confrontare due foto misurando la distanza
+pixel-per-pixel con un righello. SSIM e come chiedere ``queste due foto
+sembrano la stessa scena?''. La prima e precisa ma ingenua, la seconda coglie
+la qualita percepita.
+\end{hint}
 
 % =============================================================================
 % SLIDE 19
