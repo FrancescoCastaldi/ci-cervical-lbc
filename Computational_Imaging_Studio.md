@@ -75,9 +75,7 @@ import imageio      # versatile, supporta DICOM
 ```
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/intro1.png" alt="Immagine digitale" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/intro2.png" alt="Esempio immagini" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/intro10.png" alt="Tipi immagini" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/intro15.png" alt="CT" width="400">
 ---
 
 ### 2. Pixel Processing `[p.2-3]`
@@ -151,11 +149,9 @@ Un sistema LSIS e completamente caratterizzato dalla sua **risposta impulsiva** 
 
 $$y = x * h$$
 
-Proprieta: commutativa, associativa, distributiva.
+Proprieta: commutativa, associativa, distributiva. *(come la moltiplicazione tra numeri: scambiare o raggruppare i fattori non cambia il risultato)*
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/LSIS1.png" alt="LSIS1" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/LSIS2.png" alt="LSIS2" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/LSIS3.png" alt="LSIS3" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/LSIS4.png" alt="LSIS4" width="400">
 #### 3.2 Convoluzione 1D e 2D
 
@@ -169,14 +165,6 @@ Proprieta: commutativa, associativa, distributiva.
 > la chiamano convoluzione). Padding serve per mantenere la stessa dimensione.
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv1.png" alt="Conv1" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv2.png" alt="Conv2" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv3.png" alt="Conv3" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv4.png" alt="Conv4" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv5.png" alt="Conv5" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv6.png" alt="Conv6" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv7.png" alt="Conv7" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv8.png" alt="Conv8" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv9.png" alt="Conv9" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/conv10.png" alt="Conv10" width="400">
 #### 3.3 Filtri Lineari
 
@@ -202,15 +190,7 @@ $$G(x,y) = \frac{1}{2\pi\sigma^2} e^{-\frac{x^2+y^2}{2\sigma^2}}$$
 - $\sigma$ controlla l'ampiezza: $\sigma$ grande = piu sfocatura
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt5.png" alt="Gaussiano" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt2.png" alt="Passa-basso" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt3.png" alt="Passa-alto" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt4.png" alt="Confronto" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt7.png" alt="Laplaciano" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt8.png" alt="Edge detection" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt9.png" alt="Sobel" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt10.png" alt="Prewitt" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt11.png" alt="Direzionali" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt12.png" alt="Bordi confronto" width="400">
 #### 3.4 Filtri Non Lineari
 
 > **💡 Intuizione:** Il filtro mediano è come chiedere l'opinione a tutto il
@@ -238,19 +218,7 @@ Due pesi:
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt20.png" alt="Bilaterale" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt13.png" alt="Mediana" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt14.png" alt="Mediana vs media" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt15.png" alt="Non lineare" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt16.png" alt="Bilaterale dettaglio" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt17.png" alt="Bilaterale esempio" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt18.png" alt="Confronto filtri" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt19.png" alt="Scelta filtro" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt21.png" alt="Freq domain" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt22.png" alt="Filtri freq" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt23.png" alt="Band-pass" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt24.png" alt="Bordi freq" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt25.png" alt="Rumore freq" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/filt26.png" alt="Deblurring" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fillt6.png" alt="Separabile" width="400">
 
 ---
 
@@ -277,11 +245,7 @@ Ogni segnale periodico $f(t)$ con periodo $T$ si puo scrivere come somma di sinu
 $$f(t) = \sum_{n=-\infty}^{\infty} c_n e^{i 2\pi n t / T}$$
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/square.png" alt="Serie Fourier" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier.png" alt="Fourier" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier1.png" alt="Fourier1" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier2.png" alt="Armoniche" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier3.png" alt="Sintesi" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier4.png" alt="Esempio" width="400">
 #### 4.3 DFT (Discrete Fourier Transform)
 
 **1D**: $X[k] = \sum_{n=0}^{N-1} x[n] e^{-i 2\pi kn/N}$
@@ -292,29 +256,14 @@ $$f(t) = \sum_{n=-\infty}^{\infty} c_n e^{i 2\pi n t / T}$$
 - Simmetria coniugata: $X[u,v] = X^*[-u,-v]$
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/dft.png" alt="DFT" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier5.png" alt="DFT2D" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier6.png" alt="DFTes" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier7.png" alt="FFT" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier8.png" alt="fftshift" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/Nuova%20cartella%20con%20elementi/fourier9.png" alt="DFTprop" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/Nuova%20cartella%20con%20elementi/fourier10.png" alt="DFTsim" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier11.png" alt="Freq" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier12.png" alt="Filtraggio" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier13.png" alt="Rumore" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier14.png" alt="Filtri" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier15.png" alt="Freq filt" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier16.png" alt="Low-pass" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier17.png" alt="High-pass" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier18.png" alt="Band-pass" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier19.png" alt="Ideale" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/fourier20.png" alt="Gaussiano" width="400">
 #### 4.4 Teorema della Convoluzione
 
 $$x * h \xleftrightarrow{\mathcal{F}} X \cdot H$$
 
 La convoluzione nel dominio spaziale diventa **prodotto** nel dominio della frequenza (e viceversa).
 
-**Implicazione pratica**: filtrare in frequenza e $O(N \log N)$ contro $O(N \cdot k^2)$ nello spazio.
+**Implicazione pratica**: filtrare in frequenza e $O(N \log N)$ contro $O(N \cdot k^2)$ nello spazio. *(con la FFT, convolvere è un prodotto punto-a-punto in frequenza — molto più veloce per kernel grandi)*
 
 #### 4.5 Filtraggio in Frequenza
 
@@ -329,7 +278,7 @@ La convoluzione nel dominio spaziale diventa **prodotto** nel dominio della freq
 
 #### 4.7 Compressione DFT
 
-Si possono scartare le componenti di Fourier con magnitudine piccola (sotto una soglia). Poche componenti a bassa frequenza catturano l'essenza dell'immagine.
+Si possono scartare le componenti di Fourier con magnitudine piccola (sotto una soglia). Poche componenti a bassa frequenza catturano l'essenza dell'immagine. *(come JPEG: tieni le basse frequenze che l'occhio vede, butta via il rumore fine)*
 
 #### 4.8 Hybrid Images
 
@@ -362,12 +311,7 @@ $$\boldsymbol{y} = A\boldsymbol{x} + \boldsymbol{e}$$
 **Problema inverso**: dato $y$, trovare $x$ ? difficile, spesso mal posto.
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim1.jpg" alt="Forward model" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim2.jpg" alt="Inverso" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim3.jpg" alt="CT" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim4.jpg" alt="MRI" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim5.png" alt="Framework" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim6.png" alt="Diretto vs inverso" width="400">
-<img src="https://raw.githubusercontent.com/devangelista2/computational-imaging/main/years/2025-26/imgs/GoPro.jpg" alt="Deblurring esempio" width="400">
 #### 5.2 Problemi Ill-Posed (Mal Posti)
 
 > **💡 Intuizione:** Un problema mal posto è come cercare di ricostruire un
@@ -382,7 +326,6 @@ $$\boldsymbol{y} = A\boldsymbol{x} + \boldsymbol{e}$$
 > sottodeterminato ($m < n$).
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim7.png" alt="Ill-posed" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim8.png" alt="Hadamard" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim9.png" alt="Esempio ill-posed" width="400">
 #### 5.3 SVD (Singular Value Decomposition)
 
@@ -399,9 +342,7 @@ $$\boldsymbol{y} = A\boldsymbol{x} + \boldsymbol{e}$$
 > decadono gradualmente a zero.
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim10.png" alt="SVD" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim11.png" alt="SVD valori" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim12.png" alt="SVD basi" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim13.png" alt="Condizionamento" width="400">
 #### 5.4 Soluzione Naive e Amplificazione del Rumore
 
 > **💡 Intuizione:** La soluzione naive è come alzare il volume al massimo
@@ -415,9 +356,7 @@ $A^{-1}e$ amplifica il rumore. «Soluzione?» = troncare i $\sigma_i$ più
 > piccoli (truncated SVD) o aggiungere regolarizzazione.
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim14.png" alt="Naive problem" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim15.png" alt="Naive solution" width="500">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim16.png" alt="Confronto" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim17.png" alt="Amplificazione" width="400">
 ---
 
 ### 6. Regolarizzazione `[p.10-11]`
@@ -467,8 +406,6 @@ $$\hat{\boldsymbol{x}} = \arg\min_{\boldsymbol{x}} \underbrace{\|A\boldsymbol{x}
 
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim18.png" alt="Reg confronto" width="400">
 <img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim19.png" alt="Tikhonov vs TV" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/compim20.png" alt="Lambda" width="400">
-<img src="https://raw.githubusercontent.com/elenaloli/computational-imaging/main/book/immagini_sorgente/reg1.png" alt="Regolarizzazione" width="400">
 #### 6.4 Collegamento con il Deep Learning
 
 Il framework model-based classico usa regolarizzatori **hand-crafted**. Il deep learning sostituisce $R(\boldsymbol{x})$ con un **prior appreso** dai dati.
@@ -674,7 +611,6 @@ Un modello lineare $f(x) = Wx + b$ puo rappresentare solo relazioni lineari.
 > imparati, non progettati. Domanda: «Perché padding?» = per mantenere la
 > dimensione e non perdere informazione ai bordi.
 
-<img src="immagini_locali/padded-convolution.png" alt="Convoluzione con padding" width="400">
 #### 10.2 Architettura CNN
 
 > **💡 Intuizione:** Una CNN è come una catena di montaggio: primo strato
@@ -693,7 +629,6 @@ Un modello lineare $f(x) = Wx + b$ puo rappresentare solo relazioni lineari.
 - **Average Pooling**: media i valori nella finestra -> dimezza risoluzione, smoothing
 - **Perche si usa il pooling?**: Riduce la risoluzione spaziale (e il costo computazionale) e aumenta il receptive field dei layer successivi. Nelle CNN per ricostruzione (senza downsampling), il pooling non si usa perche si vuole mantenere la risoluzione piena.
 
-<img src="immagini_locali/CNN.png" alt="CNN" width="600">
 #### 10.3 Translation Equivariance
 
 Le CNN sono **equivarianti** alle traslazioni: se l'input si sposta, l'output si sposta nello stesso modo. Questo perche i pesi sono **condivisi** su tutta l'immagine (weight sharing).
@@ -738,7 +673,6 @@ $$x_{pred} = y^\delta + f_\Theta(y^\delta)$$
 
 > **🎯 All'orale:** La domanda classica e: "Perche ResNet funziona meglio di una CNN profonda normale?" Risposta: 1) Il residuo e piu facile da imparare (bias induttivo — identity mapping e gia una buona soluzione). 2) Le skip connections permettono gradienti di fluire direttamente ai layer iniziali (vanishing gradient risolto). Nel nostro caso specifico (deblur): $x_{pred} = y^\delta + f_\Theta(y^\delta)$ e una skip connection GLOBALE — l'input degradato arriva direttamente all'output, la rete impara solo il residuo. Se chiedono "svantaggio?" — se il rumore e forte ($\sigma_n$ alto), $y^\delta$ non e una buona approssimazione, e il residuo diventa grande e difficile da imparare.
 
-<img src="immagini_locali/ResCNN.png" alt="ResCNN" width="400">
 #### 11.2 Receptive Field
 
 Il **receptive field** di un neurone e la regione dell'input che influenza la sua attivazione.
@@ -749,7 +683,6 @@ $$r_L = r_{L-1} + (k_L - 1) \prod_{i=1}^{L-1} s_i$$
 
 dove $k_L$ e la dimensione del kernel e $s_i$ lo stride al layer $i$.
 
-<img src="immagini_locali/receptive_field.png" alt="Receptive Field" width="400">
 **Problema**: CNN poco profonde hanno receptive field piccolo -> non catturano contesto globale. Soluzione nell'UNet: downsampling + bottleneck permette ai layer profondi di avere receptive field molto grande (tutta l'immagine dopo vari stride 2).
 
 > **💡 Intuizione:** Il receptive field e come il campo visivo: guardando da vicino vedi dettagli ma non l'insieme; allontanandoti vedi tutto ma perdi dettagli. In una CNN, ogni strato convoluzionale aumenta il receptive field — dopo $L$ layer, un neurone "vede" una regione di $(k_L-1)\prod s_i$ pixel in piu rispetto al layer precedente. Il downsampling (stride 2) amplifica quest'effetto: un layer dopo 4 stride 2 vede $2^4 = 16\times$ l'area.
@@ -773,7 +706,6 @@ Encoder (downsampling):       Decoder (upsampling):
 - **Skip connections (concat)**: collegano encoder e decoder alla stessa risoluzione tramite **concatenazione** (non somma come ResNet) -> preservano dettagli spaziali che altrimenti andrebbero persi nel bottleneck
 - **Bottleneck**: rappresentazione compatta al centro con il maggior numero di canali e la minima risoluzione
 
-<img src="immagini_locali/UNet.png" alt="UNet" width="600">
 **Varianti**:
 - **Residual UNet**: blocchi residui al posto delle conv semplici
 - **Attention UNet**: attention gates sulle skip connections
@@ -804,7 +736,6 @@ I Transformer, nati per NLP, sono stati adattati alle immagini.
 - Ogni patch -> vettore tramite proiezione lineare
 - Sequenza di $N$ token + token [CLS] opzionale
 
-<img src="immagini_locali/Patching.png" alt="Patching" width="300">
 **Self-Attention**:
 
 $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right) V$$
@@ -813,13 +744,10 @@ $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right
 - $\sqrt{d_k}$: scaling per evitare gradienti troppo piccoli
 - Ogni token "guarda" tutti gli altri token ? **contesto globale**
 
-<img src="immagini_locali/SA.png" alt="Self-Attention" width="400">
 **Multi-Head Self-Attention (MHSA)**: $h$ attention heads in parallelo, ognuno impara relazioni diverse.
 
-<img src="immagini_locali/MHSA.png" alt="MHSA" width="400">
 **Positional Encoding**: aggiunto ai patch embeddings per dare informazione di posizione (senza di esso, il transformer e permutation-invariant).
 
-<img src="immagini_locali/ViT.png" alt="ViT" width="600">
 #### 12.2 Encoder-Decoder per Image-to-Image
 
 Per tasks di ricostruzione, si usa un ViT encoder + decoder (spesso convoluzionale):
@@ -830,7 +758,6 @@ Per tasks di ricostruzione, si usa un ViT encoder + decoder (spesso convoluziona
 - CNN: efficiente per feature locali, induttive bias forte (localita, equivarianza)
 - ViT: contesto globale, meno bias induttivo, richiede piu dati
 
-<img src="immagini_locali/CNN-issue.png" alt="CNN issue" width="400">
 #### 12.3 Metriche di Qualita
 
 **PSNR** (Peak Signal-to-Noise Ratio):
@@ -875,7 +802,6 @@ dove $\mathcal{R}$ e la **Trasformata di Radon**.
 
 Il dominio dei dati (sinogramma) e diverso dal dominio dell'immagine -> problema **cross-domain**.
 
-<img src="immagini_locali/CT_acquisition.png" alt="CT Acquisition" width="400">
 #### 13.2 FBP (Filtered Back-Projection)
 
 Metodo classico per ricostruire da sinogrammi:
@@ -918,7 +844,6 @@ $$\boldsymbol{z} \sim p(\boldsymbol{z}), \quad \boldsymbol{x} \sim p_\Theta(\bol
 - $p(\boldsymbol{z}) = \mathcal{N}(0, I)$: prior semplice
 - $p_\Theta(\boldsymbol{x}|\boldsymbol{z})$: decoder (rete neurale)
 
-<img src="immagini_locali/DLVM.png" alt="DLVM" width="300">
 **Latent vector**: descrizione compressa dell'immagine. Non memorizza ogni pixel, ma codifica i fattori principali (anatomia, struttura, texture).
 
 > **💡 Intuizione:** Un modello discriminativo e come un esaminatore che guarda una foto e dice "e un gatto" (mappa input → etichetta). Un modello generativo e come un artista che, avendo visto tanti gatti, puo disegnarne uno nuovo mai visto prima (impara la distribuzione $p(x)$). Il DLVM funziona come: lo spazio latente $z$ e un "codice genetico" compresso — data una sequenza di DNA ($z$), il decoder produce l'immagine completa. $z$ non memorizza pixel ma concetti ad alto livello: "c'e un nucleo", "la texture e granulare", "il bordo e netto".
@@ -942,8 +867,6 @@ $$\log p_\Theta(\boldsymbol{x}) \geq \underbrace{\mathbb{E}_{q_\phi(\boldsymbol{
 $$\boldsymbol{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\varepsilon}, \quad \boldsymbol{\varepsilon} \sim \mathcal{N}(0, I)$$
 Rende il sampling differenziabile -> backprop possibile.
 
-<img src="immagini_locali/VAE.png" alt="VAE" width="400">
-<img src="immagini_locali/VAE_architecture.png" alt="VAE Architecture" width="600">
 **Training in 2 stadi** (nel corso):
 1. **Pretraining AE**: training deterministico (senza KL) -> buona ricostruzione
 2. **Fine-tuning VAE**: attivazione KL con capacity annealing -> spazio latente regolare
@@ -965,8 +888,6 @@ $$\min_\Theta \max_\Psi \; \mathbb{E}_{\boldsymbol{x}}[\log D_\Psi(\boldsymbol{x
 **Non-saturating loss** (piu stabile per il generator):
 $$\min_\Theta -\mathbb{E}_{\boldsymbol{z}}[\log D_\Psi(G_\Theta(\boldsymbol{z}))]$$
 
-<img src="immagini_locali/GAN.png" alt="GAN" width="400">
-<img src="immagini_locali/GAN_architecture.png" alt="GAN Architecture" width="600">
 **Problemi delle GAN**:
 - **Mode collapse**: il generator produce poca varieta
 - **Training instabile**: equilibrio delicato tra G e D
@@ -997,7 +918,6 @@ $$\hat{\boldsymbol{x}} = G(\hat{\boldsymbol{z}})$$
 - GAN prior: latente irregolare, ottimizzazione fragile
 - VAE prior: spazio piu regolare, ma immagini piu sfocate
 
-<img src="immagini_locali/DGP.png" alt="DGP" width="400">
 
 > **💡 Intuizione:** Il DGP e come cercare una persona scomparsa sapendo che si trova in un determinato quartiere (lo spazio $\mathcal{M}$ del generatore). Non puo essere fuori dal quartiere, quindi riduci il problema dal mondo intero a una zona ristretta. Il generatore $G$ definisce quali immagini sono "plausibili" — se $x_{true}$ non e rappresentabile dal generatore (non sta nel quartiere), non la troverai mai (representation error). E come cercare una persona che vive in un'altra citta.
 
@@ -1019,7 +939,6 @@ $$\hat{\boldsymbol{x}} = G(\hat{\boldsymbol{z}})$$
 
 I diffusion models generano dati imparando a **invertire un processo di aggiunta graduale di rumore**.
 
-<img src="immagini_locali/DM.png" alt="Diffusion Model" width="600">
 #### 15.2 Forward Process (DDPM)
 
 Sequenza di variabili latenti $\boldsymbol{x}_0, \boldsymbol{x}_1, \ldots, \boldsymbol{x}_T$:
@@ -1062,8 +981,6 @@ $$\hat{\boldsymbol{x}}_0(\boldsymbol{x}_t, t) = \frac{\boldsymbol{x}_t - \sqrt{1
 - Self-attention a risoluzioni intermedie
 - **Sinusoidal embedding** per il timestep $t$ (come positional encoding nei transformer)
 
-<img src="immagini_locali/sinusoidal_embedding.png" alt="Sinusoidal Embedding" width="300">
-<img src="immagini_locali/DiffusionUNet.png" alt="DiffusionUNet" width="600">
 Il time embedding viene proiettato e **aggiunto** dentro i residual blocks -> ogni blocco sa a quale livello di rumore sta operando.
 
 **EMA** (Exponential Moving Average): si mantiene una copia "mediata" dei pesi per sampling piu stabile.
@@ -1143,7 +1060,6 @@ $$\boldsymbol{x}_{s} \approx R_\Theta(\boldsymbol{x}_t, t, s) - \eta\,\boldsymbo
 
 dove $R_\Theta$ e lo step DDIM e $\eta$ e la guidance strength.
 
-<img src="immagini_locali/DPS.png" alt="DPS" width="400">
 **Pro**: prior diffusionale sempre nel loop, riusabile per diversi operatori $K$ senza riaddestrare.
 **Contro**: computazionalmente pesante (gradiente ad ogni step), $\eta$ da tuningare, gradiente approssimato.
 
@@ -1163,7 +1079,6 @@ $$\boldsymbol{x}_{next} = \boldsymbol{x}_{prior} - \tau K^T(K\boldsymbol{x}_{pri
 
 dove $\tau > 0$ e uno step size.
 
-<img src="immagini_locali/DiffPIR.png" alt="DiffPIR" width="400">
 **Pro**: modulare, interpretabile, connesso a metodi di ottimizzazione classici (proximal algorithms).
 **Contro**: non e un campionatore posterio esatto, bilanciamento denoising/correction delicato.
 
