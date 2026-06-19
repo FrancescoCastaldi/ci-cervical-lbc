@@ -1,13 +1,41 @@
+import os
 import yaml
 import random
 from pathlib import Path
 from PIL import Image
 import numpy as np
+import torch
 from torch.utils.data import Dataset
-import torchvision.transforms as T
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+def _find_project_root():
+    """Walk up from CWD (or __file__) looking for AGENTS.md / .git / configs/experiment.yaml."""
+    # Primary: from CWD (works in Jupyter with notebookFileRoot set)
+    start = Path.cwd().resolve()
+    for marker in ["AGENTS.md", ".git", "configs/experiment.yaml"]:
+        p = start
+        for _ in range(10):
+            if (p / marker).exists():
+                return p
+            if p.parent == p:
+                break
+            p = p.parent
+    # Fallback: from __file__ (works outside Jupyter)
+    try:
+        return Path(__file__).resolve().parents[2]
+    except NameError:
+        pass
+    return start
+
+PROJECT_ROOT = _find_project_root()
+
+
+def _transform(img, image_size=256):
+    """PIL Image -> torch.Tensor [C,H,W] in [-1,1] (no torchvision needed)."""
+    img = img.resize((image_size, image_size), Image.BILINEAR)
+    arr = np.array(img, dtype=np.float32) / 255.0          # [0, 1]
+    tensor = torch.from_numpy(arr).permute(2, 0, 1)       # [C, H, W]
+    return (tensor - 0.5) / 0.5                            # [-1, 1]
 
 
 def _resolve(path):
@@ -74,18 +102,13 @@ class LBCDataset(Dataset):
             self.paths = [_resolve(l.strip()) for l in f.readlines() if l.strip()]
         self.image_size = image_size
         self.return_path = return_path
-        self.transform = T.Compose([
-            T.Resize((image_size, image_size)),
-            T.ToTensor(),
-            T.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-        ])
 
     def __len__(self):
         return len(self.paths)
 
     def __getitem__(self, idx):
         img = Image.open(self.paths[idx]).convert("RGB")
-        tensor = self.transform(img)
+        tensor = _transform(img, self.image_size)
         if self.return_path:
             return tensor, str(self.paths[idx])
         return tensor

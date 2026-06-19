@@ -10,8 +10,10 @@ from src.degradation.degradation import degrade
 from src.methods.tv.tv import tv_restore
 from src.eval.metrics import evaluate
 from src.plots.visualize import show_comparison
+from src.utils import get_device
 
 config = load_config()
+device = get_device()
 noise_levels = config["degradation"]["noise_levels"]
 kernel_size = config["degradation"]["kernel_size"]
 blur_sigma = config["degradation"]["blur_sigma"]
@@ -30,6 +32,7 @@ rows = []
 for noise_level in noise_levels:
     psnr_list, ssim_list = [], []
     for i, gt in enumerate(dataset):
+        gt = gt.to(device)
         degraded = degrade(gt, kernel_size=kernel_size, sigma=blur_sigma, noise_level=noise_level)
         restored = tv_restore(degraded, kernel_size=kernel_size, sigma=blur_sigma,
                               lambda_reg=lambda_reg, max_iter=max_iter)
