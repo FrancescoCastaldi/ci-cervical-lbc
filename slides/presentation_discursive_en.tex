@@ -523,53 +523,6 @@
   \end{columns}
 \end{frame}
 
-\section{Implementation}
-
-\begin{frame}{Implementation -- Repository Structure}
-  \begin{columns}
-    \column{0.55\textwidth}
-      \textbf{Project tree}
-      \vspace{0.1cm}
-      \begin{center}
-      \begin{tikzpicture}[scale=0.42, every node/.style={font=\scriptsize\ttfamily}]
-        \node[anchor=west] at (0,0) {ci-cervical-lbc/};
-        \node[anchor=west] at (0.6,-0.6) {src/};
-        \node[anchor=west] at (1.2,-1.2) {data/dataset.py};
-        \node[anchor=west] at (1.2,-1.8) {degradation/degradation.py};
-        \node[anchor=west] at (1.2,-2.4) {methods/};
-        \node[anchor=west] at (1.8,-3.0) {tv/tv.py};
-        \node[anchor=west] at (1.8,-3.6) {unet/unet.py};
-        \node[anchor=west] at (1.8,-4.2) {diffpir/};
-        \node[anchor=west] at (2.4,-4.8) {diffpir.py, model.py, train.py};
-        \node[anchor=west] at (0.6,-5.4) {scripts/ (run\_tv.py, run\_unet.py, run\_diffpir.py)};
-        \node[anchor=west] at (0.6,-6.0) {tests/ (34 unit tests)};
-        \node[anchor=west] at (0.6,-6.6) {results/ (tv/, unet/, diffpir/)};
-        \node[anchor=west] at (0.6,-7.2) {configs/experiment.yaml};
-      \end{tikzpicture}
-      \end{center}
-    \column{0.45\textwidth}
-      \textbf{Modularity}
-      \begin{itemize}
-        \item Each method is an independent module
-        \item Shared pipeline: degradation, metrics
-        \item Same test set for all
-      \end{itemize}
-      \vspace{0.3cm}
-      \textbf{Execution:}
-      \vspace{0.1cm}
-      \begin{enumerate}
-        \item \texttt{python scripts/preprocess.py}
-        \item \texttt{python scripts/run\_tv.py}
-        \item \texttt{python scripts/run\_unet.py}
-        \item \texttt{python scripts/run\_diffpir.py}
-        \item \texttt{python scripts/plot\_results.py}
-      \end{enumerate}
-      \vspace{0.3cm}
-      \begin{block}{Reproducibility}
-        Seed 42, shared pipeline, 34 unit tests
-      \end{block}
-  \end{columns}
-\end{frame}
 
 \section{Quantitative Results}
 
