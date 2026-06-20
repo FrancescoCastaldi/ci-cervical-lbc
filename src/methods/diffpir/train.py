@@ -107,4 +107,4 @@ def train(epochs=30, lr=1e-4, batch_size=4, num_timesteps=1000, subset=100, save
 
 
 if __name__ == "__main__":
-    train()
+    train(epochs=50, num_timesteps=1000, subset=0, lr=1e-4, batch_size=4)

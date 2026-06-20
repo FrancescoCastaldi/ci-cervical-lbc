@@ -111,12 +111,13 @@ def run_diffpir(
     else:
         weights_path = Path(weights_path)
         if not weights_path.is_absolute():
-            # Relative: try module-specific paths
-            candidates = [
-                MOD_DIR / weights_path,           # module-relative (full path)
-                MOD_DIR / "weights" / weights_path.name,  # weights/ dir (filename only)
-            ]
-            weights_path = candidates[0] if candidates[0].exists() else candidates[1]
+            # Resolve relative paths against PROJECT_ROOT first,
+            # then fallback to MOD_DIR/weights/ with the filename only.
+            resolved = PROJECT_ROOT / weights_path
+            if resolved.exists():
+                weights_path = resolved
+            else:
+                weights_path = MOD_DIR / "weights" / weights_path.name
     if not weights_path.exists():
         raise FileNotFoundError(
             f"DDPM weights not found at {weights_path}\n"
