@@ -83,7 +83,13 @@ for i in tqdm(range(n_examples), desc="Esempi", unit="img"):
         axes[j + 1].axis("off")
 
     plt.tight_layout()
-    plt.savefig(examples_dir / f"example_{i:02d}.png", dpi=100)
+    plt.tight_layout()
+    plt.savefig(
+       examples_dir / f"example_{i:02d}.png",
+       dpi=100,
+       bbox_inches="tight",
+       pad_inches=0.1
+              )
     plt.close()
 
 print()
