@@ -179,26 +179,23 @@
         $\sigma_n\in\{0.005,0.01,0.05,0.1\}$
     \end{columns}
   \end{block}
+
   \vspace{0.15cm}
-  \begin{columns}
-    \column{0.45\textwidth}
-      \textbf{Degradation pipeline:}
-      \begin{enumerate}\small
-        \item Apply Gaussian blur $H$ to GT image $x$
-        \item Add AWGN noise $n$ with deviation $\sigma_n$
-        \item Clamp to $[-1,1]$
-      \end{enumerate}
-      \vspace{0.1cm}
+  \centering
+  \includegraphics[width=0.95\textwidth]{../results/qualitative_slides/noise_strip_crops.png}
+
+  \vspace{0.15cm}
+  \begin{columns}[t]
+    \column{0.55\textwidth}\raggedright\small
+      \textbf{Pipeline:} blur $H$ on GT $x$ $\to$ add AWGN $n$ ($\sigma_n$) $\to$ clamp $[-1,1]$
       \begin{equation*}
         y = \mathcal{H}(x) + n
       \end{equation*}
-      \vspace{0.1cm}
-      \begin{itemize}\small
+    \column{0.4\textwidth}\raggedright\small
+      \begin{itemize}
         \item Same pipeline for all methods
         \item Seed 42 for reproducibility
       \end{itemize}
-    \column{0.55\textwidth}
-      \includegraphics[width=\textwidth]{../results/qualitative_slides/noise_strip_crops.png}
   \end{columns}
 \end{frame}
 
