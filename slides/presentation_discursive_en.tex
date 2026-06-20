@@ -103,33 +103,37 @@
 \section{Dataset}
 
 \begin{frame}{Mendeley LBC Cervical Cancer}
-  \begin{center}
-    \includegraphics[width=0.75\textwidth, height=3.5cm, keepaspectratio]{../data/degraded/examples/example_01.png}
-  \end{center}
-  
-  \vspace{-0.2cm} \hrule \vspace{0.2cm} 
-
-  \begin{columns}[t]
-    \column{0.5\textwidth}
-      \footnotesize
+  \begin{columns}[c] % Allinea verticalmente al centro le due colonne
+    
+    % Colonna di sinistra: Informazioni e Tabella (più stretta per risparmiare spazio)
+    \column{0.45\textwidth}
+      \footnotesize % Testo compatto ma perfettamente leggibile nelle slide
       \begin{itemize}
-        \item \textbf{962 images} of cervical cytology
-        \item Original $2048\times1536$, \textbf{resized} to $256\times256$
-        \item Normalized to $[-1,1]$
+        \item \textbf{962 images} of cervical cytology 
+        \item Original $2048\times1536$, \textbf{resized} to $256\times256$ 
+        \item Normalized to $[-1,1]$ 
       \end{itemize}
-    \column{0.5\textwidth}
-      \vspace{-0.25cm} 
+      
+      \vspace{0.1cm}
+      
       \begin{block}{\footnotesize Diagnostic Classes}
         \centering
-        \scriptsize 
+        \scriptsize % Ottimizza la tabella per farla stare perfettamente nel blocco strettissimo
+        \setlength{\tabcolsep}{4pt} % Riduce lo spazio tra le colonne della tabella
         \begin{tabular}{lrc}\toprule
-          \textbf{Class} & \textbf{N} & \textbf{\%}\\\midrule
-          NILM & 612 & 63.6\%\\
-          HSIL & 163 & 16.9\%\\
-          LSIL & 113 & 11.7\%\\
-          SCC  & 74  & 7.7\%\\\bottomrule
+          \textbf{Class} & \textbf{N} & \textbf{\%}\\\midrule 
+          NILM & 612 & 63.6\%\\ 
+          HSIL & 163 & 16.9\%\\ 
+          LSIL & 113 & 11.7\%\\ 
+          SCC  & 74  & 7.7\%\\\bottomrule 
         \end{tabular}
       \end{block}
+
+    % Colonna di destra: Immagine quadrata (più larga, occupa il 55% della slide)
+    \column{0.55\textwidth}
+      \centering
+      \includegraphics[width=\textwidth, keepaspectratio]{../data/degraded/examples/eda_samples_per_class.png}
+      
   \end{columns}
 \end{frame}
 
