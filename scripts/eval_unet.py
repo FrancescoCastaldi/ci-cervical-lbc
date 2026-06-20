@@ -18,6 +18,7 @@ from src.degradation.degradation import gaussian_kernel
 from src.methods.unet.unet import UNet
 from src.eval.metrics import evaluate
 from src.plots.visualize import show_comparison
+from src.utils import get_device
 
 
 def degrade_batch(images, kernel_size=9, sigma=2.0, noise_level=0.01):
@@ -31,11 +32,7 @@ def degrade_batch(images, kernel_size=9, sigma=2.0, noise_level=0.01):
 
 # ── Setup ─────────────────────────────────────────────────────────────────────
 config = load_config()
-device = torch.device(
-    "cuda" if torch.cuda.is_available()
-    else "mps" if torch.backends.mps.is_available()
-    else "cpu"
-)
+device = get_device()
 torch.manual_seed(config["seed"])
 
 noise_levels = config["degradation"]["noise_levels"]

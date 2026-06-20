@@ -13,6 +13,7 @@ def gaussian_kernel(kernel_size=9, sigma=2.0):
 def apply_blur(img, kernel_size=9, sigma=2.0):
     kernel = gaussian_kernel(kernel_size, sigma)
     kernel = kernel.view(1, 1, kernel_size, kernel_size).repeat(img.shape[0], 1, 1, 1)
+    kernel = kernel.to(img.device)
     padding = kernel_size // 2
     blurred = F.conv2d(img.unsqueeze(0), kernel, padding=padding, groups=img.shape[0])
     return blurred.squeeze(0)
