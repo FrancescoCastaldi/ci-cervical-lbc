@@ -1,36 +1,36 @@
-﻿# src/ — Codice Sorgente
+﻿# src/ — Source Code
 
-Moduli Python per l'intera pipeline: caricamento dati, degradazione, metodi di restauro, metriche, visualizzazione.
+Python modules for the entire pipeline: data loading, degradation, restoration methods, metrics, visualization.
 
-## Utilità per l'esame
+## Exam Utility
 
-- **Modularità**: ogni metodo è indipendente in methods/<metodo>/ — codice pulito e manutenibile
-- **Pipeline condivisa**: degradazione, metriche e plot sono comuni — confronto equo garantito
-- **Parametri euristici**: ogni metodo ha i propri iperparametri, documentati nel report
+- **Modularity**: each method is independent in methods/<method>/ — clean and maintainable code
+- **Shared pipeline**: degradation, metrics and plots are common — guaranteed fair comparison
+- **Heuristic parameters**: each method has its own hyperparameters, documented in the report
 
-## Sottomoduli
+## Submodules
 
-| Modulo | Contenuto | Ruolo |
+| Module | Content | Role |
 |---|---|---|
-| data/ | LBCDataset, uild_splits, DegradedDataset | Caricamento e preprocessing dataset |
-| degradation/ | degrade(), gaussian_kernel() | Pipeline blur + AWGN (identica per tutti) |
-| methods/tv/ | 	v_restore(), 	v_loss() | Total Variation (variazionale) |
+| data/ | LBCDataset, build_splits, DegradedDataset | Dataset loading and preprocessing |
+| degradation/ | degrade(), gaussian_kernel() | Blur + AWGN pipeline (identical for all) |
+| methods/tv/ | tv_restore(), tv_loss() | Total Variation (variational) |
 | methods/unet/ | UNet, DoubleConv | UNet end-to-end (deep learning) |
-| methods/diffpir/ | DiffPIR, LightUNet, training loop | DiffPIR generativo (diffusion) |
-| eval/ | compute_psnr(), compute_ssim(), evaluate() | Metriche di valutazione |
-| plots/ | show_comparison(), plot_metrics() | Visualizzazione risultati |
+| methods/diffpir/ | DiffPIR, LightUNet, training loop | DiffPIR generative (diffusion) |
+| eval/ | compute_psnr(), compute_ssim(), evaluate() | Evaluation metrics |
+| plots/ | show_comparison(), plot_metrics() | Results visualization |
 
-## Pipeline di esecuzione
+## Execution Pipeline
 
-`
-data/ → degradation/ → methods/<metodo>/ → eval/ → plots/
-`
+```
+data/ → degradation/ → methods/<method>/ → eval/ → plots/
+```
 
-Tre metodi indipendenti, un'unica pipeline di valutazione.
+Three independent methods, a single evaluation pipeline.
 
-## Esempi di import
+## Import Examples
 
-`python
+```python
 from src.data.dataset import LBCDataset, DegradedDataset, build_splits, load_config
 from src.degradation.degradation import degrade, gaussian_kernel
 from src.methods.tv.tv import tv_restore
@@ -38,11 +38,11 @@ from src.methods.unet.unet import UNet
 from src.methods.diffpir.diffpir import DiffPIR
 from src.eval.metrics import compute_psnr, compute_ssim, evaluate
 from src.plots.visualize import show_comparison, plot_metrics
-`
+```
 
-## Esecuzione completa
+## Full Execution
 
-`python
+```python
 from src.data.dataset import LBCDataset, DegradedDataset
 from src.degradation.degradation import degrade
 from src.methods.tv.tv import tv_restore
@@ -55,21 +55,21 @@ restored = tv_restore(deg, lambda_reg=0.005, num_iters=150)
 metrics = evaluate(restored, gt)
 show_comparison({"GT": gt, "Degraded": deg, "Restored": restored},
                 save_path="comparison.png")
-`
+```
 
 ## Testing
 
-`ash
+```bash
 pytest tests/ -v
-`
+```
 
-I test sono organizzati per modulo: 	ests/test_degradation.py, 	ests/test_metrics.py,
-	ests/test_tv.py, 	ests/test_unet.py, 	ests/test_diffpir.py (34 test totali).
+Tests are organized by module: tests/test_degradation.py, tests/test_metrics.py,
+tests/test_tv.py, tests/test_unet.py, tests/test_diffpir.py (34 tests total).
 
-## Come aggiungere un metodo
+## How to Add a Method
 
-1. Creare src/methods/<nuovo_metodo>/ con il modulo principale
-2. Implementare la funzione di restauro (es. my_restore(img, **params))
-3. Creare scripts/run_<metodo>.py seguendo il pattern esistente
-4. I risultati confluiscono automaticamente in esults/<metodo>/metrics.csv
-5. python scripts/plot_results.py include il nuovo metodo nel grafico comparativo
+1. Create src/methods/<new_method>/ with the main module
+2. Implement the restoration function (e.g. my_restore(img, **params))
+3. Create scripts/run_<method>.py following the existing pattern
+4. Results automatically flow into results/<method>/metrics.csv
+5. python scripts/plot_results.py includes the new method in the comparison plot

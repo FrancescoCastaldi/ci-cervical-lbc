@@ -1,96 +1,94 @@
-﻿# configs/ — Configurazione Esperimento
+﻿# configs/ — Experiment Configuration
 
-Contiene experiment.yaml con tutti i parametri dell'esperimento centralizzati per riproducibilità.
+Contains experiment.yaml with all experiment parameters centralized for reproducibility.
 
-## Caricamento in Python
+## Loading in Python
 
-La configurazione viene caricata da src/data/dataset.py e scripts/run_*.py tramite:
+The configuration is loaded by `src/data/dataset.py` and `scripts/run_*.py` via:
 
-`python
+```python
 import yaml
 with open("configs/experiment.yaml") as f:
     cfg = yaml.safe_load(f)
-`
+```
 
-Ogni script importa cfg e accede alle sezioni: cfg["dataset"], cfg["degradation"], ecc.
+Each script imports cfg and accesses sections: cfg["dataset"], cfg["degradation"], etc.
 
-## Struttura completa del YAML
+## Complete YAML Structure
 
-`yaml
-seed: 42                        # Seed globale per numpy, torch, random
+```yaml
+seed: 42                        # Global seed for numpy, torch, random
 
 dataset:
-  root: data/raw/               # Dataset originale (non processato)
-  processed: data/processed/    # Immagini resize + normalizzate
-  splits: data/splits/          # Split train/val/test .txt
-  degraded: data/degraded/      # Degradate pre-calcolate
-  subset_size: 4000             # Numero massimo immagini da usare
-  image_size: 256               # Resize a 256×256 px
+  root: data/raw/               # Original dataset (unprocessed)
+  processed: data/processed/    # Resized + normalized images
+  splits: data/splits/          # Train/val/test .txt splits
+  degraded: data/degraded/      # Precomputed degraded images
+  subset_size: 4000             # Maximum number of images to use
+  image_size: 256               # Resize to 256×256 px
   train_ratio: 0.7
   val_ratio: 0.15
   test_ratio: 0.15
 
 degradation:
-  blur_sigma: 2                 # σ del blur gaussiano
-  kernel_size: 9                # Dimensione kernel blur (dispari)
-  noise_levels: [0.005, 0.01, 0.05, 0.1]   # 4 livelli AWGN
+  blur_sigma: 2                 # Gaussian blur σ
+  kernel_size: 9                # Blur kernel size (odd)
+  noise_levels: [0.005, 0.01, 0.05, 0.1]   # 4 AWGN levels
 
 tv:
-  lambda_reg: 0.005             # Peso regolarizzazione (λ)
-  max_iter: 150                 # Iterazioni Adam
+  lambda_reg: 0.005             # Regularization weight (λ)
+  max_iter: 150                 # Adam iterations
 
 unet:
-  lr: 0.0001                    # Learning rate Adam
-  batch_size: 16                # Batch size training
-  epochs: 50                    # Epoche massime
-  in_channels: 4                # RGB + canale noise level
-  out_channels: 3               # RGB ricostruito
-  features: [16, 32, 64, 128]  # Canali per ogni livello
+  lr: 0.0001                    # Adam learning rate
+  batch_size: 16                # Training batch size
+  epochs: 50                    # Maximum epochs
+  in_channels: 4                # RGB + noise level channel
+  out_channels: 3               # Reconstructed RGB
+  features: [16, 32, 64, 128]  # Channels per level
 
 diffpir:
-  num_steps: 15                 # Step DDIM sub-campionati
+  num_steps: 15                 # Subsampled DDIM steps
   noise_level: 0.05
-  max_test_images: 10           # Limite test per velocità
+  max_test_images: 10           # Test limit for speed
   weights: src/methods/diffpir/weights/ddpm_lbc.pt
-  lambda: 10.0                  # Peso data-fidelity (FFT)
-  zeta: 0.0                     # zeta>0 → rumore extra su step
-  t_start: 50                   # Timestep iniziale DDIM
+  lambda: 10.0                  # Data-fidelity weight (FFT)
+  zeta: 0.0                     # zeta>0 → extra noise on steps
+  t_start: 50                   # Initial DDIM timestep
 
 eval:
   results_dir: results/
-  save_qualitative: 6           # 6 immagini per noise level
-`
+  save_qualitative: 6           # 6 images per noise level
+```
 
-## Spiegazione parametri critici
+## Critical Parameter Explanations
 
-| Parametro | Effetto |
+| Parameter | Effect |
 |---|---|
-| lur_sigma: 2 | Equalizza per tutti i metodi; σ alto → blur forte |
-| 
-oise_levels | 4 valori testati; σₙ=0.1 è il caso più difficile |
-| lambda_reg: 0.005 | Bilanciamento fedeltà/regolarizzazione TV |
-| eatures: [16,32,64,128] | Architettura snella (~500K params, 1.9M con GroupNorm) |
-| 	_start: 50 | Scelto sperimentalmente per i nostri noise level |
-| lambda: 10.0 | Adattato internamente per-σₙ per il data-fidelity FFT |
+| blur_sigma: 2 | Equal for all methods; high σ → strong blur |
+| noise_levels | 4 values tested; σₙ=0.1 is the hardest case |
+| lambda_reg: 0.005 | Fidelity/regularization trade-off for TV |
+| features: [16,32,64,128] | Lightweight architecture (~500K params, 1.9M with GroupNorm) |
+| t_start: 50 | Chosen experimentally for our noise levels |
+| lambda: 10.0 | Internally adapted per-σₙ for FFT data-fidelity |
 
-## Modificare parametri per esperimenti custom
+## Modifying Parameters for Custom Experiments
 
-1. Editare configs/experiment.yaml
-2. Creare una copia: configs/experiment_noisy.yaml e lanciare con:
-   `python
+1. Edit `configs/experiment.yaml`
+2. Create a copy: `configs/experiment_noisy.yaml` and run with:
+   ```python
    with open("configs/experiment_noisy.yaml") as f: cfg = yaml.safe_load(f)
-   `
-3. Per sweep parametrico, modificare il parametro e rieseguire lo script
+   ```
+3. For parameter sweeps, modify the parameter and re-run the script
 
-## Seed management
+## Seed Management
 
-Seed fisso 42 garantisce riproducibilità tra esecuzioni. Se si cambia seed, split e inizializzazioni cambiano. Per confronti equi, mantenere lo stesso seed per tutti i metodi.
+Fixed seed 42 ensures reproducibility across runs. If the seed changes, splits and initializations change. For fair comparisons, keep the same seed for all methods.
 
-## Validazione
+## Validation
 
-La configurazione non ha validazione automatica — verificare:
-- kernel_size dispari
-- 	rain_ratio + val_ratio + test_ratio == 1.0
-- Path nei weights devono esistere
-- image_size multiplo di 16 (compatibilità UNet/DiffPIR)
-
+The configuration has no automatic validation — verify:
+- kernel_size is odd
+- train_ratio + val_ratio + test_ratio == 1.0
+- Paths in weights must exist
+- image_size is a multiple of 16 (UNet/DiffPIR compatibility)

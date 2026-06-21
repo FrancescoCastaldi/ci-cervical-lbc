@@ -1,83 +1,80 @@
-﻿# results/ — Risultati Sperimentali
+﻿# results/ — Experimental Results
 
-Output di tutti e tre i metodi: metriche quantitative e immagini qualitative.
+Output of all three methods: quantitative metrics and qualitative images.
 
-## Struttura
+## Structure
 
-`
+```
 results/
-├── comparison.png                     # Grafico comparativo (tutti i metodi)
+├── comparison.png                     # Comparative plot (all methods)
 ├── tv/
-│   ├── metrics.csv                    # PSNR, SSIM per ogni noise level
+│   ├── metrics.csv                    # PSNR, SSIM per noise level
 │   └── qualitative/                   # 24 PNG (6 per σₙ × 4)
 ├── unet/
-│   ├── metrics.csv                    # PSNR, SSIM, tempo inferenza
+│   ├── metrics.csv                    # PSNR, SSIM, inference time
 │   ├── qualitative/                   # 24 PNG
-│   └── best_model.pth                 # Pesi modello (non tracciato)
+│   └── best_model.pth                 # Model weights (not tracked)
 ├── diffpir/
-│   ├── metrics.csv                    # PSNR, SSIM, tempo inferenza
+│   ├── metrics.csv                    # PSNR, SSIM, inference time
 │   └── qualitative/                   # 24 PNG
-└── qualitative_slides/                # Griglie per presentazione
-`
+└── qualitative_slides/                # Grids for presentation
+```
 
-## Formato CSV
+## CSV Format
 
-`
+```
 method,noise_level,psnr,ssim[,avg_inference_time]
-tv,0.005,32.09,0.911
-unet,0.01,29.89,0.894,0.034
-diffpir,0.1,24.68,0.664,2.893
-`
+tv,0.005,31.87,0.907
+unet,0.01,29.79,0.895,0.028
+diffpir,0.1,25.60,0.797,0.64
+```
 
-## Convenzione nomi immagini
+## Image Naming Convention
 
+`noise_{σₙ}_sample{id}.png` — e.g. `noise_0.05_sample2.png` = third test image with σₙ=0.05.
 
-oise_{σₙ}_sample{id}.png — es. 
-oise_0.05_sample2.png = terza immagine di test con σₙ=0.05.
-
-## Metriche riassuntive
+## Summary Metrics
 
 | σₙ | TV (PSNR/SSIM) | UNet (PSNR/SSIM) | DiffPIR (PSNR/SSIM) |
 |---|---|---|---|
-| 0.005 | **32.09** / **0.911** | 29.89 / 0.894 | 15.80 / 0.356 |
-| 0.01  | **32.04** / **0.909** | 29.89 / 0.894 | 16.48 / 0.407 |
-| 0.05  | **30.42** / **0.837** | 29.63 / 0.875 | 22.77 / 0.722 |
-| 0.1   | 26.54 / 0.586         | **28.93** / **0.830** | 25.60 / 0.797 |
+| 0.005 | **31.87** / **0.907** | 29.79 / 0.896 | 15.80 / 0.356 |
+| 0.01  | **31.82** / **0.905** | 29.79 / 0.895 | 16.48 / 0.407 |
+| 0.05  | **30.23** / **0.834** | 29.44 / 0.864 | 22.77 / 0.722 |
+| 0.1   | 26.42 / 0.583         | **28.46** / **0.795** | 25.60 / 0.797 |
 
-## Interpretazione dei risultati
+## Results Interpretation
 
-- **Basso rumore (σₙ ≤ 0.05)**: TV domina — la regolarizzazione L2 è ottimale per AWGN debole, il blur è gestito bene da pochi step di gradient descent. UNet è competitivo ma leggermente inferiore per via della generalizzazione imperfetta su 50 epoche CPU.
-- **Alto rumore (σₙ = 0.1)**: UNet supera TV (−3.61 dB PSNR) — la rete ha appreso una prior forte sulle citologie cervicali che aiuta quando l'osservazione è molto rumorosa. DiffPIR si avvicina (25.60 dB, +0.92 dB rispetto alla versione precedente) ma non raggiunge UNet.
-- **DiffPIR**: PSNR più basso in tutti i regimi ma con miglioramenti significativi dopo il training full-dataset (50 epoche, 1000 timestep). Il SSIM a σₙ=0.1 (0.797, +0.133) mostra che la qualità strutturale è nettamente migliorata. Possibili cause residue: (1) LightUNet (1.26M params) insufficiente per catturare la distribuzione complessa; (2) λ=10 non ottimale per σₙ bassi.
+- **Low noise (σₙ ≤ 0.05)**: TV dominates — L2 regularization is optimal for weak AWGN, and blur is handled well by few gradient descent steps. UNet is competitive but slightly inferior due to imperfect generalization over 50 epochs on CPU.
+- **High noise (σₙ = 0.1)**: UNet surpasses TV (+2.04 dB PSNR) — the network has learned a strong prior on cervical cytology that helps when the observation is very noisy. DiffPIR approaches (25.60 dB, +0.92 dB over the previous version) but does not reach UNet.
+- **DiffPIR**: Lowest PSNR across all regimes but with significant improvements after full-dataset training (50 epochs, 1000 timesteps). The SSIM at σₙ=0.1 (0.797, +0.133) shows that structural quality has clearly improved. Possible residual causes: (1) LightUNet (1.26M params) insufficient to capture the complex distribution; (2) λ=10 not optimal for low σₙ.
 
-## Trade-off PSNR/SSIM
+## PSNR/SSIM Trade-off
 
-- TV ha il miglior SSIM a basso rumore (0.911) — preserva bordi netti grazie all'L1 sulla derivata.
-- UNet mantiene SSIM > 0.83 su tutti i livelli — è il più robusto.
-- DiffPIR ha SSIM a σₙ=0.005 (0.356, +0.121 vs versione precedente): le allucinazioni si sono ridotte grazie al training full-dataset, ma il modello fatica ancora a basso rumore.
+- TV has the best SSIM at low noise (0.907) — preserves sharp edges thanks to L1 on the derivative.
+- UNet maintains SSIM ≥ 0.795 across all levels — it is the most robust.
+- DiffPIR SSIM at σₙ=0.005 (0.356, +0.121 vs previous version): hallucinations have been reduced thanks to full-dataset training, but the model still struggles at low noise.
 
-## Tempi di inferenza (medi su 10 test)
+## Inference Times (averaged over 10 tests)
 
-| Metodo | σₙ=0.005 | σₙ=0.01 | σₙ=0.05 | σₙ=0.1 |
+| Method | σₙ=0.005 | σₙ=0.01 | σₙ=0.05 | σₙ=0.1 |
 |---|---|---|---|---|
-| TV | ~5 s | ~5 s | ~5 s | ~5 s |
-| UNet | **0.035 s** | **0.034 s** | **0.034 s** | **0.036 s** |
+| TV | 0.59 s | 0.79 s | 0.58 s | 0.62 s |
+| UNet | **0.030 s** | **0.028 s** | **0.027 s** | **0.026 s** |
 | DiffPIR | **0.65 s** | **0.64 s** | **0.64 s** | **0.64 s** |
 
-UNet è ~15× più veloce di TV e ~20× più veloce di DiffPIR — ideale per applicazioni real-time. DiffPIR ha migliorato l'efficienza di ~5.5× grazie ai nuovi pesi ottimizzati.
+UNet is ~23× faster than TV and ~23× faster than DiffPIR — ideal for real-time applications. DiffPIR has improved efficiency by ~5.5× thanks to the new optimized weights.
 
-## Rigenerare i risultati
+## Regenerating Results
 
-`ash
+```bash
 python scripts/run_tv.py        # results/tv/metrics.csv
 python scripts/run_unet.py      # results/unet/metrics.csv
 python scripts/run_diffpir.py   # results/diffpir/metrics.csv
 python scripts/plot_results.py  # results/comparison.png
-`
+```
 
-Ogni script sovrascrive la cartella qualitative/ e il file metrics.csv del proprio metodo.
+Each script overwrites the qualitative/ folder and metrics.csv file of its own method.
 
-## Perché DiffPIR ha punteggi più bassi?
+## Why Does DiffPIR Have Lower Scores?
 
-Il modello DDPM ha solo 200 epoche di training su 2800 immagini — insufficiente per una buona stima della prior. I modelli diffusivi di stato dell'arte richiedono centinaia di migliaia di step. Inoltre, il data-fidelity FFT assume blur noto, ma la rete non è stata schedulata con il rumore esatto del test. DiffPIR rimane valido come dimostrazione dell'approccio generativo sul dataset LBC.
-
+The DDPM model has only 200 epochs of training on 2800 images — insufficient for a good prior estimate. State-of-the-art diffusion models require hundreds of thousands of steps. Additionally, the FFT data-fidelity assumes known blur, but the network was not scheduled with the exact test noise. DiffPIR remains valid as a demonstration of the generative approach on the LBC dataset.

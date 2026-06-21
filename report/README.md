@@ -1,49 +1,48 @@
-﻿# report/ — Documentazione e Report
+﻿# report/ — Documentation and Report
 
-Documentazione teorica, relazione di esame e materiali di studio.
+Theoretical documentation, exam report, and study materials.
 
-## File
+## Files
 
-| File | Contenuto |
+| File | Content |
 |---|---|
-| 	heory.md | Fondamenti teorici: problema inverso, regolarizzazione TV, UNet, modelli diffusivi, metriche PSNR/SSIM |
-| eport.md | Relazione completa: dataset, task, metodi, parametri, risultati, confronto critico, conclusioni |
-| studio.md | Appunti di studio preparatori, derivazioni matematiche, note sui paper |
-| 
-otebook.md | Riassunto dei risultati dei notebook, tabelle riassuntive |
+| theory.md | Theoretical foundations: inverse problem, TV regularization, UNet, diffusion models, PSNR/SSIM metrics |
+| report.md | Full report: dataset, task, methods, parameters, results, critical comparison, conclusions |
+| studio.md | Preparatory study notes, mathematical derivations, paper notes |
+| notebook.md | Summary of notebook results, summary tables |
 
-## Struttura di theory.md
+## Structure of theory.md
 
-1. **Problema inverso** — degradazione come y = (k ∗ x)↓ + n; formulazione MAP; ill-posedness
-2. **Total Variation** — funzionale TV-L2, derivata, algoritmo Adam, interpretazione edge-preserving
-3. **UNet** — architettura encoder-decoder con skip connections, GroupNorm, noise conditioning channel
-4. **Modelli diffusivi** — forward SDE, reverse process, DDIM, DiffPIR con data-fidelity FFT
-5. **Metriche** — PSNR (dB), SSIM (luminanza, contrasto, struttura), trade-off
+1. **Inverse Problem** — degradation as y = (k ∗ x)↓ + n; MAP formulation; ill-posedness
+2. **Total Variation** — TV-L2 functional, derivative, Adam algorithm, edge-preserving interpretation
+3. **UNet** — encoder-decoder architecture with skip connections, GroupNorm, noise conditioning channel
+4. **Diffusion Models** — forward SDE, reverse process, DDIM, DiffPIR with FFT data-fidelity
+5. **Metrics** — PSNR (dB), SSIM (luminance, contrast, structure), trade-off
 
-## Struttura di report.md
+## Structure of report.md
 
-1. **Introduzione** — contesto del dataset LBC Cervical Cancer, task di deblurring + denoising
-2. **Dataset e preprocessing** — 962 immagini, resize 256×256, split 70/15/15, normalizzazione [-1, 1]
-3. **Degradazione** — blur Gaussiano (σ=2, k=9) + 4 livelli AWGN, pipeline identica per tutti
-4. **TV** — formulazione, parametri (λ=0.005, 150 iter), risultati con tabella PSNR/SSIM
-5. **UNet** — architettura, training (L1, Adam, 50 epoche CPU), multi-noise augmentation
+1. **Introduction** — context of the LBC Cervical Cancer dataset, deblurring + denoising task
+2. **Dataset and Preprocessing** — 962 images, resize 256×256, split 70/15/15, normalization [-1, 1]
+3. **Degradation** — Gaussian blur (σ=2, k=9) + 4 AWGN levels, identical pipeline for all
+4. **TV** — formulation, parameters (λ=0.005, 150 iter), results with PSNR/SSIM table
+5. **UNet** — architecture, training (L1, Adam, 50 epochs CPU), multi-noise augmentation
 6. **DiffPIR** — DDPM training (LightUNet 1.26M params), DDIM sampling, FFT data-fidelity
-7. **Confronto** — tabella comparativa, analisi per regime di rumore, tempi di inferenza
-8. **Discussione** — successi e fallimenti, perché TV vince a basso rumore, UNet è più robusto
-9. **Conclusioni** — summary, limiti, lavori futuri
+7. **Comparison** — comparative table, analysis by noise regime, inference times
+8. **Discussion** — successes and failures, why TV wins at low noise, UNet is more robust
+9. **Conclusions** — summary, limitations, future work
 
-## Relazione tra theory.md e report.md
+## Relationship Between theory.md and report.md
 
-- 	heory.md è atemporale — può essere usato per qualsiasi progetto di computational imaging
-- eport.md è specifico per questo progetto — parametri, risultati, discussione
-- 	heory.md fornisce le equazioni; eport.md applica quelle equazioni al dataset LBC
-- Per l'esame, eport.md è il documento principale; 	heory.md è il riferimento per i fondamenti
+- `theory.md` is timeless — can be used for any computational imaging project
+- `report.md` is specific to this project — parameters, results, discussion
+- `theory.md` provides the equations; `report.md` applies those equations to the LBC dataset
+- For the exam, `report.md` is the main document; `theory.md` is the reference for fundamentals
 
-## Destinatari
+## Audience
 
-Commissione d'esame di Computational Imaging (Laurea Magistrale). Si assume che il lettore conosca: algebra lineare, basi di probabilità, reti neurali. Non si assume familiarità con modelli diffusivi o regolarizzazione variazione.
+Exam committee for Computational Imaging (Master's degree). Assumes the reader knows: linear algebra, basic probability, neural networks. Does not assume familiarity with diffusion models or variational regularization.
 
-## Riferimenti
+## References
 
 - Rudin, Osher, Fatemi (1992) — TV denoising
 - Ronneberger, Fischer, Brox (2015) — U-Net
@@ -52,7 +51,6 @@ Commissione d'esame di Computational Imaging (Laurea Magistrale). Si assume che 
 - Zhang et al. (2022) — DiffPIR
 - Wang et al. (2004) — SSIM
 
-## Aggiornare il report
+## Updating the Report
 
-Dopo aver rieseguito gli esperimenti, aggiornare le tabelle in eport.md con i nuovi valori PSNR/SSIM. Le metriche sono generate da esults/*/metrics.csv.
-
+After re-running experiments, update the tables in `report.md` with the new PSNR/SSIM values. The metrics are generated from `results/*/metrics.csv`.

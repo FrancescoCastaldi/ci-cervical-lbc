@@ -1,60 +1,59 @@
-﻿# src/plots/ - Visualizzazione e Grafici
+﻿# src/plots/ — Visualization and Plots
 
-Funzioni per generare confronti visivi e grafici comparativi dei metodi di restauro.
+Functions for generating visual comparisons and comparative plots of restoration methods.
 
-## Utilità per l'esame
+## Exam Utility
 
-- **Confronto visivo**: immagini degraded vs restored vs GT affiancate - valutazione qualitativa
-- **Grafico comparativo**: plot PSNR/SSIM per tutti i metodi e noise level - deliverable obbligatorio
+- **Visual comparison**: degraded vs restored vs GT images side by side — qualitative evaluation
+- **Comparison plot**: PSNR/SSIM plot for all methods and noise levels — mandatory deliverable
 
-## File
+## Files
 
-| File | Contenuto |
+| File | Content |
 |---|---|
-| isualize.py | show_comparison(), plot_metrics() |
+| visualize.py | show_comparison(), plot_metrics() |
 
-## API completa
+## Full API
 
 ### show_comparison(images_dict, save_path=None)
 
-Genera una griglia orizzontale (1xN) con le immagini in images_dict.
+Generates a horizontal grid (1xN) with the images in images_dict.
 
-`python
-images = {"Ground Truth": gt, "Degradata": deg, "Restored TV": restored}
-show_comparison(images, save_path="risultati/confronto.png")
-`
+```python
+images = {"Ground Truth": gt, "Degraded": deg, "Restored TV": restored}
+show_comparison(images, save_path="results/comparison.png")
+```
 
-Parametri:
-- images_dict: dict[str, torch.Tensor | np.ndarray] - etichetta verso immagine
-- save_path: str | Path | None - percorso salvataggio (None = mostra a schermo)
+Parameters:
+- images_dict: dict[str, torch.Tensor | np.ndarray] — label to image mapping
+- save_path: str | Path | None — save path (None = display on screen)
 
-Dettagli implementativi:
-- Layout: 1 riga, N colonne, figsize=(4*N, 4)
-- Tensori PyTorch convertiti: detach().cpu().permute(1,2,0).clamp(0,1).numpy()
-- Salvataggio a 150 DPI, tight_layout
-- Output: cartella esults/<metodo>/qualitative/
+Implementation details:
+- Layout: 1 row, N columns, figsize=(4*N, 4)
+- PyTorch tensors converted: detach().cpu().permute(1,2,0).clamp(0,1).numpy()
+- Saved at 150 DPI, tight_layout
+- Output: results/<method>/qualitative/ folder
 
 ### plot_metrics(results_dir, save_path=None)
 
-Legge tutti i metrics.csv da esults/<metodo>/ e genera un grafico 1x2.
+Reads all metrics.csv files from results/<method>/ and generates a 1x2 plot.
 
-`python
+```python
 plot_metrics("results", save_path="results/comparison.png")
-`
+```
 
-Parametri:
-- esults_dir: str | Path - directory con sottocartelle per metodo
-- save_path: str | Path | None - percorso salvataggio
+Parameters:
+- results_dir: str | Path — directory with subfolders per method
+- save_path: str | Path | None — save path
 
-Dettagli implementativi:
-- Legge CSV con pandas (colonne attese: method, 
-oise_level, psnr, ssim)
-- Traccia linea con marker o per ogni metodo
-- Subplots 1x2, figsize=(12, 5), salvataggio 150 DPI
+Implementation details:
+- Reads CSV with pandas (expected columns: method, noise_level, psnr, ssim)
+- Plots line with marker o for each method
+- Subplots 1x2, figsize=(12, 5), saved at 150 DPI
 
-## Code snippet: generazione confronto per TV
+## Code snippet: generating comparison for TV
 
-`python
+```python
 from src.data.dataset import DegradedDataset
 from src.methods.tv.tv import tv_restore
 from src.eval.metrics import evaluate
@@ -67,26 +66,26 @@ for idx in range(5):
     metrics = evaluate(restored, gt)
     show_comparison({"GT": gt, "Degraded": deg, "TV": restored},
                     save_path=f"results/tv/qualitative/sample_{idx:02d}.png")
-`
+```
 
-## Code snippet: generazione grafico comparativo
+## Code snippet: generating comparison plot
 
-Esecuzione:
-`ash
+Execution:
+```bash
 python scripts/plot_results.py
-`
+```
 
-Internamente chiama plot_metrics("results", "results/comparison.png") e produce
-un grafico che confronta TV, UNet e DiffPIR sui 4 noise level.
+Internally calls plot_metrics("results", "results/comparison.png") and produces
+a plot comparing TV, UNet and DiffPIR across the 4 noise levels.
 
-## Output organizzati
+## Organized Outputs
 
-`
+```
 results/
-├── comparison.png              # Grafico comparativo (tutti i metodi)
-├── tv/qualitative/             # 24 immagini di confronto TV
-├── unet/qualitative/           # 24 immagini di confronto UNet
-└── diffpir/qualitative/        # 24 immagini di confronto DiffPIR
-`
+├── comparison.png              # Comparison plot (all methods)
+├── tv/qualitative/             # 24 TV comparison images
+├── unet/qualitative/           # 24 UNet comparison images
+└── diffpir/qualitative/        # 24 DiffPIR comparison images
+```
 
-Ogni metodo produce 6 immagini per ognuno dei 4 noise level (24 totali).
+Each method produces 6 images for each of the 4 noise levels (24 total).

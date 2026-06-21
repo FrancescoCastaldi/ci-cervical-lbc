@@ -1,82 +1,82 @@
-﻿# scripts/ — Script di Esecuzione
+﻿# scripts/ — Execution Scripts
 
-Pipeline completa per il preprocessing, esecuzione di tutti i metodi, e generazione dei risultati.
+Complete pipeline for preprocessing, running all methods, and generating results.
 
-## Utilità per l'esame
+## Exam Utility
 
-- **Riproducibilità**: eseguendo gli script in ordine si rigenerano tutti i risultati
-- **Automazione**: ogni metodo ha il suo script dedicato
-- **Orchestrazione**: lo script `plot_results.py` raccoglie i risultati di tutti i metodi
+- **Reproducibility**: running the scripts in order regenerates all results
+- **Automation**: each method has its dedicated script
+- **Orchestration**: the `plot_results.py` script collects results from all methods
 
-## Pipeline completa
+## Complete Pipeline
 
 ```bash
-# 0. Prerequisiti: dataset scaricato in data/raw/, pesi UNet/DiffPIR disponibili
-# 1. Preprocessing (una volta sola, ~2 min)
+# 0. Prerequisites: dataset downloaded in data/raw/, UNet/DiffPIR weights available
+# 1. Preprocessing (one-time, ~2 min)
 python scripts/preprocess.py
 
-# 2. Esecuzione metodi (indipendenti, ordine arbitrario)
-python scripts/run_tv.py          # Total Variation (~20 min su 145 immagini)
+# 2. Run methods (independent, any order)
+python scripts/run_tv.py          # Total Variation (~20 min on 145 images)
 python scripts/run_unet.py        # UNet training + eval (~2 h CPU)
-python scripts/run_diffpir.py     # DiffPIR su test set (~30 min)
+python scripts/run_diffpir.py     # DiffPIR on test set (~30 min)
 
-# 3. Confronto finale e metriche
-python scripts/plot_results.py    # Grafico comparativo PSNR/SSIM
+# 3. Final comparison and metrics
+python scripts/plot_results.py    # Comparative PSNR/SSIM plot
 
-# 4. Immagini per presentazione (opzionale)
+# 4. Presentation images (optional)
 python scripts/generate_noise_strip.py       # noise_strip_crops.png
 python scripts/generate_crop_images.py       # crop_comparison.png + crop_diff_comparison.png
-python scripts/generate_qualitative_pngs.py  # PNG qualitative supplementari
+python scripts/generate_qualitative_pngs.py  # Additional qualitative PNGs
 python scripts/generate_diffpir_2x4.py       # DiffPIR 2×4 comparison
 ```
 
-## Output generati
+## Generated Output
 
 ```
 results/
-├── comparison.png              # Grafico PSNR/SSIM comparativo
-├── tv/metrics.csv              # PSNR, SSIM per ogni immagine
-├── tv/qualitative/             # 24 immagini confronto (6 per noise level)
+├── comparison.png              # Comparative PSNR/SSIM plot
+├── tv/metrics.csv              # PSNR, SSIM per image
+├── tv/qualitative/             # 24 comparison images (6 per noise level)
 ├── unet/metrics.csv
 ├── unet/qualitative/
 ├── diffpir/metrics.csv
 └── diffpir/qualitative/
 ```
 
-## Dettaglio script
+## Script Details
 
-| Script | Durata | Cosa fa internamente |
+| Script | Duration | What it does internally |
 |---|---|---|
-| `preprocess.py` | ~2 min | Legge raw .jpg, resize 256×256, split 70/15/15, applica degrade(), salva .pt |
-| `run_tv.py` | ~20 min | Itera test set (145 img), chiama tv_restore() per 4 noise level, calcola PSNR/SSIM, salva CSV e PNG |
-| `run_unet.py` | ~2 h (CPU) | Addestra UNet (multi-noise, 50 epoche, early stopping), salva best model, esegui eval su test set |
-| `run_diffpir.py` | ~30 min | Carica LightUNet pesi, chiama diffpir_restore() su test set per 4 noise level |
-| `plot_results.py` | ~10 s | Legge tutti i metrics.csv, genera bar chart e line plot comparativi |
-| `gen_tv_qual.py` | ~5 min | Solo generazione qualitative TV (utile per rigenerare senza rieseguire metriche) |
-| `eval_unet.py` | ~10 min | Carica modello pre-addestrato, esegue solo evaluation (senza training) |
+| `preprocess.py` | ~2 min | Reads raw .jpg, resize 256×256, split 70/15/15, apply degrade(), save .pt |
+| `run_tv.py` | ~20 min | Iterates test set (145 img), calls tv_restore() for 4 noise levels, computes PSNR/SSIM, saves CSV and PNG |
+| `run_unet.py` | ~2 h (CPU) | Trains UNet (multi-noise, 50 epochs, early stopping), saves best model, runs eval on test set |
+| `run_diffpir.py` | ~30 min | Loads LightUNet weights, calls diffpir_restore() on test set for 4 noise levels |
+| `plot_results.py` | ~10 s | Reads all metrics.csv, generates comparative bar chart and line plot |
+| `gen_tv_qual.py` | ~5 min | TV qualitative generation only (useful to regenerate without re-running metrics) |
+| `eval_unet.py` | ~10 min | Loads pretrained model, runs evaluation only (no training) |
 
-## Prerequisiti e configurazione
+## Prerequisites and Configuration
 
-- **Dataset**: deve essere scaricato manualmente in `data/raw/` (Mendeley LBC Cervical Cancer)
-- **Pesi UNet**: generati da `run_unet.py` in `src/methods/unet/`
-- **Pesi DiffPIR**: pre-addestrati in `src/methods/diffpir/weights/`
-- **Config**: parametri modificabili in `configs/experiment.yaml`
+- **Dataset**: must be downloaded manually in `data/raw/` (Mendeley LBC Cervical Cancer)
+- **UNet weights**: generated by `run_unet.py` in `src/methods/unet/`
+- **DiffPIR weights**: pretrained in `src/methods/diffpir/weights/`
+- **Config**: modifiable parameters in `configs/experiment.yaml`
 
-## Esecuzione su singola immagine
+## Running on a Single Image
 
 ```python
-# Esempio: test rapido con TV
+# Example: quick test with TV
 from src.methods.tv.tv import tv_restore
 from src.data.dataset import LBCDataset
 
-ds = LBCDataset(split="test")  # 145 immagini
-x_clean, _ = ds[0]             # prima immagine clean
+ds = LBCDataset(split="test")  # 145 images
+x_clean, _ = ds[0]             # first clean image
 x_tv, metrics = tv_restore(x_clean.unsqueeze(0), lmbda=0.005, n_iter=150)
 ```
 
-## Risoluzione problemi
+## Troubleshooting
 
-- `FileNotFoundError` in data/: eseguire prima `preprocess.py`
-- `ModuleNotFoundError`: verificare `pip install -e .` o PYTHONPATH
-- Memoria insufficiente: ridurre batch_size in experiment.yaml
-- Tempi lunghi: su GPU i metodi DL sono 10-50× più veloci
+- `FileNotFoundError` in data/: run `preprocess.py` first
+- `ModuleNotFoundError`: verify `pip install -e .` or PYTHONPATH
+- Insufficient memory: reduce batch_size in experiment.yaml
+- Long runtimes: on GPU the DL methods are 10–50× faster

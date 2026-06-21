@@ -1,50 +1,50 @@
-﻿# src/degradation/ — Pipeline di Degradazione
+﻿# src/degradation/ — Degradation Pipeline
 
-Implementa la degradazione blur + rumore, **identica per tutti i metodi**.
+Implements blur + noise degradation, **identical for all methods**.
 
-## Utilità per l'esame
+## Exam Utility
 
-- **Confronto equo**: stessa funzione `degrade()` per TV, UNet e DiffPIR — le differenze nei risultati sono solo dovute ai metodi
-- **Parametri fissi**: blur gaussiano (σ=2, kernel=9) e 4 livelli di AWGN (0.005, 0.01, 0.05, 0.1)
-- **Seed controllato**: seed 42 per riproducibilità
+- **Fair comparison**: same `degrade()` function for TV, UNet and DiffPIR — differences in results are only due to the methods
+- **Fixed parameters**: Gaussian blur (σ=2, kernel=9) and 4 AWGN levels (0.005, 0.01, 0.05, 0.1)
+- **Controlled seed**: seed 42 for reproducibility
 
-## Formulazione matematica
+## Mathematical Formulation
 
-L'immagine degradata _y_ è ottenuta dal modello diretto:
+The degraded image _y_ is obtained from the forward model:
 
 $$ y = (H * x) + n $$
 
-dove _H_ è il kernel di blur gaussiano, _*_ è la convoluzione 2D, e _n_ ∼ N(0, σ²I) è rumore AWGN indipendente.
+where _H_ is the Gaussian blur kernel, _*_ is 2D convolution, and _n_ ∼ N(0, σ²I) is independent AWGN noise.
 
-Il kernel gaussiano si calcola come:
+The Gaussian kernel is computed as:
 
 $$ G(i,j) = \frac{1}{2\pi\sigma^2} \exp\left(-\frac{i^2 + j^2}{2\sigma^2}\right) $$
 
-con _i, j_ ∈ [-K/2, K/2] per kernel di dimensione _K=9_, normalizzato a somma 1.
+with _i, j_ ∈ [-K/2, K/2] for kernel size _K=9_, normalized to sum 1.
 
-## Perché questi parametri?
+## Why These Parameters?
 
-| Parametro | Scelta | Motivazione |
+| Parameter | Choice | Motivation |
 |---|---|---|
-| σ_blur = 2 | Blur moderato | Simula sfocatura da microscopio ottico reale |
-| Kernel 9×9 | 99.7% energia gaussiana | Dimensione sufficiente per σ=2 senza artefatti di troncamento |
-| σ_n ∈ [0.005, 0.1] | 4 livelli di rumore | Copre scenari da rumore basso (CCD di qualità) ad alto (acquisizione rapida) |
+| σ_blur = 2 | Moderate blur | Simulates real optical microscope defocus |
+| Kernel 9×9 | 99.7% Gaussian energy | Sufficient size for σ=2 without truncation artifacts |
+| σ_n ∈ [0.005, 0.1] | 4 noise levels | Covers scenarios from low noise (quality CCD) to high noise (fast acquisition) |
 
-## Esempio d'uso
+## Usage Example
 
 ```python
 from src.degradation.degradation import degrade
 import torch
 
-x = torch.randn(1, 3, 256, 256)  # immagine clean [-1, 1]
+x = torch.randn(1, 3, 256, 256)  # clean image [-1, 1]
 x_degraded, kernel = degrade(x, noise_level=0.05)
 # x_degraded.shape → (1, 3, 256, 256)
 # kernel.shape → (1, 1, 9, 9)
 ```
 
-## Riproducibilità
+## Reproducibility
 
-La pipeline fissa il seed deterministico **prima** di ogni invocazione:
+The pipeline sets the deterministic seed **before** each invocation:
 
 ```python
 import numpy as np
@@ -56,18 +56,18 @@ np.random.seed(seed)
 torch.manual_seed(seed)
 ```
 
-Questo garantisce che l'identica immagine degradata venga fornita ai tre metodi.
+This guarantees that the identical degraded image is provided to all three methods.
 
-## Dataset pre-calcolato
+## Pre-computed Dataset
 
-Le immagini degradate sono salvate in `data/degraded/` per evitare di ricalcolare ogni volta:
+The degraded images are saved in `data/degraded/` to avoid recomputing each time:
 
 ```
 data/degraded/
-├── noise_0.005/      # 962 immagini
-├── noise_0.01/       # 962 immagini
-├── noise_0.05/       # 962 immagini
-└── noise_0.1/        # 962 immagini
+├── noise_0.005/      # 962 images
+├── noise_0.01/       # 962 images
+├── noise_0.05/       # 962 images
+└── noise_0.1/        # 962 images
 ```
 
-Il caricamento avviene tramite `DegradedDataset` in `src/data/dataset.py`, che legge `_degraded.pt` per ogni immagine originale.
+Loading is done via `DegradedDataset` in `src/data/dataset.py`, which reads `_degraded.pt` for each original image.

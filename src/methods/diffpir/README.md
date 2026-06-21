@@ -1,61 +1,61 @@
-# DiffPIR — Metodo Generativo
+# DiffPIR — Generative Method
 
-Implementazione del metodo DiffPIR (Denoising Diffusion Models for Plug-and-Play Image Restoration) per il restauro di immagini degradate.
+Implementation of the DiffPIR method (Denoising Diffusion Models for Plug-and-Play Image Restoration) for restoring degraded images.
 
-## Modello
+## Model
 
-Usa una **LightUNet** (custom DDPM) addestrata su immagini LBC cervicali:
-- Architettura: UNet leggero con embedding temporale sinusoidale
+Uses a **LightUNet** (custom DDPM) trained on cervical LBC images:
+- Architecture: lightweight UNet with sinusoidal time embedding
 - Timesteps: 1000 (training), 15 (sampling)
-- Pesi: `weights/ddpm_lbc.pt` (~5MB)
+- Weights: `weights/ddpm_lbc.pt` (~5MB)
 
-### Addestramento
+### Training
 
 ```bash
 python -m src.methods.diffpir.train
 ```
 
-Training su 100 immagini del training set, 30 epoche, MSE loss.
+Training on 100 images from the training set, 30 epochs, MSE loss.
 
-## Utilizzo
+## Usage
 
-### Script completo
+### Full script
 ```bash
 python scripts/run_diffpir.py
 ```
 
-### Notebook interattivo
+### Interactive notebook
 ```bash
 jupyter notebook notebooks/04_diffpir.ipynb
 ```
 
-## Configurazione
+## Configuration
 
-Parametri in `configs/experiment.yaml`:
+Parameters in `configs/experiment.yaml`:
 ```yaml
 diffpir:
-  num_steps: 15           # Step di sampling
-  noise_level: 0.05       # Livello rumore di riferimento
-  max_test_images: 10     # Numero immagini da processare
+  num_steps: 15           # Sampling steps
+  noise_level: 0.05       # Reference noise level
+  max_test_images: 10     # Number of images to process
   weights: src/methods/diffpir/weights/ddpm_lbc.pt
-  lambda: 10.0            # Peso data-fidelity
-  zeta: 0.0               # Stocasticità (0 = deterministico)
-  t_start: 50             # Timestep di partenza
+  lambda: 10.0            # Data-fidelity weight
+  zeta: 0.0               # Stochasticity (0 = deterministic)
+  t_start: 50             # Starting timestep
 ```
 
-### Parametri DiffPIR
-| Parametro | Default | Ruolo |
+### DiffPIR Parameters
+| Parameter | Default | Role |
 |---|---|---|
-| `num_steps` | 15 | Step di sampling (sub-campionati da t_start a 0) |
-| `lambda_` | 10.0 | Peso data-fidelity |
-| `zeta` | 0.0 | Stocasticità (0=deterministico, 1=fully stochastic) |
-| `t_start` | 50 | Timestep di partenza (50 per stabilità numerica) |
+| `num_steps` | 15 | Sampling steps (sub-sampled from t_start to 0) |
+| `lambda_` | 10.0 | Data-fidelity weight |
+| `zeta` | 0.0 | Stochasticity (0=deterministic, 1=fully stochastic) |
+| `t_start` | 50 | Starting timestep (50 for numerical stability) |
 
-## Risultati
+## Results
 
-Metriche su 10 immagini di test:
+Metrics on 10 test images:
 
-| σ_n | PSNR | SSIM | Tempo |
+| σ_n | PSNR | SSIM | Time |
 |---|---|---|---|
 | 0.005 | 15.78 dB | 0.329 | 3.59 s |
 | 0.01 | 16.45 dB | 0.374 | 3.79 s |
@@ -64,21 +64,21 @@ Metriche su 10 immagini di test:
 
 ## Output
 
-### Metriche
-- `results/diffpir/metrics.csv`: PSNR, SSIM, tempo inferenza per ogni noise level
+### Metrics
+- `results/diffpir/metrics.csv`: PSNR, SSIM, inference time for each noise level
 
-### Immagini qualitative
-- `results/diffpir/qualitative/noise_{level}_sample{i}.png`: Confronto degraded vs restored vs GT
+### Qualitative images
+- `results/diffpir/qualitative/noise_{level}_sample{i}.png`: Degraded vs restored vs GT comparison
 
-## Confronto con altri metodi
+## Comparison with Other Methods
 
-Dopo aver eseguito TV e UNet, carica i risultati nel notebook per il confronto:
+After running TV and UNet, load the results in the notebook for comparison:
 ```python
 from src.plots.visualize import plot_metrics
 plot_metrics("results", save_path="results/comparison.png")
 ```
 
-## Riferimenti
+## References
 
 - Paper: [Denoising Diffusion Models for Plug-and-Play Image Restoration](https://arxiv.org/pdf/2305.08995.pdf)
 - Repository: https://github.com/yuanzhi-zhu/DiffPIR

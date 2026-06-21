@@ -1,22 +1,22 @@
-﻿# src/methods/ — Metodi di Restauro
+﻿# src/methods/ — Restoration Methods
 
-Implementazioni dei tre metodi di restauro: variazionale (TV), end-to-end (UNet), generativo (DiffPIR).
+Implementations of three restoration methods: variational (TV), end-to-end (UNet), generative (DiffPIR).
 
-## Utilità per l'esame
+## Exam Utility
 
-- **Copertura metodologica**: tre famiglie diverse — variazionale, deep learning, generativo
-- **Indipendenza**: ogni metodo è un modulo separato con il proprio codice
-- **Confronto critico**: stessi input, stesse metriche — si valutano punti di forza e limiti di ciascuno
+- **Methodological coverage**: three different families — variational, deep learning, generative
+- **Independence**: each method is a separate module with its own code
+- **Critical comparison**: same inputs, same metrics — evaluate strengths and limitations of each
 
-## Metodi
+## Methods
 
-| Modulo | Metodo | Famiglia | File principale | Parametri chiave |
+| Module | Method | Family | Main file | Key parameters |
 |---|---|---|---|---|
-| `tv/` | Total Variation | Variazionale | `tv.py` | λ_reg=0.005, iter=150 |
+| `tv/` | Total Variation | Variational | `tv.py` | λ_reg=0.005, iter=150 |
 | `unet/` | UNet | Deep Learning (end-to-end) | `unet.py` | 1.9M params, GroupNorm |
-| `diffpir/` | DiffPIR | Generativo (diffusion) | `diffpir.py` | ζ=1.0, step=30, DDIM |
+| `diffpir/` | DiffPIR | Generative (diffusion) | `diffpir.py` | ζ=1.0, step=30, DDIM |
 
-## Risultati comparativi (PSNR / SSIM su test set)
+## Comparative Results (PSNR / SSIM on test set)
 
 | σ_n | TV | UNet | DiffPIR |
 |---|---|---|---|
@@ -25,23 +25,23 @@ Implementazioni dei tre metodi di restauro: variazionale (TV), end-to-end (UNet)
 | 0.05  | 30.42 dB / 0.837 | 29.63 dB / 0.875 | 22.49 dB / 0.512 |
 | 0.1   | 26.54 dB / 0.586 | 28.93 dB / 0.830 | 24.68 dB / 0.664 |
 
-**TV** domina a basso rumore (σ_n ≤ 0.01), **UNet** è il più robusto su tutti i livelli, **DiffPIR** recupera a rumore alto ma soffre a σ_n basso.
+**TV** dominates at low noise (σ_n ≤ 0.01), **UNet** is the most robust across all levels, **DiffPIR** recovers at high noise but struggles at low σ_n.
 
-## Complessità computazionale (CPU, 256×256)
+## Computational Complexity (CPU, 256×256)
 
-| Metodo | Tempo per immagine | Note |
+| Method | Time per image | Notes |
 |---|---|---|
-| TV | ~8 s | 150 iterazioni Adam |
-| UNet | ~0.035 s | Singolo forward pass |
-| DiffPIR | ~3 s | 30 step DDIM sampling |
+| TV | ~8 s | 150 Adam iterations |
+| UNet | ~0.035 s | Single forward pass |
+| DiffPIR | ~3 s | 30 DDIM sampling steps |
 
-## Quando usare ciascun metodo
+## When to Use Each Method
 
-- **TV**: quando non si hanno dati di training e serve una baseline interpretabile
-- **UNet**: quando si hanno dati simili alla distribuzione di training, serve velocità in inferenza
-- **DiffPIR**: quando si accetta più costo computazionale per qualità generativa e dettagli fini
+- **TV**: when no training data is available and an interpretable baseline is needed
+- **UNet**: when data similar to the training distribution is available and inference speed is required
+- **DiffPIR**: when more computational cost is acceptable for generative quality and fine details
 
-## Struttura dei moduli
+## Module Structure
 
 ```
 tv/
@@ -49,18 +49,18 @@ tv/
 └── __init__.py
 
 unet/
-├── unet.py        # Architettura UNet (encoder-decoder, skip connections)
+├── unet.py        # UNet architecture (encoder-decoder, skip connections)
 └── __init__.py
 
 diffpir/
-├── diffpir.py     # Algoritmo DiffPIR (FFT data-fidelity, DDIM)
-├── model.py       # LightUNet per DDPM (1.26M params)
-├── train.py       # Training loop DDPM
-├── weights/       # Pesi pre-addestrati (non tracciati)
-└── README.md      # Documentazione specifica
+├── diffpir.py     # DiffPIR algorithm (FFT data-fidelity, DDIM)
+├── model.py       # LightUNet for DDPM (1.26M params)
+├── train.py       # DDPM training loop
+├── weights/       # Pre-trained weights (not tracked)
+└── README.md      # Specific documentation
 ```
 
-## Esempio: eseguire un metodo su una singola immagine
+## Example: Running a Method on a Single Image
 
 ```python
 from src.degradation.degradation import degrade

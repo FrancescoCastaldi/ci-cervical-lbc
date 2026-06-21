@@ -1,44 +1,44 @@
-﻿# tests/ — Test Unitari
+﻿# tests/ — Unit Tests
 
-34 test unitari che verificano la correttezza delle implementazioni.
+34 unit tests verifying the correctness of the implementations.
 
-## Utilità per l'esame
+## Exam Utility
 
-- **Affidabilità del codice**: ogni metodo ha test specifici che ne verificano il funzionamento
-- **Riproducibilità**: i test garantiscono che le implementazioni siano numericamente stabili e corrette
-- **Copertura**: degradation (10), metrics (9), diffpir (7), unet (8), tv (8)
+- **Code reliability**: each method has specific tests that verify its operation
+- **Reproducibility**: the tests ensure implementations are numerically stable and correct
+- **Coverage**: degradation (10), metrics (9), diffpir (7), unet (8), tv (8)
 
-## File
+## Files
 
-| File | Test | Cosa verifica |
+| File | Tests | What it verifies |
 |---|---|---|
-| `test_degradation.py` | 10 | Kernel gaussiano, blur, AWGN, pipeline completa |
-| `test_metrics.py` | 9 | PSNR, SSIM, edge case (immagini identiche, nere, diverse) |
-| `test_diffpir.py` | 7 | FFT data-fidelity, DDIM sampling, shape output |
-| `test_unet.py` | 8 | Forward pass, gradienti, range output, condizionamento noise |
-| `test_tv.py` | 8 | TV loss, kernel, blur, range output, convergenza |
+| `test_degradation.py` | 10 | Gaussian kernel, blur, AWGN, complete pipeline |
+| `test_metrics.py` | 9 | PSNR, SSIM, edge cases (identical, black, different images) |
+| `test_diffpir.py` | 7 | FFT data-fidelity, DDIM sampling, output shape |
+| `test_unet.py` | 8 | Forward pass, gradients, output range, noise conditioning |
+| `test_tv.py` | 8 | TV loss, kernel, blur, output range, convergence |
 
-## Esecuzione
+## Running
 
 ```bash
-# Tutti i test
+# All tests
 python -m pytest tests/ -v
 
-# Singolo file
+# Single file
 python -m pytest tests/test_tv.py -v
 
-# Singolo test
+# Single test
 python -m pytest tests/test_tv.py::test_tv_loss -v
 
-# Con output dettagliato
+# With detailed output
 python -m pytest tests/ -v --tb=short
 ```
 
-## Struttura dei test
+## Test Structure
 
-I test usano `pytest` con funzioni `test_*` indipendenti (nessuna classe). Ogni test crea input sintetici con `torch.randn` e verifica l'output con `torch.allclose`.
+Tests use `pytest` with independent `test_*` functions (no classes). Each test creates synthetic inputs with `torch.randn` and verifies the output with `torch.allclose`.
 
-**Esempio concreto** (da `test_degradation.py`):
+**Concrete example** (from `test_degradation.py`):
 
 ```python
 def test_gaussian_kernel_sum():
@@ -47,36 +47,36 @@ def test_gaussian_kernel_sum():
     assert kernel.shape == (1, 1, 9, 9)
 ```
 
-**Esempio metriche** (da `test_metrics.py`):
+**Metrics example** (from `test_metrics.py`):
 
 ```python
 def test_psnr_identical():
     x = torch.randn(1, 3, 64, 64)
     psnr = compute_psnr(x, x)
-    assert psnr == float("inf")  # immagini identiche → PSNR infinito
+    assert psnr == float("inf")  # identical images → infinite PSNR
 ```
 
-## Cosa viene testato per modulo
+## What is Tested per Module
 
-| Modulo | Copertura specifica |
+| Module | Specific coverage |
 |---|---|
-| **degradation** | normalizzazione kernel, blur conserva media, AWGN ha σ corretto, pipeline end-to-end riproducibile con seed |
-| **metrics** | PSNR infinito per input identici, PSNR = 0 per immagini opposte, SSIM = 1 per identiche, SSIM < 1 per diverse, range [0,1] e [-1,1] |
-| **diffpir** | FFT data-fidelity term, DDIM sampling mantiene shape e range [-1,1], zeta=0 coincide con denoising puro |
-| **unet** | forward pass con e senza noise conditioning, gradienti fluiscono, output in [-1,1], shape preservato, skip connections attive |
-| **tv** | TV loss è sempre ≥ 0, kernel gaussiano normalizzato, blur riduce varianza, output in [-1,1], convergenza iterativa |
+| **degradation** | kernel normalization, blur preserves mean, correct AWGN σ, reproducible end-to-end pipeline with seed |
+| **metrics** | Infinite PSNR for identical inputs, PSNR = 0 for opposite images, SSIM = 1 for identical, SSIM < 1 for different, [0,1] and [-1,1] ranges |
+| **diffpir** | FFT data-fidelity term, DDIM sampling preserves shape and [-1,1] range, zeta=0 matches pure denoising |
+| **unet** | Forward pass with and without noise conditioning, gradients flow, output in [-1,1], shape preserved, skip connections active |
+| **tv** | TV loss always ≥ 0, normalized Gaussian kernel, blur reduces variance, output in [-1,1], iterative convergence |
 
-## Aggiungere nuovi test
+## Adding New Tests
 
-1. Creare `tests/test_<modulo>.py`
-2. Importare le funzioni da testare
-3. Scrivere funzioni `test_*` senza classe
-4. Usare `torch.allclose()` con `atol=1e-4` per tolleranza numerica
-5. Eseguire con `python -m pytest tests/test_<modulo>.py -v`
+1. Create `tests/test_<module>.py`
+2. Import the functions to test
+3. Write `test_*` functions without a class
+4. Use `torch.allclose()` with `atol=1e-4` for numerical tolerance
+5. Run with `python -m pytest tests/test_<module>.py -v`
 
-## Dipendenze
+## Dependencies
 
 - `pytest` — test runner
-- `torch` — tensori e operazioni
-- `numpy` — metriche aggiuntive
-- `scikit-image` — SSIM di riferimento per cross-validazione
+- `torch` — tensors and operations
+- `numpy` — additional metrics
+- `scikit-image` — reference SSIM for cross-validation

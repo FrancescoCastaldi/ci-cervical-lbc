@@ -1,33 +1,33 @@
-# UNet -- Metodo Deep Learning End-to-End
+# UNet — End-to-End Deep Learning Method
 
-Architettura UNet con condizionamento del noise level per deblur + denoise su immagini LBC cervicali.
+UNet architecture with noise level conditioning for deblur + denoise on cervical LBC images.
 
-## Utilita per l'esame
+## Exam Utility
 
-- **Deep learning end-to-end**: impara direttamente la mappatura degraded -> restored dai dati
-- **Architettura snella**: ~1.9M parametri (vs 31M originale) -- addestrabile su CPU
-- **Multi-noise augmentation**: training con noise level random per batch -- generalizza su tutti i livelli
+- **End-to-end deep learning**: learns the degraded -> restored mapping directly from data
+- **Lightweight architecture**: ~1.9M parameters (vs 31M original) — trainable on CPU
+- **Multi-noise augmentation**: training with random noise level per batch — generalizes across all levels
 
-## File
+## Files
 
-| File | Contenuto |
+| File | Content |
 |---|---|
-| unet.py | UNet, DoubleConv -- architettura encoder-decoder con skip connections |
+| unet.py | UNet, DoubleConv — encoder-decoder architecture with skip connections |
 
-## Architettura Dettagliata
+## Detailed Architecture
 
-| Componente | Dettaglio |
+| Component | Detail |
 |---|---|
-| Input | 4 canali (RGB + noise map), 256x256 |
-| Encoder | 4 livelli: 16 -> 32 -> 64 -> 128 canali |
-| Decoder | 4 livelli simmetrici con upsampling |
-| Skip connections | Connessioni encoder -> decoder |
-| Output | 3 canali [-1, 1] |
-| Parametri | ~1.9M |
+| Input | 4 channels (RGB + noise map), 256x256 |
+| Encoder | 4 levels: 16 -> 32 -> 64 -> 128 channels |
+| Decoder | 4 symmetric levels with upsampling |
+| Skip connections | Encoder -> decoder connections |
+| Output | 3 channels [-1, 1] |
+| Parameters | ~1.9M |
 
 ### DoubleConv
 
-Ogni livello usa DoubleConv (unet.py:7-20): due convoluzioni 3x3 con padding=1, ciascuna seguita da **GroupNorm** (num_groups=8) e **ReLU**. Nessun bias nelle convoluzioni (la norm lo rende ridondante). GroupNorm e preferita a BatchNorm per batch size piccoli (16) e stabilita su CPU.
+Each level uses DoubleConv (unet.py:7-20): two 3x3 convolutions with padding=1, each followed by **GroupNorm** (num_groups=8) and **ReLU**. No bias in convolutions (norm makes it redundant). GroupNorm is preferred over BatchNorm for small batch sizes (16) and CPU stability.
 
 ```python
 class DoubleConv(nn.Module):
@@ -43,15 +43,15 @@ class DoubleConv(nn.Module):
         )
 ```
 
-### Condizionamento del Noise Level
+### Noise Level Conditioning
 
-Il noise level sigma_n e passato come **mappa costante 256x256** concatenata al 4 canale d'ingresso. Cio permette al modello di:
+The noise level sigma_n is passed as a **constant 256x256 map** concatenated as the 4th input channel. This allows the model to:
 
-- Adattare la forza di denoising in base al rumore presente
-- Generalizzare su noise level non visti
-- Usare lo stesso modello per tutti i 4 livelli senza ricarica pesi
+- Adapt denoising strength based on the present noise
+- Generalize to unseen noise levels
+- Use the same model for all 4 levels without weight reloading
 
-Generazione della noise map (run_unet.py:41-44):
+Noise map generation (run_unet.py:41-44):
 
 ```python
 def make_noise_map(batch_size, image_size, noise_level, device):
@@ -61,38 +61,38 @@ def make_noise_map(batch_size, image_size, noise_level, device):
 
 ### Skip Connections
 
-Collegamenti encoder -> decoder concatenano le feature map dello stesso livello spaziale, permettendo al decoder di recuperare dettagli fini persi nel downsampling. L'encoder produce 4 skip connection salvate in lista e invertite nel decoder.
+Encoder -> decoder connections concatenate feature maps at the same spatial level, allowing the decoder to recover fine details lost in downsampling. The encoder produces 4 skip connections stored in a list and reversed in the decoder.
 
 ## Training
 
-### Parametri
+### Parameters
 
-| Parametro | Valore |
+| Parameter | Value |
 |---|---|
-| Loss | L1 (MSE meno blur) |
-| Ottimizzatore | Adam, lr=10^-4 |
+| Loss | L1 (MSE is more blurry) |
+| Optimizer | Adam, lr=10^-4 |
 | Scheduler | ReduceLROnPlateau, patience=5, factor=0.5 |
 | Batch size | 16 |
-| Epoche | 50 |
-| Augmentation | sigma_n random per batch tra {0.005, 0.01, 0.05, 0.1} |
+| Epochs | 50 |
+| Augmentation | random sigma_n per batch from {0.005, 0.01, 0.05, 0.1} |
 
-### Perche L1 invece di L2?
+### Why L1 instead of L2?
 
-- **L1** (MAE): minore penalizzazione dei grandi errori -> bordi piu netti, meno blur
-- **L2** (MSE): tende a sfumare i bordi (penalizza quadraticamente i gradienti)
+- **L1** (MAE): less penalization of large errors -> sharper edges, less blur
+- **L2** (MSE): tends to blur edges (quadratically penalizes gradients)
 
-Su immagini LBC, L1 produce ~0.5 dB in piu di PSNR rispetto a L2.
+On LBC images, L1 yields ~0.5 dB more PSNR compared to L2.
 
 ### Multi-Noise Augmentation
 
-Ad ogni batch, il noise level e campionato casualmente tra i 4 valori del dataset:
+At each batch, the noise level is randomly sampled from the 4 dataset values:
 
 ```python
 noise = np.random.choice(noise_levels)
 degraded = degrade_batch(gt, kernel_size=9, sigma=2.0, noise_level=noise)
 ```
 
-Questo costringe il modello a operare su diversi livelli di rumore, migliorando la generalizzazione. Senza, il modello overfitterebbe su un singolo sigma_n.
+This forces the model to operate on different noise levels, improving generalization. Without it, the model would overfit to a single sigma_n.
 
 ### Model Checkpointing
 
@@ -102,15 +102,15 @@ if avg_val_psnr > best_val_psnr:
     torch.save(model.state_dict(), "results/unet/best_model.pth")
 ```
 
-Il modello con miglior PSNR di validazione e salvato. La validation usa un subset random del 25% su tutti i noise level, con lo stesso meccanismo di multi-noise.
+The model with the best validation PSNR is saved. Validation uses a random 25% subset across all noise levels, with the same multi-noise mechanism.
 
 ### Weight Initialization
 
-Default PyTorch (Kaiming Uniform per Conv2d). Non e stata applicata inizializzazione personalizzata -- per architetture con GroupNorm e ReLU, Kaiming Uniform e sufficiente.
+Default PyTorch (Kaiming Uniform for Conv2d). No custom initialization was applied — for architectures with GroupNorm and ReLU, Kaiming Uniform is sufficient.
 
-## Uso
+## Usage
 
-### Inferenza su singola immagine
+### Inference on a single image
 
 ```python
 import torch
@@ -120,7 +120,7 @@ model = UNet(in_channels=4, out_channels=3, features=(16, 32, 64, 128))
 model.load_state_dict(torch.load("results/unet/best_model.pth"))
 model.eval()
 
-# Crea input: [degraded RGB (3 canali) + noise map (1 canale)]
+# Create input: [degraded RGB (3 channels) + noise map (1 channel)]
 noise_map = torch.full((1, 1, 256, 256), noise_level)
 model_input = torch.cat([degraded.unsqueeze(0), noise_map], dim=1)
 
@@ -128,34 +128,34 @@ with torch.no_grad():
     restored = model(model_input).squeeze(0)
 ```
 
-### Training completo
+### Full training
 
 ```bash
 python scripts/run_unet.py
 ```
 
-Esegue 50 epoche su CPU (~20 minuti), validation ogni epoca, salvataggio best model, valutazione finale su test set.
+Runs 50 epochs on CPU (~20 minutes), validation every epoch, saves best model, final evaluation on test set.
 
-### Confronto con UNet Originale
+### Comparison with Original UNet
 
-| Caratteristica | UNet Originale | Questa Implementazione |
+| Feature | Original UNet | This Implementation |
 |---|---|---|
-| Parametri | 31M | ~1.9M |
-| Canali encoder | 64->128->256->512 | 16->32->64->128 |
-| Normalizzazione | BatchNorm | GroupNorm (gruppi=8) |
-| Attivazione | ReLU | ReLU |
-| Condizionamento | Assente | Noise map concatenata |
+| Parameters | 31M | ~1.9M |
+| Encoder channels | 64->128->256->512 | 16->32->64->128 |
+| Normalization | BatchNorm | GroupNorm (groups=8) |
+| Activation | ReLU | ReLU |
+| Conditioning | None | Concatenated noise map |
 | Upsampling | ConvTranspose2d | ConvTranspose2d |
 
-La riduzione dei canali (fattore 4x) e l'uso di GroupNorm rendono il modello addestrabile su CPU in tempi ragionevoli.
+The channel reduction (4x factor) and use of GroupNorm make the model trainable on CPU in reasonable time.
 
-## Risultati (145 test images x 4 noise level)
+## Results (145 test images x 4 noise levels)
 
-| sigma_n | PSNR | SSIM | Tempo |
+| sigma_n | PSNR | SSIM | Time |
 |---|---|---|---|
 | 0.005 | 29.89 dB | 0.894 | 0.035 s |
 | 0.01 | 29.89 dB | 0.894 | 0.034 s |
 | 0.05 | 29.63 dB | 0.875 | 0.034 s |
 | 0.1 | 28.93 dB | 0.830 | 0.036 s |
 
-Prestazioni molto stabili su tutti i noise level (29.89 -> 28.93 dB, differenza <1 dB), a differenza di TV (32.09 -> 26.54 dB, differenza ~5.5 dB). Tempo di inferenza ~35 ms/immagine su CPU (vs 3 secondi di DiffPIR).
+Very stable performance across all noise levels (29.89 -> 28.93 dB, difference <1 dB), unlike TV (32.09 -> 26.54 dB, difference ~5.5 dB). Inference time ~35 ms/image on CPU (vs 3 seconds for DiffPIR).
