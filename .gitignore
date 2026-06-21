@@ -86,3 +86,22 @@ slides/*.snm
 
 # Agent workspace
 .opencode/
+
+# Personal notes
+Computational_Imaging_Orale.md
+Computational_Imaging_Studio.md
+report/report.md
+report/studio.md
+
+# Slides — build artifacts, copies, scripts
+slides/copione.pdf
+slides/copione.tex
+slides/presentation_en.pdf
+slides/presentation_en.tex
+slides/presentazione.tex
+slides/presentation_discursive_en.tex
+slides/presentazione_discorsiva.tex
+slides/spiegazione_semplice.md
+slides/md_to_beamer.py
+slides/Exam_Assignment/
+slides/comp_imaging_beamer.tex
