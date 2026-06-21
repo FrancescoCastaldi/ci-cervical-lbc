@@ -123,12 +123,14 @@ best_epoch = 0
 train_losses = []
 val_psnrs = []
 
+global_pbar = tqdm(total=epochs, desc="Training Progress", unit="epoch",
+                   position=0, bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} epochs [{elapsed}<{remaining}, {rate_fmt}]")
 for epoch in range(epochs):
     # --- Training ---
     model.train()
     total_loss = 0
     pbar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs} [Train]",
-                unit="batch", leave=False)
+                unit="batch", leave=False, position=1)
     for gt in pbar:
         gt = gt.to(device)
 
@@ -161,8 +163,10 @@ for epoch in range(epochs):
     val_psnr_avg = 0.0
     val_count = 0
 
+    val_pbar = tqdm(val_indices, desc=f"Epoch {epoch+1}/{epochs} [Val]",
+                    unit="img", leave=False, position=2)
     with torch.no_grad():
-        for idx in val_indices:
+        for idx in val_pbar:
             gt = val_dataset[idx].unsqueeze(0).to(device)
             # Campiona un noise level random per validazione
             val_noise = np.random.choice(noise_levels)
@@ -174,6 +178,7 @@ for epoch in range(epochs):
             m = evaluate(pred[0].cpu(), gt[0].cpu())
             val_psnr_avg += m["psnr"]
             val_count += 1
+            val_pbar.set_postfix(psnr=f"{m['psnr']:.2f}")
 
     avg_val_psnr = val_psnr_avg / val_count
     val_psnrs.append(avg_val_psnr)
@@ -181,15 +186,16 @@ for epoch in range(epochs):
     scheduler.step(avg_val_psnr)
 
     improved = avg_val_psnr > best_val_psnr
-    marker = " *" if improved else ""
-    print(f"Epoch {epoch+1:2d}/{epochs} | "
-          f"Train Loss: {avg_loss:.4f} | "
-          f"Val PSNR: {avg_val_psnr:.2f} dB{marker}")
+    global_pbar.update(1)
+    global_pbar.set_postfix(loss=f"{avg_loss:.4f}", val_psnr=f"{avg_val_psnr:.2f}",
+                            best=f"{best_val_psnr:.2f}" if not improved else f"{avg_val_psnr:.2f}*")
 
     if improved:
         best_val_psnr = avg_val_psnr
         best_epoch = epoch + 1
         torch.save(model.state_dict(), output_dir / "best_model.pth")
+
+global_pbar.close()
 
 print(f"\nMiglior modello: epoch {best_epoch} (Val PSNR: {best_val_psnr:.2f} dB)")
 

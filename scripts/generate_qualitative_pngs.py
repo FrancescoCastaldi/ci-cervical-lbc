@@ -325,7 +325,7 @@ for nl in noise_levels:
 # ── Figure 4: Grid 2×2 solo metodi (TV, UNet, DiffPIR + row label) ─────
 # Un singolo noise level con tutti e 3 i metodi in griglia
 print("\nGenerating: metodo grid single noise...")
-for nl in [0.05, 0.1]:  # i due noise level piu significativi
+for nl in noise_levels:
     entry = results[nl]
     fig, axes = plt.subplots(1, 4, figsize=(18, 4.5))
     fig.patch.set_facecolor("white")
