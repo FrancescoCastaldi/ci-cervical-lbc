@@ -392,16 +392,16 @@
       \vspace{0.2cm}
       \begin{tabular}{l|ccc}\toprule
         $\sigma_n$ & \textbf{PSNR} & \textbf{SSIM} & \textbf{Time}\\\midrule
-         0.005 & 29.79 & 0.896 & 0.030 s\\
-         0.01  & 29.79 & 0.895 & 0.028 s\\
-         0.05  & 29.44 & 0.864 & 0.027 s\\
-         0.1   & 28.46 & 0.795 & 0.026 s\\\bottomrule
+         0.005 & 29.58 & 0.896 & 0.013 s\\
+         0.01  & 29.57 & 0.895 & 0.013 s\\
+         0.05  & 29.37 & 0.874 & 0.012 s\\
+         0.1   & 28.72 & 0.821 & 0.012 s\\\bottomrule
       \end{tabular}
       \vspace{0.3cm}
       \begin{itemize}
-        \item Minimal degradation ($\sim$1 dB between extremes)
-        \item \textbf{Surpasses TV} at $\sigma_n=0.1$ (28.46 vs 26.54 dB)
-        \item Fastest inference: 0.030 s/img
+        \item Minimal degradation ($\sim$0.9 dB between extremes)
+        \item \textbf{Surpasses TV} at $\sigma_n=0.1$ (28.72 vs 26.54 dB)
+        \item Fastest inference: 0.013 s/img
       \end{itemize}
     \column{0.5\textwidth}
       \includegraphics[width=\textwidth]{../results/qualitative_slides/unet_comparison.png}
@@ -573,16 +573,16 @@
   \begin{tabular}{l|ccc|ccc}\toprule
     & \multicolumn{3}{c|}{\textbf{PSNR (dB) $\uparrow$}} & \multicolumn{3}{c}{\textbf{SSIM $\uparrow$}}\\
     $\sigma_n$ & \textbf{TV} & \textbf{UNet} & \textbf{DiffPIR} & \textbf{TV} & \textbf{UNet} & \textbf{DiffPIR}\\\midrule
-     0.005 & \textbf{32.09} & 29.79 & 15.80 & \textbf{0.911} & 0.896 & 0.356\\
-     0.01  & \textbf{32.04} & 29.79 & 16.48 & \textbf{0.909} & 0.895 & 0.407\\
-     0.05  & \textbf{30.42} & 29.44 & 22.77 & 0.837 & \textbf{0.864} & 0.722\\
-     0.1   & 26.54 & \textbf{28.46} & 25.60 & 0.586 & \textbf{0.795} & 0.797\\\bottomrule
+     0.005 & \textbf{32.09} & 29.58 & 15.80 & \textbf{0.911} & 0.896 & 0.356\\
+     0.01  & \textbf{32.04} & 29.57 & 16.48 & \textbf{0.909} & 0.895 & 0.407\\
+     0.05  & \textbf{30.42} & 29.37 & 22.77 & 0.837 & \textbf{0.874} & 0.722\\
+     0.1   & 26.54 & \textbf{28.72} & 25.60 & 0.586 & \textbf{0.821} & 0.797\\\bottomrule
   \end{tabular}
   \vspace{0.3cm}
   \begin{block}{Observations}
     \begin{itemize}
       \item \textbf{TV}: dominates at $\sigma_n\leq0.01$ (PSNR $>$ 32 dB, SSIM $>$ 0.9)
-      \item \textbf{UNet}: best trade-off, $\sim$1 dB degradation, surpasses TV at $\sigma_n=0.1$
+      \item \textbf{UNet}: best trade-off, $\sim$0.9 dB degradation, surpasses TV at $\sigma_n=0.1$
       \item \textbf{DiffPIR}: generative, PSNR increases with noise (15.80$\to$25.60 dB)
     \end{itemize}
   \end{block}
@@ -650,7 +650,7 @@
       \begin{block}{\small\bfseries UNet  \hfill \scriptsize\itshape Deep Learning}
         \scriptsize
         \textcolor{green!50!black}{$\blacktriangleright$} \textbf{Pros}\\[0.05cm]
-        \hspace{0.3cm}$\checkmark$ Very fast inference (0.030\,s/img)\\
+        \hspace{0.3cm}$\checkmark$ Very fast inference (0.013\,s/img)\\
         \hspace{0.3cm}$\checkmark$ Robust across the spectrum ($\Delta$PSNR $\sim$1\,dB)\\[0.08cm]
         \textcolor{red}{$\blacktriangleright$} \textbf{Cons}\\[0.05cm]
         \hspace{0.3cm}$\times$ Requires supervised training\\
@@ -678,7 +678,7 @@
         \textbf{Key metrics}\\[0.15cm]
         \begin{tabular}{rl}\small
           \textbf{TV} & 32.09\,dB\\
-          \textbf{UNet} & 29.79\,dB\\
+          \textbf{UNet} & 29.58\,dB\\
           \textbf{DiffPIR} & 15.80\,dB\\
         \end{tabular}\\[0.1cm]
         \scriptsize (PSNR at $\sigma_n=0.005$)
@@ -693,7 +693,7 @@
       Low noise ($\sigma_n<0.05$) & \upgreen\ Excellent & \upgreen\ Good & \downred\ Poor\\
       Medium noise ($\sigma_n=0.05$) & \upgreen\ Good & \upgreen\ Very good & \upgreen\ Adequate\\
       High noise ($\sigma_n=0.1$)   & \downred\ Mediocre & \upgreen\ \textbf{Best} & \upgreen\ Good\\
-      Inference speed           & $\sim$0.7 s & $\sim$\textbf{0.03 s} & $\sim$0.64 s\\\bottomrule
+      Inference speed           & $\sim$0.7 s & $\sim$\textbf{0.013 s} & $\sim$0.64 s\\\bottomrule
     \end{tabular}
   \end{center}
   \vspace{0.3cm}
