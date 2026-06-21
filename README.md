@@ -96,31 +96,53 @@ python -m pytest tests/ -v
 
 ```
 ci-cervical-lbc/
-├── configs/                    # experiment.yaml
-├── data/
-│   ├── raw/                    # Dataset (not tracked)
-│   └── splits/                 # Train/val/test split files
+├── configs/
+│   └── experiment.yaml
 ├── notebooks/
-│   ├── 01_eda.ipynb            # Exploratory analysis
-│   ├── 02_tv.ipynb             # Total Variation demo
-│   ├── 03_unet.ipynb           # UNet training & evaluation
-│   └── 04_diffpir.ipynb        # DiffPIR demo
-├── src/
-│   ├── data/dataset.py         # Dataset loading & preprocessing
-│   ├── degradation/            # Blur + noise pipeline
+│   ├── 01_eda.ipynb
+│   ├── 02_tv.ipynb
+│   ├── 03_unet.ipynb
+│   ├── 04_diffpir.ipynb
+│   └── 05_full_pipeline.ipynb
+├── scripts/
+│   ├── download_mendeley.py
+│   ├── generate_crop_images.py
+│   ├── generate_diffpir_2x4.py
+│   ├── generate_noise_strip.py
+│   ├── generate_qualitative_pngs.py
+│   ├── plot_results.py
+│   ├── preprocess.py
+│   ├── run_diffpir.py
+│   ├── run_tv.py
+│   └── run_unet.py
+├── slides/
+│   └── presentation_discursive_en.tex
+├── src/                        # Core library
+│   ├── data/dataset.py
+│   ├── degradation/degradation.py
+│   ├── eval/metrics.py
 │   ├── methods/
-│   │   ├── tv/                 # Total Variation
-│   │   ├── unet/               # UNet
-│   │   └── diffpir/            # DiffPIR (model, algorithm, training)
-│   ├── eval/metrics.py         # PSNR, SSIM
-│   └── plots/visualize.py      # Comparison plots
-├── scripts/                    # Run experiments
-├── tests/                      # Unit tests
-├── report/                     # Documentation
-│   ├── report.md               # Full project report
-│   ├── theory.md               # Theoretical background
-│   └── notebook.md             # Notebook summary
-├── roadmap.md                  # Completed steps vs exam requirements
+│   │   ├── tv/tv.py
+│   │   ├── unet/unet.py
+│   │   └── diffpir/  (model.py, train.py, diffpir.py)
+│   ├── plots/visualize.py
+│   └── utils.py
+├── tests/                      # 34 unit tests
+│   ├── test_degradation.py
+│   ├── test_diffpir.py
+│   ├── test_metrics.py
+│   ├── test_tv.py
+│   └── test_unet.py
+├── results/                    # Metrics CSVs + qualitative PNGs
+│   ├── tv/metrics.csv
+│   ├── unet/metrics.csv
+│   ├── diffpir/metrics.csv
+│   └── qualitative_slides/     # Slide comparison PNGs
+├── report/
+│   └── theory.md
+├── data/
+│   └── degraded/examples/      # Sample degraded images
+├── requirements.txt
 └── README.md
 ```
 
