@@ -411,86 +411,118 @@
 \section{DiffPIR}
 
 \begin{frame}{DiffPIR -- Overview}
-  \begin{block}{DiffPIR (Diffusion-based Plug-and-Play Image Restoration)}
+  \begin{block}{Plug-and-Play: denoising prior + data fidelity}
     \begin{itemize}
-      \item Integrates a \textbf{diffusion model} (DDPM) into a Plug-and-Play framework
-      \item Alternates \textbf{denoising} (generative prior) and \textbf{data-fidelity} (via FFT)
+      \item Integrates a \textbf{diffusion model} (DDPM) as the denoising prior
+      \item Alternates \textbf{denoising} (generative prior) and \textbf{data-fidelity} (FFT closed-form)
+      \item The prior is \textbf{independent} of the degradation model --- flexible framework
     \end{itemize}
   \end{block}
-  \begin{alertblock}{Custom LightUNet (1.26M params, $\sim$5 MB)}
-    Trained from scratch on 673 cervical LBC images\\[0.1cm]
-    $\triangleright$ Specific to the cytological domain \\[0.1cm]
-    $\triangleright$ Training on GPU (Apple MPS), inference $\sim$0.64\,s/img
-  \end{alertblock}
+  \vspace{0.15cm}
+  \begin{columns}[t]
+    \column{0.5\textwidth}
+      \textbf{Why diffusion?}\\[0.05cm]
+      \small
+      $\triangleright$ State-of-the-art generative prior\\[0.05cm]
+      $\triangleright$ Handles complex image statistics better than TV
+    \column{0.5\textwidth}
+      \textbf{Key idea}\\[0.05cm]
+      \small
+      $\triangleright$ $x_t \xrightarrow{\text{DDPM}} \hat{x}_0$ (denoise)\\[0.05cm]
+      $\triangleright$ $\hat{x}_0 \xrightarrow{\text{FFT}} \tilde{x}_0$ (fidelity)
+  \end{columns}
+
+  \vspace{0.12cm}
+  \begin{exampleblock}{\centering\small\textbf{``Separate the prior from the physics''}}
+    \centering\scriptsize
+    DiffPIR = denoising (DDPM) $\leftrightarrow$ deblur (FFT) \\
+    ``Plug-and-Play'': we can swap the denoiser without changing the fidelity term
+  \end{exampleblock}
 \end{frame}
 
-\begin{frame}{DDPM and LightUNet}
-  \begin{columns}
-    \column{0.55\textwidth}
-      \textbf{Denoising Diffusion Probabilistic Models}
-      \begin{itemize}\small
-        \item 1000 timesteps, $\beta_1=10^{-4}$, $\beta_T=0.02$
-        \item Loss: MSE on $\varepsilon_\theta(x_t,t)$
-        \item Training: 673 images, 50 epochs
+\begin{frame}{DDPM + LightUNet: Training}
+  \begin{columns}[t]
+    \column{0.5\textwidth}
+      \textbf{DDPM in a nutshell}\\[0.08cm]
+      \small
+      \begin{itemize}
+        \item Forward: add Gaussian noise $x_0 \to x_T$ \\ (T=1000, $\beta_1=10^{-4}$, $\beta_T=0.02$)
+        \item Reverse: neural network learns to \textbf{denoise} step by step \\ (predicts $\varepsilon_\theta(x_t,t)$)
+        \item Loss: MSE on predicted noise
       \end{itemize}
-      \vspace{0.2cm}
-      \textbf{LightUNet}
-      \begin{itemize}\small
+
+      \vspace{0.25cm}
+      \textbf{Our training setup}\\[0.08cm]
+      \small
+      \begin{itemize}
+        \item 673 images, 50 epochs, batch=4
+        \item MPS (Apple GPU), $\sim$10 min total
+        \item \textbf{No pre-training} --- trained from scratch on LBC
+      \end{itemize}
+
+    \column{0.5\textwidth}
+      \textbf{LightUNet architecture}\\[0.08cm]
+      \small
+      \begin{itemize}
         \item Base channels: 32
         \item Encoder: 32$\to$64$\to$128
+        \item Decoder: 128$\to$64$\to$32
         \item Sinusoidal time embedding + MLP
-        \item GroupNorm + SiLU
-        \item \textbf{1,262,273 parameters}
+        \item ResBlocks with GroupNorm + SiLU
       \end{itemize}
-    \column{0.45\textwidth}
-      \begin{block}{Diffusion Process}
-        \centering\small
-        $x_0 \to x_1 \to \cdots \to x_T$ \\[0.1cm]
-        \textbf{Forward} \\
-        $q(x_t|x_{t-1}) = \mathcal{N}(\sqrt{1-\beta_t}x_{t-1}, \beta_t I)$ \\[0.2cm]
-        \textbf{Reverse} \\
-        $p_\theta(x_{t-1}|x_t) = \mathcal{N}(\mu_\theta(x_t,t), \Sigma_\theta(x_t,t))$
+
+      \vspace{0.15cm}
+      \begin{block}{\centering\small Total: \textbf{1.26M params} ($\sim$5 MB)}
+        \centering\scriptsize Lightest model in the project (vs 1.9M UNet)
       \end{block}
   \end{columns}
 \end{frame}
 
 \begin{frame}{DiffPIR Algorithm}
-  \begin{columns}
-    \column{0.55\textwidth}
+  \begin{columns}[t]
+    \column{0.48\textwidth}
+      \textbf{Pseudocode}\\[0.08cm]
       \small
-      \textbf{Pseudo-code:}
-      \vspace{0.1cm}
       \begin{enumerate}
         \item $y \gets$ degraded image
-        \item $\mathcal{K} \gets \text{FFT}(k)$ \hfill\tiny kernel OTF
         \item \textbf{for} $t = t_{\text{start}}$ \textbf{to} $1$ \textbf{do}
-        \item \hspace{0.5cm}$\varepsilon \gets \varepsilon_\theta(x_t, t)$ \hfill\tiny DDPM denoise
-        \item \hspace{0.5cm}$\hat{x}_0 \gets \frac{x_t - \sqrt{1-\bar{\alpha}_t}\,\varepsilon}{\sqrt{\bar{\alpha}_t}}$
-        \item \hspace{0.5cm}$\hat{x}_0 \gets \text{clamp}(\hat{x}_0, -1, 1)$
-        \item \hspace{0.5cm}$\rho_t \gets \lambda \cdot \frac{\sigma^2 \bar{\alpha}_t}{1 - \bar{\alpha}_t}$
-        \item \hspace{0.5cm}$\tilde{x}_0 \gets \mathcal{F}^{-1}\!\left(\frac{\mathcal{F}(y)\overline{\mathcal{K}} + \rho_t\mathcal{F}(\hat{x}_0)}{|\mathcal{K}|^2 + \rho_t}\right)$
-        \item \hspace{0.5cm}$x_{t-1} \gets$ DDIM step$(x_t, \tilde{x}_0)$
+        \item \hspace{0.3cm}$\varepsilon \gets \underbrace{\varepsilon_\theta(x_t, t)}_{\text{DDPM predict noise}}$
+        \item \hspace{0.3cm}$\hat{x}_0 \gets \frac{x_t - \sqrt{1-\bar{\alpha}_t}\,\varepsilon}{\sqrt{\bar{\alpha}_t}}$ \hfill \tiny denoise
+        \item \hspace{0.3cm}$\tilde{x}_0 \gets \text{FFT-fidelity}(y, \hat{x}_0, \rho_t)$ \hfill \tiny deblur
+        \item \hspace{0.3cm}$x_{t-1} \gets$ DDIM step$(x_t, \tilde{x}_0)$
         \item \textbf{end for}
         \item \textbf{return} $x_0$
       \end{enumerate}
-    \column{0.45\textwidth}
+
+      \vspace{0.2cm}
+      \textbf{DDIM sampling:} $\zeta=0$ (deterministic)\\[0.05cm]
+      15 steps subsampled from $t_{\text{start}}=50$
+
+    \column{0.52\textwidth}
+      \textbf{Step 1 --- Denoising (DDPM)}\\[0.08cm]
       \small
-      \textbf{Step 1 -- Denoising:}
+      Remove noise via the trained prior:
+      \vspace{-0.05cm}
       \begin{equation*}
-        \hat{x}_0^{(t)} = \frac{x_t - \sqrt{1-\bar{\alpha}_t}\,\varepsilon_\theta(x_t,t)}{\sqrt{\bar{\alpha}_t}}
+        \hat{x}_0 = \frac{x_t - \sqrt{1-\bar{\alpha}_t}\,\varepsilon_\theta(x_t,t)}{\sqrt{\bar{\alpha}_t}}
       \end{equation*}
+
       \vspace{0.15cm}
-      \textbf{Step 2 -- Data Fidelity (FFT):}
+      \textbf{Step 2 --- Data Fidelity (FFT)}\\[0.08cm]
+      \small
+      Enforce consistency with $y$ in frequency domain:
+      \vspace{-0.05cm}
       \begin{equation*}
         \tilde{x}_0 = \mathcal{F}^{-1}\!\left(
-        \frac{\mathcal{F}(y)\overline{\mathcal{F}(k)} + \rho\mathcal{F}(\hat{x}_0)}
-             {|\mathcal{F}(k)|^2 + \rho}\right)
+        \frac{\mathcal{F}(y)\overline{\mathcal{F}(k)} + \rho_t\,\mathcal{F}(\hat{x}_0)}
+             {|\mathcal{F}(k)|^2 + \rho_t}\right)
       \end{equation*}
+
       \vspace{0.15cm}
-      \textbf{Dynamic weight:}
-      \begin{equation*}
-        \rho_t = \lambda \cdot \frac{\sigma^2 \cdot \bar{\alpha}_t}{1 - \bar{\alpha}_t}
-      \end{equation*}
+      \textbf{Dynamic weight} $\rho_t = \lambda \cdot \sigma^2 \cdot \alpha_t\,/\,(1 - \bar{\alpha}_t)$\\[0.05cm]
+      \small
+      \hspace{0.3cm}$\triangleright$ High $t$: prior dominates\\[0.02cm]
+      \hspace{0.3cm}$\triangleright$ Low $t$: fidelity dominates
   \end{columns}
 \end{frame}
 
@@ -518,11 +550,13 @@
         0.1   & 25.60 & 0.797\\\bottomrule
       \end{tabular}
 
-      \vspace{0.25cm}
+      \vspace{0.2cm}
       \raggedright
       \begin{itemize}\small
-        \item PSNR \textbf{increases} with noise
-        \item Best at $\sigma_n=0.1$ (25.60 dB)
+        \item PSNR \textbf{increases} with noise (15.80 $\to$ 25.60 dB)
+        \item Best at $\sigma_n=0.1$: surpasses TV (26.54 vs 25.60)\\[0.08cm]
+        \textcolor{blue!60!black}{\small $\triangleright$ Low $\sigma_n$: model \textbf{hallucinates} details --- ``sees'' structures not in the signal}\\[0.02cm]
+        \textcolor{blue!60!black}{\small $\triangleright$ High $\sigma_n$: generative prior is beneficial --- recovers what TV/UNet lose}
       \end{itemize}
 
     \column{0.55\textwidth}
