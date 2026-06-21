@@ -59,9 +59,13 @@ for i, (label, img_np) in enumerate(strips):
     ax.set_title(label, fontsize=10, fontweight="bold", color="#333", pad=8)
     ax.axis("off")
 
-plt.subplots_adjust(wspace=0.05, left=0.02, right=0.98, top=0.88, bottom=0.02)
-fig.text(0.5, 0.95, "Pipeline di Degradazione — Blur Gaussiano + AWGN a 4 livelli",
-         ha="center", fontsize=14, fontweight="bold", color="#222")
+# Più margine in alto (top=0.80) per fare spazio al titolo generale
+plt.subplots_adjust(wspace=0.05, left=0.02, right=0.98, top=0.80, bottom=0.02)
+fig.suptitle(
+    "Pipeline di Degradazione — Blur Gaussiano + AWGN a 4 livelli",
+    x=0.5, y=0.97,
+    fontsize=14, fontweight="bold", color="#222",
+)
 
 filepath = SAVE_DIR / "noise_strip_crops.png"
 plt.savefig(filepath, dpi=200, bbox_inches="tight")

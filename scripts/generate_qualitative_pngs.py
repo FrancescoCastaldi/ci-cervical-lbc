@@ -218,7 +218,7 @@ for row, nl in enumerate(noise_levels):
         if col == 0:
             ax.set_ylabel(f"σ = {nl}", fontsize=14, fontweight="bold", color="#333")
 
-plt.subplots_adjust(left=0.06, right=0.98, bottom=0.03, top=0.94,
+plt.subplots_adjust(left=0.06, right=0.98, bottom=0.03, top=0.90,
                     wspace=0.06, hspace=0.15)
 
 # Titolo generale
@@ -228,9 +228,9 @@ method_labels = {
     "DiffPIR": "DiffPIR (Generativo)"
 }
 col_labels = "  |  ".join([f"{k}: {v}" for k, v in method_labels.items()])
-fig.text(0.5, 0.96, f"Confronto Qualitativo — Sample #{sample_idx}",
+fig.text(0.5, 0.97, f"Confronto Qualitativo — Sample #{sample_idx}",
          ha="center", fontsize=18, fontweight="bold", color="#222")
-fig.text(0.5, 0.925, col_labels,
+fig.text(0.5, 0.93, col_labels,
          ha="center", fontsize=9, color="#888")
 
 plt.savefig(SAVE_DIR / "all_methods_grid.png", dpi=200, bbox_inches="tight")

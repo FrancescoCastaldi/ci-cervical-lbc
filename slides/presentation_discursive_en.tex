@@ -68,7 +68,7 @@
 \end{frame}
 
 \begin{frame}{Selected Methods}
-  \begin{center}\small Group of 2 students $\to$ 3 out of 4 methods (excluded Weighted TV)\end{center}
+  \begin{center}\small 3 out of 4 methods (excluded Weighted TV)\end{center}
   \vspace{0.2cm}
   \noindent We selected three fundamentally different approaches, one for each methodological family of the course. This allows a comparison that is not only numerical, but also qualitative on the different resolution philosophies.
   \vspace{0.2cm}
@@ -78,7 +78,7 @@
         \centering\includegraphics[height=1.1cm]{../results/tv/qualitative/noise_0.005_sample0.png}\\[0.05cm]
         \textbf{Total Variation}
         \begin{itemize}\small
-          \item $\lambda=0.005$, Adam 150 iter
+          \item $\lambda=0.005$, Adam, 150 iter
         \end{itemize}
       \end{block}
     \column{0.33\textwidth}
@@ -86,7 +86,7 @@
         \centering\includegraphics[height=1.1cm]{../results/unet/qualitative/noise_0.005_sample0.png}\\[0.05cm]
         \textbf{UNet}
         \begin{itemize}\small
-          \item Encoder-Decoder, MSE+Adam
+          \item Encoder-Decoder, L1+Adam
         \end{itemize}
       \end{block}
     \column{0.33\textwidth}
@@ -199,7 +199,7 @@
   \end{columns}
 \end{frame}
 
-\section{Total Variation -- Paolo}
+\section{Total Variation}
 
 \begin{frame}{Total Variation -- Theory}
   \begin{block}{Variational model}
@@ -284,7 +284,7 @@
   \end{columns}
 \end{frame}
 
-\section{UNet -- Paolo}
+\section{UNet}
 
 \begin{frame}{UNet -- Architecture}
   \begin{block}{Encoder-Decoder with Skip Connections}
@@ -408,7 +408,7 @@
   \end{columns}
 \end{frame}
 
-\section{DiffPIR -- Francesco}
+\section{DiffPIR}
 
 \begin{frame}{DiffPIR -- Overview}
   \begin{block}{DiffPIR (Diffusion-based Plug-and-Play Image Restoration)}
@@ -495,32 +495,39 @@
 \end{frame}
 
 \begin{frame}{DiffPIR -- Parameters and Results}
-  \begin{columns}
+  \begin{columns}[T]
     \column{0.45\textwidth}
-      \textbf{Heuristic parameter selection}
-      \begin{tabular}{ll}\toprule
+      \textbf{Heuristic parameter selection}\\[0.15cm]
+      \centering
+      \begin{tabular}{lc}\toprule
         \textbf{Parameter} & \textbf{Value}\\\midrule
-        $t_{\text{start}}$ & 50\\
-        $\lambda$ & 10.0\\
-        $num\_steps$ & 15\\
-        $\zeta$ & 0.0 (DDIM)\\\bottomrule
+        $t_{\text{start}}$       & 50 \\
+        $\lambda$                & 10.0 \\
+        \texttt{num\_steps}      & 15 \\
+        $\zeta$                  & 0.0 (DDIM) \\\bottomrule
       \end{tabular}
-      \vspace{0.3cm}
-      \textbf{Quantitative results}
-      \begin{tabular}{l|cc}\toprule
+
+      \vspace{0.4cm}
+      \raggedright\textbf{Quantitative results}\\[0.15cm]
+      \centering
+      \begin{tabular}{c|cc}\toprule
         $\sigma_n$ & \textbf{PSNR} & \textbf{SSIM}\\\midrule
         0.005 & 15.80 & 0.356\\
         0.01  & 16.48 & 0.407\\
         0.05  & 22.77 & 0.722\\
         0.1   & 25.60 & 0.797\\\bottomrule
       \end{tabular}
-      \vspace{0.2cm}
-      \begin{itemize}
+
+      \vspace{0.25cm}
+      \raggedright
+      \begin{itemize}\small
         \item PSNR \textbf{increases} with noise
         \item Best at $\sigma_n=0.1$ (25.60 dB)
       \end{itemize}
+
     \column{0.55\textwidth}
-      \includegraphics[width=\textwidth]{../results/qualitative_slides/diffpir_2x4.png}
+      \centering
+      \includegraphics[width=\textwidth]{../results/qualitative_slides/diffpir_comparison.png}
   \end{columns}
 \end{frame}
 
@@ -558,6 +565,13 @@
 \begin{frame}{Full Grid}
   \begin{center}
     \includegraphics[width=0.7\textwidth]{../results/qualitative_slides/all_methods_grid.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Visual Comparison -- $\sigma_n = 0.005$}
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]{../results/qualitative_slides/noise_0.005_comparison.png}
+    \vspace{0.3cm}
   \end{center}
 \end{frame}
 
