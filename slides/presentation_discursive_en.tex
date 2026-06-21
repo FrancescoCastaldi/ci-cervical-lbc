@@ -401,7 +401,7 @@
       \begin{itemize}
         \item Minimal degradation ($\sim$1 dB between extremes)
         \item \textbf{Surpasses TV} at $\sigma_n=0.1$ (28.46 vs 26.54 dB)
-        \item Fastest inference: 0.035 s/img
+        \item Fastest inference: 0.030 s/img
       \end{itemize}
     \column{0.5\textwidth}
       \includegraphics[width=\textwidth]{../results/qualitative_slides/unet_comparison.png}
@@ -420,7 +420,7 @@
   \begin{alertblock}{Custom LightUNet (1.26M params, $\sim$5 MB)}
     Trained from scratch on 673 cervical LBC images\\[0.1cm]
     $\triangleright$ Specific to the cytological domain \\[0.1cm]
-    $\triangleright$ Training and inference on CPU
+    $\triangleright$ Training on GPU (Apple MPS), inference $\sim$0.64\,s/img
   \end{alertblock}
 \end{frame}
 
@@ -431,7 +431,7 @@
       \begin{itemize}\small
         \item 1000 timesteps, $\beta_1=10^{-4}$, $\beta_T=0.02$
         \item Loss: MSE on $\varepsilon_\theta(x_t,t)$
-        \item Training: 673 images, 30 epochs
+        \item Training: 673 images, 50 epochs
       \end{itemize}
       \vspace{0.2cm}
       \textbf{LightUNet}
@@ -509,15 +509,15 @@
       \textbf{Quantitative results}
       \begin{tabular}{l|cc}\toprule
         $\sigma_n$ & \textbf{PSNR} & \textbf{SSIM}\\\midrule
-        0.005 & 15.78 & 0.329\\
-        0.01  & 16.45 & 0.374\\
-        0.05  & 22.64 & 0.677\\
-        0.1   & 25.46 & 0.766\\\bottomrule
+        0.005 & 15.80 & 0.356\\
+        0.01  & 16.48 & 0.407\\
+        0.05  & 22.77 & 0.722\\
+        0.1   & 25.60 & 0.797\\\bottomrule
       \end{tabular}
       \vspace{0.2cm}
       \begin{itemize}
         \item PSNR \textbf{increases} with noise
-        \item Best at $\sigma_n=0.1$ (25.46 dB)
+        \item Best at $\sigma_n=0.1$ (25.60 dB)
       \end{itemize}
     \column{0.55\textwidth}
       \includegraphics[width=\textwidth]{../results/qualitative_slides/diffpir_2x4.png}
@@ -532,17 +532,17 @@
   \begin{tabular}{l|ccc|ccc}\toprule
     & \multicolumn{3}{c|}{\textbf{PSNR (dB) $\uparrow$}} & \multicolumn{3}{c}{\textbf{SSIM $\uparrow$}}\\
     $\sigma_n$ & \textbf{TV} & \textbf{UNet} & \textbf{DiffPIR} & \textbf{TV} & \textbf{UNet} & \textbf{DiffPIR}\\\midrule
-     0.005 & \textbf{32.09} & 29.79 & 15.78 & \textbf{0.911} & 0.896 & 0.329\\
-     0.01  & \textbf{32.04} & 29.79 & 16.45 & \textbf{0.909} & 0.895 & 0.374\\
-     0.05  & \textbf{30.42} & 29.44 & 22.64 & 0.837 & \textbf{0.864} & 0.677\\
-     0.1   & 26.54 & \textbf{28.46} & 25.46 & 0.586 & \textbf{0.795} & 0.766\\\bottomrule
+     0.005 & \textbf{32.09} & 29.79 & 15.80 & \textbf{0.911} & 0.896 & 0.356\\
+     0.01  & \textbf{32.04} & 29.79 & 16.48 & \textbf{0.909} & 0.895 & 0.407\\
+     0.05  & \textbf{30.42} & 29.44 & 22.77 & 0.837 & \textbf{0.864} & 0.722\\
+     0.1   & 26.54 & \textbf{28.46} & 25.60 & 0.586 & \textbf{0.795} & 0.797\\\bottomrule
   \end{tabular}
   \vspace{0.3cm}
   \begin{block}{Observations}
     \begin{itemize}
       \item \textbf{TV}: dominates at $\sigma_n\leq0.01$ (PSNR $>$ 32 dB, SSIM $>$ 0.9)
       \item \textbf{UNet}: best trade-off, $\sim$1 dB degradation, surpasses TV at $\sigma_n=0.1$
-      \item \textbf{DiffPIR}: generative, PSNR increases with noise (15.78$\to$25.46 dB)
+      \item \textbf{DiffPIR}: generative, PSNR increases with noise (15.80$\to$25.60 dB)
     \end{itemize}
   \end{block}
 \end{frame}
@@ -616,7 +616,7 @@
       \begin{block}{\small\bfseries UNet  \hfill \scriptsize\itshape Deep Learning}
         \scriptsize
         \textcolor{green!50!black}{$\blacktriangleright$} \textbf{Pros}\\[0.05cm]
-        \hspace{0.3cm}$\checkmark$ Very fast inference (0.035\,s/img)\\
+        \hspace{0.3cm}$\checkmark$ Very fast inference (0.030\,s/img)\\
         \hspace{0.3cm}$\checkmark$ Robust across the spectrum ($\Delta$PSNR $\sim$1\,dB)\\[0.08cm]
         \textcolor{red}{$\blacktriangleright$} \textbf{Cons}\\[0.05cm]
         \hspace{0.3cm}$\times$ Requires supervised training\\
@@ -634,9 +634,9 @@
         \scriptsize
         \textcolor{green!50!black}{$\blacktriangleright$} \textbf{Pros}\\[0.05cm]
         \hspace{0.3cm}$\checkmark$ Reconstructs details lost by other methods\\
-        \hspace{0.3cm}$\checkmark$ Improves with increasing noise (15.78\,$\to$\,25.46\,dB)\\[0.08cm]
+        \hspace{0.3cm}$\checkmark$ Improves with increasing noise (15.80\,$\to$\,25.60\,dB)\\[0.08cm]
         \textcolor{red}{$\blacktriangleright$} \textbf{Cons}\\[0.05cm]
-        \hspace{0.3cm}$\times$  Slow ($\sim$3\,s/img) -- 15 DDIM steps\\
+        \hspace{0.3cm}$\times$  Moderate ($\sim$0.64\,s/img) -- 15 DDIM steps\\
         \hspace{0.3cm}$\times$  Hallucinations at low $\sigma_n$ (invents non-existent details)
       \end{block}}
     \column{0.26\textwidth}
@@ -645,7 +645,7 @@
         \begin{tabular}{rl}\small
           \textbf{TV} & 32.09\,dB\\
           \textbf{UNet} & 29.79\,dB\\
-          \textbf{DiffPIR} & 25.46\,dB\\
+          \textbf{DiffPIR} & 15.80\,dB\\
         \end{tabular}\\[0.1cm]
         \scriptsize (PSNR at $\sigma_n=0.005$)
       \end{center}
@@ -659,7 +659,7 @@
       Low noise ($\sigma_n<0.05$) & \upgreen\ Excellent & \upgreen\ Good & \downred\ Poor\\
       Medium noise ($\sigma_n=0.05$) & \upgreen\ Good & \upgreen\ Very good & \upgreen\ Adequate\\
       High noise ($\sigma_n=0.1$)   & \downred\ Mediocre & \upgreen\ \textbf{Best} & \upgreen\ Good\\
-      Inference speed           & $\sim$7 s & $\sim$\textbf{0.035 s} & $\sim$3 s\\\bottomrule
+      Inference speed           & $\sim$0.7 s & $\sim$\textbf{0.03 s} & $\sim$0.64 s\\\bottomrule
     \end{tabular}
   \end{center}
   \vspace{0.3cm}

@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from pathlib import Path
+from tqdm import tqdm
 
 from src.utils import get_device
 from src.data.dataset import load_config, LBCDataset, PROJECT_ROOT
@@ -47,10 +48,12 @@ def train(epochs=30, lr=1e-4, batch_size=4, num_timesteps=1000, subset=100, save
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.5)
 
-    for epoch in range(1, epochs + 1):
+    epoch_bar = tqdm(range(1, epochs + 1), desc="Training", unit="epoch")
+    for epoch in epoch_bar:
         model.train()
         train_loss = 0.0
-        for clean in train_loader:
+        train_bar = tqdm(train_loader, desc=f"Epoch {epoch}/{epochs}", unit="batch", leave=False)
+        for clean in train_bar:
             clean = clean.to(device)
             batch_size = clean.size(0)
             
@@ -68,12 +71,14 @@ def train(epochs=30, lr=1e-4, batch_size=4, num_timesteps=1000, subset=100, save
             loss.backward()
             optimizer.step()
             train_loss += loss.item() * batch_size
+            train_bar.set_postfix(loss=loss.item())
         train_loss /= len(train_dataset)
 
         model.eval()
         val_loss = 0.0
+        val_bar = tqdm(val_loader, desc=f"Val {epoch}/{epochs}", unit="batch", leave=False)
         with torch.no_grad():
-            for clean in val_loader:
+            for clean in val_bar:
                 clean = clean.to(device)
                 batch_size = clean.size(0)
                 
@@ -87,10 +92,11 @@ def train(epochs=30, lr=1e-4, batch_size=4, num_timesteps=1000, subset=100, save
                 pred_noise = model(noisy, t)
                 loss = criterion(pred_noise, noise)
                 val_loss += loss.item() * batch_size
+                val_bar.set_postfix(loss=loss.item())
         val_loss /= len(val_dataset)
 
         scheduler.step()
-        print(f"Epoch {epoch:2d}/{epochs} | Train: {train_loss:.6f} | Val: {val_loss:.6f}")
+        epoch_bar.set_postfix(train=train_loss, val=val_loss)
 
     if save_path is None:
         save_path = PROJECT_ROOT / "src" / "methods" / "diffpir" / "weights" / "ddpm_lbc.pt"
