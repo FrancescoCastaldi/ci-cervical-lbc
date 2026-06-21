@@ -431,6 +431,13 @@
       $\triangleright$ $x_t \xrightarrow{\text{DDPM}} \hat{x}_0$ (denoise)\\[0.05cm]
       $\triangleright$ $\hat{x}_0 \xrightarrow{\text{FFT}} \tilde{x}_0$ (fidelity)
   \end{columns}
+
+  \vspace{0.12cm}
+  \begin{exampleblock}{\centering\small\textbf{TL;DR ---  ``Separate the prior from the physics''}}
+    \centering\scriptsize
+    DiffPIR = denoising (DDPM) $\leftrightarrow$ deblur (FFT) \\
+    ``Plug-and-Play'': we can swap the denoiser without changing the fidelity term
+  \end{exampleblock}
 \end{frame}
 
 \begin{frame}{DDPM + LightUNet: Training}
