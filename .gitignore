@@ -58,7 +58,7 @@ thoughts/
 excalidraw.log
 
 # Slide PDFs (large files, compile locally)
-slides/*.pdf
+#slides/*.pdf
 
 # LaTeX build artifacts (root)
 *.aux
